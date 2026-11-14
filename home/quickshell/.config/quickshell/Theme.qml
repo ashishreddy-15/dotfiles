@@ -4,24 +4,24 @@ import QtQuick
 import Quickshell
 
 // The one place for colours, fonts and sizes. Every other file reads from here.
-// Palette: "Abyss & Ice". The same colours are used in:
+// Palette: "Carbon & Ice". The same colours are used in:
 //   hypr/modules/look.lua (borders), hypr/hyprlock.conf, kitty/kitty.conf
 Singleton {
     // Surfaces, darkest to lightest
-    readonly property color bg:      "#0f1114"   // behind everything
-    readonly property color surface: "#15181c"   // bar, panels
-    readonly property color raised:  "#1d2126"   // pop-ups, hovered items
-    readonly property color border:  "#2a3037"
+    readonly property color bg:      "#111111"   // behind everything
+    readonly property color surface: "#141414"   // bar, panels
+    readonly property color raised:  "#1b1b1b"   // pop-ups, hovered items
+    readonly property color border:  "#262626"
 
     // Text
-    readonly property color text:    "#c0c6cc"
-    readonly property color dim:     "#6f7882"
+    readonly property color text:    "#adb0b3"
+    readonly property color dim:     "#666a6e"
 
     // Accent and status (kept muted on purpose)
-    readonly property color accent:  "#a3b9c4"
-    readonly property color ok:      "#8aa79a"
-    readonly property color warn:    "#b7a57f"
-    readonly property color err:     "#b48488"
+    readonly property color accent:  "#8a9fab"
+    readonly property color ok:      "#7d9889"
+    readonly property color warn:    "#a8976f"
+    readonly property color err:     "#a67a7e"
 
     // Fonts
     readonly property string uiFont:   "Asap"            // panels, notifications, launcher

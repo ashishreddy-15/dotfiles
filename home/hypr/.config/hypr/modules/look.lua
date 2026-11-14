@@ -1,12 +1,12 @@
--- Colours: "Abyss & Ice" (same palette as quickshell/Theme.qml).
+-- Colours: "Carbon & Ice" (same palette as quickshell/Theme.qml).
 hl.config({
     general = {
         gaps_in     = 4,
         gaps_out    = 8,
         border_size = 2,
         col = {
-            active_border   = "rgba(a3b9c4ee)",
-            inactive_border = "rgba(2a3037ee)",
+            active_border   = "rgba(8a9fabee)",
+            inactive_border = "rgba(262626ee)",
         },
         resize_on_border = true,   -- drag window edges to resize
         layout           = "dwindle",

@@ -99,7 +99,7 @@ update back for a few days until the COPR rebuilds Quickshell. That's expected.
 
 ## Look
 
-Palette "Abyss & Ice": near-black base, soft grey text, one pale icy accent, muted
+Palette "Carbon & Ice": neutral near-black base (#111111), dim grey text, one muted icy accent, muted
 status colours. Fonts: **Maple Mono NF** (bar, terminal, icons) and **Asap** (interface,
 slightly condensed). Neither is in Fedora, so `./install.sh fonts` downloads the
 exact versions listed in `system/fonts.txt` and verifies their checksums.
