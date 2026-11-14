@@ -119,7 +119,7 @@ Column {
             StyledText {
                 id: profileText
                 anchors.centerIn: parent
-                text: root.profileName() + "  ›"
+                text: root.profileName() + "  " + Theme.glyphNext
                 color: Theme.dim
             }
         }

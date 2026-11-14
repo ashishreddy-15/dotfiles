@@ -21,11 +21,11 @@ hl.window_rule({
     float = true,
 })
 
--- The pickers, the control center, the indicator and the notification pop-ups animate themselves (fade, zoom, height) inside their window.
+-- The bar, the pickers, the control center, the indicator and the notification pop-ups animate themselves (fade, zoom, height) inside their window.
 -- Hyprland's own layer fade smears when Quickshell unmaps the window, so switch it off for them.
 hl.layer_rule({
     name  = "no-anim-pickers",
-    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|panel|osd|notifications)$" },
+    match = { namespace = "^quickshell-(bar|launcher|clipboard|wallpapers|panel|osd|notifications|traymenu)$" },
     no_anim = true,
 })
 
@@ -33,7 +33,7 @@ hl.layer_rule({
 -- margin around a card (where its shadow is), so only the card itself is frosted.
 hl.layer_rule({
     name  = "blur-cards",
-    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|panel|osd|notifications)$" },
+    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|panel|osd|notifications|traymenu)$" },
     blur  = true,
     ignore_alpha = 0.5,
 })

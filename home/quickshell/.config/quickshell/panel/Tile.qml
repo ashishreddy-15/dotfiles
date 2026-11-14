@@ -85,7 +85,7 @@ Item {
 
         StyledText {
             anchors.centerIn: parent
-            text: "›"
+            text: Theme.glyphNext
             color: root.active ? Theme.text : Theme.dim
         }
         MouseArea {

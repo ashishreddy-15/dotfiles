@@ -76,9 +76,9 @@ Column {
                 FocusRing { visible: btn.activeFocus }
             }
 
-            Button { glyph: ""; enabled: root.player?.canGoPrevious ?? false; onClicked: root.player.previous() }
-            Button { glyph: root.player?.isPlaying ? "" : ""; enabled: root.player?.canTogglePlaying ?? false; onClicked: root.player.togglePlaying() }
-            Button { glyph: ""; enabled: root.player?.canGoNext ?? false; onClicked: root.player.next() }
+            Button { glyph: Theme.glyphPrev; enabled: root.player?.canGoPrevious ?? false; onClicked: root.player.previous() }
+            Button { glyph: root.player?.isPlaying ? Theme.glyphPause : Theme.glyphPlay; enabled: root.player?.canTogglePlaying ?? false; onClicked: root.player.togglePlaying() }
+            Button { glyph: Theme.glyphForward; enabled: root.player?.canGoNext ?? false; onClicked: root.player.next() }
         }
     }
 }

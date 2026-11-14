@@ -45,7 +45,7 @@ Item {
         x: 10
         anchors.verticalCenter: parent.verticalCenter
         spacing: 8
-        StyledText { text: "‹"; color: Theme.dim }
+        StyledText { text: Theme.glyphBack; color: Theme.dim }
         StyledText { text: root.title; color: Theme.bright }
     }
 

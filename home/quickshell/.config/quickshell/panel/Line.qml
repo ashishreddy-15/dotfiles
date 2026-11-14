@@ -53,7 +53,7 @@ Item {
     StyledText {
         visible: root.chevron
         anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-        text: "›"
+        text: Theme.glyphNext
         color: Theme.dim
     }
 

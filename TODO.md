@@ -30,9 +30,9 @@ quiet tiles, the control center's structure.
 - [x] Hyprland animations: windows, workspaces and layers on the same speed as the shell (snappy)
 - [x] Picker: the selection highlight slides between rows instead of jumping
 - [x] Hover / pressed feedback for: sliders, tray icons, the bar's clock area
-- [ ] One consistent glyph set (selection dot, padlock, arrows)
-- [ ] Tray right-click menus: check how they look and theme them
-- [ ] `Super + B` (hide bar) animated inside the shell instead of a compositor fade
+- [x] One consistent glyph set: all icons are `Theme.glyph*` (FontAwesome symbols in Maple Mono NF); ui-check forbids inline icon characters
+- [x] Tray right-click menus: own themed menu (`bar/TrayMenu.qml`, Card, submenus as pages, Esc / click-outside). Arrow-key navigation not done
+- [x] `Super + B` slides and fades the bar inside the shell (no compositor fade)
 - [x] Type scale: shell stays at 12 px base; kitty set to 10.5 pt by choice (15 px shell and 11.5 pt kitty were tried and looked too big)
 - [x] Guard rail: `scripts/ui-check` (static: magic values + Theme vs Hyprland/hyprlock/kitty font; live: open/close timing + leftover layers + log). Screen recording not included
 

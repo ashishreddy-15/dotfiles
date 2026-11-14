@@ -60,6 +60,20 @@ Singleton {
     readonly property int fontSize:    fontBase   // (older names, same values)
     readonly property int barFontSize: fontBase
 
+    // ---- glyphs ----
+    // One icon set: the FontAwesome symbols that ship inside Maple Mono NF, so every icon has the same weight and
+    // sits on the same baseline as the text. Write icons through these names, never as a literal character.
+    readonly property string glyphNext:    "\uf105"   // chevron right: opens a page / a menu
+    readonly property string glyphBack:    "\uf104"   // chevron left: back
+    readonly property string glyphClose:   "\uf00d"   // x
+    readonly property string glyphMark:    "\uf111"   // filled dot: the chosen item in a list
+    readonly property string glyphCheck:   "\uf00c"   // tick: a ticked menu entry
+    readonly property string glyphLock:    "\uf023"   // padlock: secured network
+    readonly property string glyphPrev:    "\uf048"
+    readonly property string glyphPlay:    "\uf04b"
+    readonly property string glyphPause:   "\uf04c"
+    readonly property string glyphForward: "\uf051"
+
     // ---- space ----
     readonly property int pad:        10    // bar edge padding
     readonly property int padContent: 14    // inside a card that holds free-form content (notifications)

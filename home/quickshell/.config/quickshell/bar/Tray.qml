@@ -13,6 +13,8 @@ Row {
     spacing: 8
     readonly property bool hasItems: SystemTray.items.values.length > 0
 
+    TrayMenu { id: menu; window: root.window }
+
     Repeater {
         model: SystemTray.items
 
@@ -29,10 +31,7 @@ Row {
 
             onClicked: event => {
                 if (event.button === Qt.RightButton || modelData.onlyMenu) {
-                    if (modelData.hasMenu) {
-                        const pos = entry.mapToItem(null, 0, entry.height + 8)
-                        modelData.display(root.window, pos.x, pos.y)
-                    }
+                    if (modelData.hasMenu) menu.openFor(modelData, entry.mapToItem(null, entry.width / 2, 0).x)
                 } else if (event.button === Qt.MiddleButton) {
                     modelData.secondaryActivate()
                 } else {

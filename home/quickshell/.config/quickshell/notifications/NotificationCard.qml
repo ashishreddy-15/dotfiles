@@ -83,7 +83,7 @@ Item {
                     }
                     // Close: hides the pop-up (same as clicking the card, but obvious)
                     StyledText {
-                        text: "×"
+                        text: Theme.glyphClose
                         color: closeArea.containsMouse ? Theme.bright : Theme.dim
                         font.pixelSize: Theme.fontLarge
                         Behavior on color { ColorAnimation { duration: Theme.durFast } }

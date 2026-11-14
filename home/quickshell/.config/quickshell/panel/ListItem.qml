@@ -40,7 +40,7 @@ Item {
         x: 10
         width: 14
         anchors.verticalCenter: parent.verticalCenter
-        text: root.marked ? "●" : ""
+        text: root.marked ? Theme.glyphMark : ""
         color: Theme.accent
     }
     StyledText {

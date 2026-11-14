@@ -24,7 +24,10 @@ Variants {
         readonly property bool mainPresent: Quickshell.screens.some(s => s.name === Theme.mainOutput)
         readonly property bool full: modelData.name === Theme.mainOutput || !mainPresent
 
-        visible: ShellState.barVisible
+        // Super+B slides and fades the bar inside the window (ShellState.barShown). The window stays mapped until
+        // that has finished, and gives its screen space back at once so windows resize alongside the slide.
+        visible: ShellState.barVisible || ShellState.barShown > 0
+        exclusiveZone: ShellState.barVisible ? Theme.barHeight : 0
         anchors { top: true; left: true; right: true }
         implicitHeight: Theme.barHeight
         color: Qt.alpha(Theme.bg, Theme.barOpacity)
@@ -34,54 +37,61 @@ Variants {
         // (An inhibitor needs a visible window; the bar is always there.)
         IdleInhibitor { window: bar; enabled: Modes.keepAwake }
 
-        // Left: workspaces, then the focused app
-        Row {
-            spacing: 14
-            anchors { left: parent.left; leftMargin: Theme.pad; verticalCenter: parent.verticalCenter }
+        Item {
+            id: content
+            anchors.fill: parent
+            opacity: ShellState.barShown
+            transform: Translate { y: (ShellState.barShown - 1) * Theme.barHeight / 2 }
 
-            Workspaces { screen: bar.modelData }
-            AppName { screen: bar.modelData }
-        }
+            // Left: workspaces, then the focused app
+            Row {
+                spacing: 14
+                anchors { left: parent.left; leftMargin: Theme.pad; verticalCenter: parent.verticalCenter }
 
-        // Right: tray and attention-only status (main bar), then the clock
-        Row {
-            spacing: 16
-            anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
+                Workspaces { screen: bar.modelData }
+                AppName { screen: bar.modelData }
+            }
 
-            Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
+            // Right: tray and attention-only status (main bar), then the clock
+            Row {
+                spacing: 16
+                anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
 
-            // Status items and the clock: click anywhere here to open the quick-settings panel.
-            Item {
-                implicitWidth: statusArea.implicitWidth
-                implicitHeight: statusArea.implicitHeight
-                anchors.verticalCenter: parent.verticalCenter
+                Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
 
-                Row {
-                    id: statusArea
-                    spacing: 16
+                // Status items and the clock: click anywhere here to open the quick-settings panel.
+                Item {
+                    implicitWidth: statusArea.implicitWidth
+                    implicitHeight: statusArea.implicitHeight
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    Network { visible: bar.full && attention }
-                    BluetoothStatus { visible: bar.full && attention }
-                    Volume { visible: bar.full && attention }
-                    Battery { visible: bar.full && attention }
-                    Clock {}
-                }
+                    Row {
+                        id: statusArea
+                        spacing: 16
 
-                // Hover / pressed wash behind the status items and clock, in the bar's own text colour so it
-                // reads on both dark and light wallpapers.
-                Rectangle {
-                    anchors { fill: parent; leftMargin: -8; rightMargin: -8; topMargin: -4; bottomMargin: -4 }
-                    radius: Theme.radiusRow
-                    color: Qt.alpha(Theme.barText, area.pressed ? 0.22 : area.containsMouse ? 0.12 : 0)
-                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                }
+                        Network { visible: bar.full && attention }
+                        BluetoothStatus { visible: bar.full && attention }
+                        Volume { visible: bar.full && attention }
+                        Battery { visible: bar.full && attention }
+                        Clock {}
+                    }
 
-                MouseArea {
-                    id: area
-                    hoverEnabled: true
-                    anchors { fill: parent; margins: -6 }
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: ShellState.togglePanel(bar.modelData.name)
+                    // Hover / pressed wash behind the status items and clock, in the bar's own text colour so it
+                    // reads on both dark and light wallpapers.
+                    Rectangle {
+                        anchors { fill: parent; leftMargin: -8; rightMargin: -8; topMargin: -4; bottomMargin: -4 }
+                        radius: Theme.radiusRow
+                        color: Qt.alpha(Theme.barText, area.pressed ? 0.22 : area.containsMouse ? 0.12 : 0)
+                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                    }
+
+                    MouseArea {
+                        id: area
+                        hoverEnabled: true
+                        anchors { fill: parent; margins: -6 }
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: ShellState.togglePanel(bar.modelData.name)
+                    }
                 }
             }
         }

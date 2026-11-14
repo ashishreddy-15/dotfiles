@@ -68,7 +68,7 @@ Column {
                 marked: entry.modelData.connected
                 // "connecting…", or the signal strength, with a padlock in front of networks that need a password
                 detail: entry.connecting ? "connecting…"
-                      : (entry.secured && !entry.modelData.known ? "  " : "") + Math.round(entry.modelData.signalStrength * 100) + "%"
+                      : (entry.secured && !entry.modelData.known ? Theme.glyphLock + "  " : "") + Math.round(entry.modelData.signalStrength * 100) + "%"
                 rightColor: entry.modelData.connected ? Theme.ok : Theme.dim
                 onClicked: root.activate(entry.modelData)
             }
