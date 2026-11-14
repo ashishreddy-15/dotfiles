@@ -53,13 +53,11 @@ Rectangle {
             spacing: 3
 
             StyledText {
-                mono: false
                 text: card.n?.appName || "Notification"
                 color: card.critical ? Theme.err : Theme.dim
                 font.pixelSize: Theme.fontSize - 1
             }
             StyledText {
-                mono: false
                 Layout.fillWidth: true
                 text: card.n?.summary
                 font.weight: Font.DemiBold
@@ -67,7 +65,6 @@ Rectangle {
                 elide: Text.ElideRight
             }
             StyledText {
-                mono: false
                 Layout.fillWidth: true
                 visible: text !== ""
                 text: card.n?.body
@@ -87,7 +84,6 @@ Rectangle {
                     model: card.n?.actions
                     StyledText {
                         required property var modelData
-                        mono: false
                         text: modelData.text
                         color: actHover.hovered ? Theme.bright : Theme.accent
                         HoverHandler { id: actHover; cursorShape: Qt.PointingHandCursor }

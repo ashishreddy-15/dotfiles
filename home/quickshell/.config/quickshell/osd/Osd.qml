@@ -86,7 +86,6 @@ Scope {
                 spacing: 12
 
                 StyledText {
-                    mono: false
                     width: 24
                     text: root.label
                     color: Theme.dim

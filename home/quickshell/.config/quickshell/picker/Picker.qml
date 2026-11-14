@@ -117,9 +117,8 @@ Scope {
                         onTextChanged: { root.query = text; root.selected = 0 }
                         color: Theme.bright
                         selectionColor: Theme.border
-                        font.family: Theme.uiFont
-                        font.variableAxes: ({ "wdth": Theme.uiWidth })
-                        font.pixelSize: 18
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 16
                         clip: true
                         focus: true
 
@@ -145,11 +144,11 @@ Scope {
                         }
 
                         StyledText {
-                            mono: false
                             visible: input.text === ""
                             text: root.placeholder
                             color: Theme.dim
-                            font.pixelSize: 18
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 16
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -201,17 +200,15 @@ Scope {
 
                                     StyledText {
                                         id: title
-                                        mono: false
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: Math.min(implicitWidth, parent.width - (sub.visible ? sub.implicitWidth + 10 : 0))
                                         elide: Text.ElideRight
                                         text: row.modelData.title
                                         color: row.active ? Theme.bright : Theme.text
-                                        font.pixelSize: 15
+                                        font.pixelSize: 14
                                     }
                                     StyledText {
                                         id: sub
-                                        mono: false
                                         anchors { left: title.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
                                         visible: text !== ""
                                         text: row.modelData.subtitle ?? ""

@@ -1,12 +1,9 @@
 import QtQuick
 
-// Text with the theme applied. mono: true -> Maple Mono, false -> Asap.
+// Text with the theme applied (Maple Mono, the theme's size and colour).
 Text {
-    property bool mono: true
-
     color: Theme.text
-    font.family: mono ? Theme.monoFont : Theme.uiFont
+    font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    font.variableAxes: mono ? ({}) : ({ "wdth": Theme.uiWidth })
     verticalAlignment: Text.AlignVCenter
 }

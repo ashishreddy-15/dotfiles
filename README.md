@@ -100,9 +100,10 @@ update back for a few days until the COPR rebuilds Quickshell. That's expected.
 ## Look
 
 Palette "Carbon & Pewter": neutral near-black base (#111111), dim grey text, one pewter (grey-blue) accent, muted
-status colours. Fonts: **Maple Mono NF** (bar at 12 px, terminal, icons) and **Asap** (notifications, launcher, panels;
-slightly condensed). Neither is in Fedora, so `./install.sh fonts` downloads the
-exact versions listed in `system/fonts.txt` and verifies their checksums.
+status colours. Font: **Maple Mono NF** everywhere (bar 12 px, notifications, launcher, lock screen,
+terminal). It is not in Fedora, so `./install.sh fonts` downloads the
+exact version listed in `system/fonts.txt` and verifies its checksum. To use another font, change
+`fontFamily` in `Theme.qml` (and `font_family` in `hyprlock.conf`, `font_family` in `kitty.conf`).
 
 The palette is defined in `home/quickshell/.config/quickshell/Theme.qml` and repeated
 in `hypr/modules/look.lua`, `hypr/hyprlock.conf` and `kitty/kitty.conf`. Change all

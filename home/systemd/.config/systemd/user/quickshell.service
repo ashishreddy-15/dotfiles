@@ -10,6 +10,8 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
 Type=simple
+# Icon theme for app icons (launcher): without this only the minimal hicolor theme is searched.
+Environment=QS_ICON_THEME=Adwaita
 ExecStart=/usr/bin/quickshell
 Restart=on-failure
 RestartSec=1
