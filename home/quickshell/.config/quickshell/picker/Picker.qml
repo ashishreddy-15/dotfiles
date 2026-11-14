@@ -209,7 +209,7 @@ Scope {
                             anchors.verticalCenter: parent.verticalCenter
                             width: 2
                             height: 16
-                            radius: 1
+                            radius: Theme.radiusMark
                             color: Theme.accent
                         }
                     }

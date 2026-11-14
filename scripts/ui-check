@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# ui-check: guard rails for the look of the desktop.
+#
+#   scripts/ui-check            run both parts
+#   scripts/ui-check static     no desktop needed: magic values, and Theme.qml vs hyprland / kitty / hyprlock
+#   scripts/ui-check live       needs the running session: opens and closes every floating surface through
+#                               `qs ipc`, times how long it takes to unmap, and reports what is left behind
+#
+# Exit status is the number of failures (0 = all good).
+
+set -u
+root=$(cd "$(dirname "$0")/.." && pwd)
+qml=$root/home/quickshell/.config/quickshell
+theme=$qml/Theme.qml
+look=$root/home/hypr/.config/hypr/modules/look.lua
+kitty=$root/home/kitty/.config/kitty/kitty.conf
+lock=$root/home/hypr/.config/hypr/hyprlock.conf
+
+fails=0
+fail() { printf '  FAIL  %s\n' "$*"; fails=$((fails + 1)); }
+ok()   { printf '  ok    %s\n' "$*"; }
+
+# Value of `readonly property <type> <name>: <value>` in Theme.qml (first token, comments stripped).
+tv() { sed -nE "s|^ *readonly property [a-z]+ +$1: *([^ /]+).*|\1|p" "$theme" | head -1; }
+
+# ---------------------------------------------------------------------------------------------------------
+static() {
+    echo "static: magic values outside Theme.qml"
+    local hits
+    # Every colour, duration, radius and font size must come from Theme.qml.
+    hits=$(cd "$qml" && grep -rnE '"#[0-9a-fA-F]{3,8}"|Qt\.rgba\([^)]*[0-9]|duration: *[0-9]|radius: *[0-9]|pixelSize: *[0-9]|font\.family: *"|font\.pointSize' \
+           --include=*.qml . | grep -v '^\./Theme\.qml' || true)
+    # Wallpaper.qml builds its scrim from Theme numbers: allow rgba made of 0/1 and a Theme.* alpha.
+    hits=$(printf '%s\n' "$hits" | grep -vE 'Qt\.rgba\((0|1), (0|1), (0|1), (Theme\.[A-Za-z]+|0)\)' | sed '/^$/d')
+    if [ -n "$hits" ]; then fail "hard-coded look values (use a Theme.* token):"; printf '%s\n' "$hits" | sed 's/^/          /'
+    else ok "no hard-coded colours, durations, radii or font sizes"; fi
+
+    echo "static: Theme.qml agrees with Hyprland, kitty and hyprlock"
+    local radius accent border text rounding
+    radius=$(tv radiusCard); rounding=$(sed -nE 's/^ *rounding *= *([0-9]+).*/\1/p' "$look")
+    [ "$radius" = "$rounding" ] && ok "corner radius $radius = Hyprland rounding" || fail "radiusCard $radius vs Hyprland rounding ${rounding:-?}"
+
+    # Hyprland animation speeds are in units of 100 ms.
+    local name ms want
+    for pair in durBase:1.4 durFast:0.9 durSlow:2.4; do
+        name=${pair%%:*}; want=${pair##*:}; ms=$(tv "$name")
+        if grep -qE "speed *= *$want\b" "$look" && [ "$(awk "BEGIN{print $ms/100}")" = "$want" ]; then ok "$name ${ms} ms = Hyprland speed $want"
+        else fail "$name ${ms:-?} ms has no matching 'speed = $want' in look.lua"; fi
+    done
+
+    accent=$(tv accent | tr -d '"#'); border=$(tv border | tr -d '"#'); text=$(tv text | tr -d '"#')
+    grep -qi "$accent" "$look" && ok "accent #$accent in Hyprland active border" || fail "accent #$accent missing from look.lua"
+    grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
+    grep -qi "$text"   "$lock" && ok "text #$text in hyprlock" || fail "text #$text missing from hyprlock.conf"
+
+    # kitty: font family and size in px must equal the shell's base size (9 px per cell at 0.6 em; 1 pt = 4/3 px).
+    local pt base
+    pt=$(sed -nE 's/^ *font_size +([0-9.]+).*/\1/p' "$kitty"); base=$(tv fontBase)
+    if [ "$(awk "BEGIN{d=$pt*4/3-$base; print (d<1 && d>-1)}")" = 1 ]; then ok "fontBase ${base} px = kitty ${pt} pt"
+    else fail "fontBase $base px vs kitty ${pt} pt ($(awk "BEGIN{print $pt*4/3}") px)"; fi
+    local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")
+    grep -q "$fam" "$kitty" && ok "font \"$fam\" in kitty" || fail "kitty does not use \"$fam\""
+    grep -q "$fam" "$lock"  && ok "font \"$fam\" in hyprlock" || fail "hyprlock does not use \"$fam\""
+}
+
+# ---------------------------------------------------------------------------------------------------------
+layers() { hyprctl layers -j 2>/dev/null | python3 -c '
+import json, sys
+for mon in json.load(sys.stdin).values():
+    for lvl in mon["levels"].values():
+        for l in lvl:
+            if l["namespace"].startswith("quickshell-"): print(l["namespace"])'; }
+
+# Poll until namespace $1 is gone; echo the milliseconds it took (or "stuck").
+time_gone() {
+    local ns=$1 t0 t
+    t0=$(date +%s%N)
+    while layers | grep -qx "$ns"; do
+        t=$(( ($(date +%s%N) - t0) / 1000000 ))
+        [ "$t" -gt 3000 ] && { echo stuck; return; }
+        sleep 0.01
+    done
+    echo $(( ($(date +%s%N) - t0) / 1000000 ))
+}
+
+live() {
+    echo "live: open / close every floating surface"
+    command -v qs >/dev/null && command -v hyprctl >/dev/null && hyprctl layers >/dev/null 2>&1 || { fail "needs a running Hyprland session with quickshell"; return; }
+
+    # Start from a quiet desktop: close the panel and wait (up to 3 s) for every pop-up to unmap.
+    qs ipc call panel close >/dev/null 2>&1
+    local i
+    for i in $(seq 300); do layers | grep -qE 'quickshell-(launcher|clipboard|wallpapers|panel|osd|notifications)$' || break; sleep 0.01; done
+    local before; before=$(layers | sort -u | tr '\n' ' ')
+    local limit=$(( $(tv durFast) + 400 ))   # exit animation + the window's own linger + a frame or two
+
+    # target:function:namespace
+    local item target fn ns res
+    for item in launcher:toggle:quickshell-launcher clipboard:toggle:quickshell-clipboard panel:toggle:quickshell-panel; do
+        IFS=: read -r target fn ns <<<"$item"
+        qs ipc call "$target" "$fn" >/dev/null 2>&1; sleep 0.6
+        if layers | grep -qx "$ns"; then
+            qs ipc call "$target" "$fn" >/dev/null 2>&1
+            res=$(time_gone "$ns")
+            if [ "$res" = stuck ]; then fail "$target: window still mapped 3 s after closing"
+            elif [ "$res" -gt "$limit" ]; then fail "$target: took $res ms to unmap (limit $limit ms)"
+            else ok "$target: opened, unmapped ${res} ms after closing"; fi
+        else
+            fail "$target: did not open (no $ns layer)"
+            qs ipc call "$target" "$fn" >/dev/null 2>&1
+        fi
+        sleep 0.4
+    done
+
+    sleep 0.5
+    local after; after=$(layers | sort -u | tr '\n' ' ')
+    [ "$before" = "$after" ] && ok "nothing left behind (layers: ${after:-none})" || fail "layers changed: before [$before] after [$after]"
+
+    echo "live: quickshell log"
+    local errs
+    errs=$(journalctl --user -u quickshell --since "-10 min" --no-pager 2>/dev/null | grep -E "ERROR|WARN" | grep -v "Reloading" | tail -5)
+    [ -z "$errs" ] && ok "no errors or warnings in the last 10 minutes" || { fail "quickshell logged problems:"; printf '%s\n' "$errs" | cut -c1-200 | sed 's/^/          /'; }
+}
+
+case "${1:-all}" in
+    static) static ;;
+    live)   live ;;
+    all)    static; live ;;
+    *)      sed -n '2,10p' "$0"; exit 2 ;;
+esac
+
+echo; [ "$fails" -eq 0 ] && echo "all checks passed" || echo "$fails check(s) failed"
+exit "$fails"

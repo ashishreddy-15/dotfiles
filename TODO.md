@@ -34,7 +34,7 @@ quiet tiles, the control center's structure.
 - [ ] Tray right-click menus: check how they look and theme them
 - [ ] `Super + B` (hide bar) animated inside the shell instead of a compositor fade
 - [x] Type scale: shell aligned to kitty (11.5 pt = 15 px): 13 / 15 / 17 / 20; panel, notifications, OSD and bar widened to fit
-- [ ] Guard rail: `scripts/ui-check` (record + time + leftover check) and a grep for magic numbers outside `Theme.qml`
+- [x] Guard rail: `scripts/ui-check` (static: magic values + Theme vs Hyprland/kitty/hyprlock; live: open/close timing + leftover layers + log). Screen recording not included
 
 ## 4. Beyond the shell
 

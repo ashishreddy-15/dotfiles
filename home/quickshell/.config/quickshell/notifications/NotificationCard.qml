@@ -140,7 +140,7 @@ Item {
             anchors { left: parent.left; bottom: parent.bottom; leftMargin: Theme.radiusCard; bottomMargin: 2 }
             width: (parent.width - 2 * Theme.radiusCard) * root.remaining
             height: 2
-            radius: 1
+            radius: Theme.radiusMark
             color: Theme.accent
             opacity: 0.45
         }

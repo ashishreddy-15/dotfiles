@@ -42,7 +42,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: 2
             height: 18
-            radius: 1
+            radius: Theme.radiusMark
             color: Theme.accent
             opacity: root.active ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }

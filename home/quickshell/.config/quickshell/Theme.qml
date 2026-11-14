@@ -42,6 +42,7 @@ Singleton {
     readonly property int radiusCard:  10    // windows and floating cards
     readonly property int radiusRow:   6     // rows, buttons and inputs inside a card
     readonly property int radiusSmall: 3     // slider tracks, small marks
+    readonly property int radiusMark:  1     // 2 px accent marks (selection, timeout, tile)
     readonly property int cardInset:   4     // gap between a card's edge and the rows inside it
 
     // ---- depth ----
