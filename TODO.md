@@ -103,7 +103,7 @@ quiet tiles, the control center's structure.
 - [x] Pen tablet: Settings > Tablet (screen, proportions, orientation, mode, battery, test pad), applied live
 - [x] Tablet: pen and pressure confirmed
 - [x] ExpressKeys: Settings > Tablet, tablet-keys helper (runs only while the tablet is plugged in)
-- [ ] Run `./install.sh services` (sudo) for the pad's udev rule, then press each ExpressKey to check
+- [x] ExpressKeys confirmed working in Xournal++ (udev rule installed)
 - [x] Handwriting app: Xournal++ (packages/desktop.txt)
 - [x] Xournal++ installed; pen and pressure work
 - [x] fzf (Ctrl+R / Ctrl+T / Alt+C / **), zoxide (z, zi), bat previews; prompt still ~0.05 ms (zoxide without its
