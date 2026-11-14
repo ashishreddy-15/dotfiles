@@ -23,15 +23,16 @@ import "../ui"
 Scope {
     id: root
 
+    // The sidebar, in three groups: how you connect, the machine itself, and how it looks and talks to you.
     readonly property var sections: [
-        { id: "wifi",          label: "Wi-Fi",          file: "WifiSection.qml" },
-        { id: "bluetooth",     label: "Bluetooth",      file: "BluetoothSection.qml" },
-        { id: "sound",         label: "Sound",          file: "SoundSection.qml" },
-        { id: "display",       label: "Display",        file: "DisplaySection.qml" },
-        { id: "wallpaper",     label: "Wallpaper",      file: "WallpaperSection.qml" },
-        { id: "notifications", label: "Notifications",  file: "NotificationsSection.qml" },
-        { id: "power",         label: "Power",          file: "BatterySection.qml" },
-        { id: "appearance",    label: "Appearance",     file: "AppearanceSection.qml" }
+        { id: "wifi",          group: "Connections", label: "Wi-Fi",         glyph: Theme.glyphWifi,      file: "WifiSection.qml" },
+        { id: "bluetooth",     group: "Connections", label: "Bluetooth",     glyph: Theme.glyphBluetooth, file: "BluetoothSection.qml" },
+        { id: "display",       group: "Device",      label: "Display",       glyph: Theme.glyphBright,    file: "DisplaySection.qml" },
+        { id: "sound",         group: "Device",      label: "Sound",         glyph: Theme.glyphVolume,    file: "SoundSection.qml" },
+        { id: "power",         group: "Device",      label: "Power",         glyph: Theme.glyphBattery,   file: "BatterySection.qml" },
+        { id: "appearance",    group: "Personal",    label: "Appearance",    glyph: Theme.glyphBrush,     file: "AppearanceSection.qml" },
+        { id: "wallpaper",     group: "Personal",    label: "Wallpaper",     glyph: Theme.glyphImage,     file: "WallpaperSection.qml" },
+        { id: "notifications", group: "Personal",    label: "Notifications", glyph: Theme.glyphBell,      file: "NotificationsSection.qml" }
     ]
     readonly property int index: Math.max(0, sections.findIndex(s => s.id === ShellState.settingsSection))
 
@@ -136,11 +137,27 @@ Scope {
                         }
                         Repeater {
                             model: root.sections
-                            SideItem {
+                            Column {
                                 required property var modelData
-                                text: modelData.label
-                                current: ShellState.settingsSection === modelData.id
-                                onClicked: { ShellState.settingsSection = modelData.id; card.forceActiveFocus() }
+                                required property int index
+                                width: parent.width
+
+                                // A small heading where a group starts
+                                StyledText {
+                                    visible: index === 0 || root.sections[index - 1].group !== modelData.group
+                                    leftPadding: 8
+                                    topPadding: index === 0 ? 4 : 16
+                                    bottomPadding: 6
+                                    text: modelData.group
+                                    color: Theme.dim
+                                    font.pixelSize: Theme.fontSmall
+                                }
+                                SideItem {
+                                    text: modelData.label
+                                    glyph: modelData.glyph
+                                    current: ShellState.settingsSection === modelData.id
+                                    onClicked: { ShellState.settingsSection = modelData.id; card.forceActiveFocus() }
+                                }
                             }
                         }
                     }

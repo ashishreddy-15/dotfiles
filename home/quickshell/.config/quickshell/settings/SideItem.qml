@@ -1,11 +1,12 @@
 import QtQuick
 import qs
 
-// One entry in the sidebar of the appearance window.
+// One entry in the sidebar of the Settings window: its icon and its name.
 Rectangle {
     id: root
 
     property string text
+    property string glyph
     property bool current: false
     signal clicked()
 
@@ -28,6 +29,14 @@ Rectangle {
 
     StyledText {
         x: 16
+        width: 18
+        horizontalAlignment: Text.AlignHCenter
+        anchors.verticalCenter: parent.verticalCenter
+        text: root.glyph
+        color: root.current ? Theme.bright : Theme.dim
+    }
+    StyledText {
+        x: 44
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
         color: root.current ? Theme.bright : Theme.text

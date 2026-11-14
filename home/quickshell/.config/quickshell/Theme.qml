@@ -84,6 +84,9 @@ Singleton {
     readonly property string glyphMuted:     "\uf026"
     readonly property string glyphMic:       "\uf130"
     readonly property string glyphMicOff:    "\uf131"
+    readonly property string glyphBattery:   "\uf240"
+    readonly property string glyphBrush:     "\uf1fc"   // paint brush: appearance
+    readonly property string glyphImage:     "\uf03e"   // picture: wallpaper
     readonly property string glyphGear:    "\uf013"   // the settings button
     readonly property string glyphMinus:   "\uf068"
     readonly property string glyphPlus:    "\uf067"
