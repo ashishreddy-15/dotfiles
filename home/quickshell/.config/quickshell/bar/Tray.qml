@@ -11,7 +11,7 @@ Row {
     required property var window   // the bar window, needed to place menus
 
     spacing: 8
-    visible: SystemTray.items.values.length > 0
+    readonly property bool hasItems: SystemTray.items.values.length > 0
 
     Repeater {
         model: SystemTray.items

@@ -18,6 +18,9 @@ hl.bind(k("E"),       app(fileManager))
 hl.bind(k("Space"),   hl.dsp.exec_cmd(launcher))
 hl.bind(k("SHIFT + V"), hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
 
+-- Shell
+hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the bar
+
 -- Session
 hl.bind(k("Escape"),    hl.dsp.exec_cmd("loginctl lock-session"))   -- lock (via hypridle -> hyprlock)
 hl.bind(k("SHIFT + E"), hl.dsp.exec_cmd("uwsm stop"))               -- log out

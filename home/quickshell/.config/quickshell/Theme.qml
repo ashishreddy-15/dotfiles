@@ -31,7 +31,8 @@ Singleton {
     readonly property int fontSize: 13
 
     // Sizes
-    readonly property int barHeight: 30
+    readonly property int barHeight: 28
+    readonly property real barOpacity: 0.72   // 1 = solid; lower lets the blurred wallpaper through
     readonly property int radius:    6
     readonly property int pad:       10
 

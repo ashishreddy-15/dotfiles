@@ -122,9 +122,20 @@ journalctl --user -u quickshell -f       # logs / QML errors
 
 - `Theme.qml`: colours, fonts, sizes, and which monitor is the main one
 - `shell.qml`: entry point listing each piece
-- `bar/`: one bar per monitor: bracket-style workspaces (`1 [2] 3`), clock, and a text-only
-  status area (tray, wifi, bt, vol, bat). Scroll on `vol` to change volume, click to mute. The main monitor gets the full bar; others show
-  only their workspaces and the clock, unless the main monitor is unplugged.
+- `ShellState.qml`: on/off switches reachable from keybinds (`qs ipc call bar toggle`)
+- `bar/`: Mac-style menu bar on every monitor: thin, edge to edge, translucent with blur.
+  Left: workspaces (`[1] 2 3`) and the focused app's name. Right: clock.
+  The bar is "quiet": status only appears on the main monitor when it needs attention:
+
+  | Item | Shown when |
+  |---|---|
+  | `bat` | 30% or less, or charging |
+  | `vol` | muted, or for 1.5 s after the volume changes |
+  | `wifi` / `net` | there is no connection |
+  | `bt` | a device is connected |
+
+  `Super + B` hides or shows the bar. If the main monitor is unplugged, the laptop's
+  bar takes over the status area.
 
 ## Desktop
 
@@ -156,6 +167,7 @@ in the centre as the main screen. Workspaces 1-9 are on the main screen, 10 on t
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
 | `Super + Shift + V` | clipboard history |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
+| `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |
 | `Super + Shift + E` | log out |
 

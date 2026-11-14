@@ -3,14 +3,15 @@ import Quickshell
 import Quickshell.Services.UPower
 import qs
 
-// "bat 84%", with "+" while charging. Turns amber at 20%, red at 10%. Hidden on machines without a battery.
+// "bat 84%", with "+" while charging. Amber at 20%, red at 10%.
+// Quiet: shown at 30% or less, and while charging.
 StatusItem {
     readonly property var dev: UPower.displayDevice
     readonly property int percent: Math.round((dev?.percentage ?? 0) * 100)
     readonly property bool charging: dev?.state === UPowerDeviceState.Charging
     readonly property bool full: dev?.state === UPowerDeviceState.FullyCharged
 
-    visible: dev?.isLaptopBattery ?? false
+    attention: (dev?.isLaptopBattery ?? false) && (percent <= 30 || charging)
     label: "bat"
     value: percent + "%" + (charging ? "+" : "")
     valueColor: charging || full ? Theme.ok

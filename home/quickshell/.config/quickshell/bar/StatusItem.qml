@@ -1,14 +1,16 @@
 import QtQuick
 import qs
 
-// One text-only status entry:  dim label + value, e.g. "vol 62%".
+// One text status entry: dim label + value, e.g. "vol 62%".
+// Each item sets `attention`; the bar only shows items that have it.
 Row {
     property string label
     property string value
     property color valueColor: Theme.text
+    property bool attention: true
 
-    spacing: 6
+    spacing: 5
 
-    StyledText { text: parent.label; color: Theme.dim }
-    StyledText { text: parent.value; color: parent.valueColor }
+    StyledText { mono: false; text: parent.label; color: Theme.dim }
+    StyledText { mono: false; text: parent.value; color: parent.valueColor }
 }

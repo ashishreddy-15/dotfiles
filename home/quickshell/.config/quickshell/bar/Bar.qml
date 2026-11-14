@@ -1,9 +1,15 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import qs
 
-// One bar per monitor. Created and removed automatically as monitors are plugged in.
+// Mac-style menu bar, one per monitor: thin, edge to edge, translucent
+// (Hyprland blurs what's behind it, see hypr/modules/rules.lua).
+//
+//   [1] 2  3   App name                              (status when it matters)   Sat 14 Nov  12:40
+//
+// "Quiet" rule: the right side only shows things that need attention.
+// Super+B hides/shows the bar.
 Variants {
     model: Quickshell.screens
 
@@ -13,43 +19,36 @@ Variants {
         required property var modelData
         screen: modelData
 
-        // Full bar on the main monitor, or on every monitor if the main one is absent.
+        // Status goes on the main monitor, or on every monitor if the main one is absent.
         readonly property bool mainPresent: Quickshell.screens.some(s => s.name === Theme.mainOutput)
         readonly property bool full: modelData.name === Theme.mainOutput || !mainPresent
 
+        visible: ShellState.barVisible
         anchors { top: true; left: true; right: true }
         implicitHeight: Theme.barHeight
-        color: Theme.surface
+        color: Qt.alpha(Theme.bg, Theme.barOpacity)
+        WlrLayershell.namespace: "quickshell-bar"
 
-        // Left: workspaces
-        Workspaces {
-            screen: bar.modelData
+        // Left: workspaces, then the focused app
+        Row {
+            spacing: 14
             anchors { left: parent.left; leftMargin: Theme.pad; verticalCenter: parent.verticalCenter }
+
+            Workspaces { screen: bar.modelData }
+            AppName { screen: bar.modelData }
         }
 
-        // Centre: clock (truly centred, whatever is on the sides)
-        Clock {
-            anchors.centerIn: parent
-        }
-
-        // Right: tray + status, text only (main bar only)
-        RowLayout {
-            visible: bar.full
-            spacing: 18
+        // Right: tray and attention-only status (main bar), then the clock
+        Row {
+            spacing: 16
             anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
 
-            Tray { window: bar }
-            Network {}
-            BluetoothStatus {}
-            Volume {}
-            Battery {}
-        }
-
-        // Hairline under the bar
-        Rectangle {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-            height: 1
-            color: Theme.border
+            Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
+            Network { visible: bar.full && attention }
+            BluetoothStatus { visible: bar.full && attention }
+            Volume { visible: bar.full && attention }
+            Battery { visible: bar.full && attention }
+            Clock {}
         }
     }
 }

@@ -20,3 +20,10 @@ hl.window_rule({
     match = { class = "^(org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor)$" },
     float = true,
 })
+
+-- Blur whatever is behind the translucent Quickshell bar (macOS-style).
+hl.layer_rule({
+    name  = "blur-bar",
+    match = { namespace = "^quickshell-bar$" },
+    blur  = true,
+})
