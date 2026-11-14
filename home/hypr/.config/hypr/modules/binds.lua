@@ -69,9 +69,11 @@ hl.bind(k("SHIFT + S"), hl.dsp.window.move({ workspace = "special:scratch" }))
 hl.bind(k("mouse:272"), hl.dsp.window.drag(),   { mouse = true })
 hl.bind(k("mouse:273"), hl.dsp.window.resize(), { mouse = true })
 
--- Screenshots (to clipboard)
-hl.bind("Print",         hl.dsp.exec_cmd([[grim -g "$(slurp)" - | wl-copy]]))
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd([[grim -o "$(hyprctl activeworkspace -j | python3 -c 'import json,sys;print(json.load(sys.stdin)["monitor"])')" - | wl-copy]]))
+-- Screenshots (home/bin/.local/bin/screenshot): the screen is frozen first, so pop-ups and the control center stay in.
+local screenshot = os.getenv("HOME") .. "/.local/bin/screenshot"
+hl.bind("Print",         hl.dsp.exec_cmd(screenshot))               -- drag a region or click a window
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(screenshot .. " screen"))  -- the focused monitor
+hl.bind("CTRL + Print",  hl.dsp.exec_cmd(screenshot .. " all"))     -- every monitor
 
 -- Media / brightness keys (work on the lock screen too)
 local hw = { locked = true, repeating = true }

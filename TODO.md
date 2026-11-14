@@ -89,7 +89,8 @@ quiet tiles, the control center's structure.
 ## 7. Ideas (not committed to)
 
 - Clipboard: image thumbnails, delete an entry, pin entries
-- Screenshot and screen-record UI (wf-recorder is installed)
+- [x] Screenshots that freeze the screen first (Print / Shift+Print / Ctrl+Print), saved and copied
+- Screen-record UI (wf-recorder is installed)
 - Wi-Fi: forget a network, a VPN tile
 - Schedules for Do Not Disturb and night light
 - A calendar popup from the clock

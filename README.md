@@ -35,7 +35,7 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
-    ├── bin/                # ~/.local/bin: appearance (GTK theme, fonts, cursor...), bt-agent (Bluetooth pairing agent)
+    ├── bin/                # ~/.local/bin: appearance (GTK look), bt-agent (Bluetooth pairing), screenshot
     ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
     ├── kitty/              # terminal: font + colours
@@ -114,6 +114,10 @@ with `./install.sh sddm` (sudo). It copies Maple Mono and your current wallpaper
 screen cannot read your home folder, so run it again after changing the wallpaper. Preview without logging out:
 `sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/carbon`. The cursor is Adwaita everywhere (shell, GTK
 apps, login screen).
+
+**Screenshots:** `Print` freezes every screen first (a still frame from `hyprpicker -r`), so the control center,
+pop-ups and anything else that closes when it loses focus stay in the shot; then drag a region or click a window.
+Every shot goes to `~/Pictures/Screenshots/` and the clipboard, with a notification (`home/bin/.local/bin/screenshot`).
 
 ## Repos
 
@@ -307,7 +311,8 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + I` | settings (toggle) |
 | `Super + Shift + A` | settings, on Appearance (GTK theme, colour scheme, fonts, icons, cursor) |
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
-| `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
+| `Print` | screenshot: the screen freezes, then drag a region or click a window (Esc cancels) |
+| `Shift + Print` / `Ctrl + Print` | screenshot of the focused monitor / every monitor |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |
 | `Super + Shift + E` | log out |
