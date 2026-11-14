@@ -26,7 +26,9 @@ Variants {
         visible: ShellState.barVisible
         anchors { top: true; left: true; right: true }
         implicitHeight: Theme.barHeight
-        color: Qt.alpha(Theme.bg, Theme.barOpacity)
+        // Transparent on dark wallpapers; a dark (blurred, see rules.lua) background on light ones.
+        color: Qt.alpha(Theme.bg, ShellState.topLuminance > Theme.brightWallpaper ? Theme.barBackdropOpacity : Theme.barOpacity)
+        Behavior on color { ColorAnimation { duration: 400 } }
         WlrLayershell.namespace: "quickshell-bar"
 
         // Left: workspaces, then the focused app

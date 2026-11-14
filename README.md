@@ -19,6 +19,7 @@ Re-running `./install.sh` is always safe: each step checks what's already done.
 ```
 dotfiles/
 ├── install.sh              # bootstrap script (see below)
+├── scripts/                # helpers: gen-wallpapers.py (makes the wallpapers; needs Pillow)
 ├── packages/               # what to dnf install, one package per line
 │   ├── hyprland.txt        #   compositor + hypr* tools (Hyprland COPR)
 │   ├── quickshell.txt      #   desktop shell (Quickshell COPR)
@@ -42,7 +43,7 @@ dotfiles/
 
 | Command                     | What it does                                              |
 |-----------------------------|-----------------------------------------------------------|
-| `./install.sh`              | all steps: `repos packages services link defaults`        |
+| `./install.sh`              | all steps: `repos packages fonts wallpapers link services defaults` |
 | `./install.sh <step>...`    | only those steps, e.g. `./install.sh link`                |
 | `./install.sh -n`           | dry run                                                   |
 | `./install.sh -y`           | don't ask dnf for confirmation                            |
@@ -155,6 +156,14 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `clipboard/`: clipboard history (`Super + V`) from `cliphist` (fed by `wl-paste --watch` in
   `autostart.lua`). Shows the latest entries; typing filters the whole history. Enter copies the entry
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
+- `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + W`
+  picks one; `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
+  It lists `~/.local/share/wallpapers` (three generated ones: carbon, pewter-glow, contours;
+  made by `./install.sh wallpapers`) and `~/Pictures/Wallpapers` (**put your own images there**;
+  png, jpg, webp). The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
+  The bar has no background of its own. When the top edge of a wallpaper is light (measured when
+  you pick it), the bar automatically gets a dark blurred background so its text stays readable;
+  `brightWallpaper` and `barBackdropOpacity` in `Theme.qml` tune that.
 
 ## Desktop
 
@@ -187,6 +196,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + Tab` | previous workspace |
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
 | `Super + V` | clipboard history |
+| `Super + W` | choose wallpaper |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |

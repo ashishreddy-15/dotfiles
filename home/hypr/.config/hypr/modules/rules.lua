@@ -21,10 +21,19 @@ hl.window_rule({
     float = true,
 })
 
--- The launcher and clipboard pickers animate themselves (fade, zoom, height) inside their window.
+-- The pickers (launcher, clipboard, wallpapers) animate themselves (fade, zoom, height) inside their window.
 -- Hyprland's own layer fade smears when Quickshell unmaps the window, so switch it off for them.
 hl.layer_rule({
     name  = "no-anim-pickers",
-    match = { namespace = "^quickshell-(launcher|clipboard)$" },
+    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers)$" },
     no_anim = true,
+})
+
+-- When the wallpaper is light, the bar gets a translucent background (Bar.qml); blur what is behind it.
+-- ignore_alpha: fully transparent pixels (the normal, dark-wallpaper case) are left alone.
+hl.layer_rule({
+    name  = "blur-bar",
+    match = { namespace = "^quickshell-bar$" },
+    blur  = true,
+    ignore_alpha = 0.1,
 })

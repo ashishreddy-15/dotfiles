@@ -2,7 +2,7 @@
 #
 # Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
 #
-#   ./install.sh                 run every step (repos packages fonts link services defaults)
+#   ./install.sh                 run every step (repos packages fonts wallpapers link services defaults)
 #   ./install.sh link            run only the given step(s)
 #   ./install.sh -n              dry run: show what would happen, change nothing
 #   ./install.sh -y              don't ask dnf for confirmation
@@ -13,6 +13,7 @@
 #   packages  dnf install everything in packages/*.txt,
 #             then dnf remove everything in packages/remove.txt
 #   fonts     download fonts in system/fonts.txt (pinned + checksummed) to ~/.local/share/fonts
+#   wallpapers generate the Carbon & Pewter wallpapers into ~/.local/share/wallpapers (scripts/gen-wallpapers.py)
 #   services  run system/services.sh (root) and system/user-services.sh (user units)
 #   link      symlink home/<pkg>/ into $HOME with GNU stow
 #             (existing real files are moved to ~/.dotfiles-backup/<time>/ first,
@@ -26,7 +27,7 @@ DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 STOW_DIR="$DOTFILES/home"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 REMOVE_LIST="$DOTFILES/packages/remove.txt"
-ALL_STEPS=(repos packages fonts link services defaults)
+ALL_STEPS=(repos packages fonts wallpapers link services defaults)
 
 # Default applications: "<desktop file> <mime type>..."
 MIME_DEFAULTS=(
@@ -288,6 +289,19 @@ step_fonts() {
   fi
 }
 
+# Generate the wallpapers (kept out of git: they are a few MB each and fully reproducible).
+step_wallpapers() {
+  step "Wallpapers"
+  local gen="$DOTFILES/scripts/gen-wallpapers.py"
+  [[ -f "$gen" ]] || { ok "no generator found"; return 0; }
+  python3 -c 'import PIL' 2>/dev/null || { warn "Pillow missing (sudo dnf install python3-pillow); skipping"; return 0; }
+  if (( DRY_RUN )); then
+    info "[dry-run] python3 scripts/gen-wallpapers.py"
+  else
+    python3 "$gen"
+  fi
+}
+
 step_defaults() {
   step "Default applications"
   command -v xdg-mime >/dev/null || { warn "xdg-mime not found (dnf install xdg-utils); skipping"; return 0; }
@@ -326,7 +340,7 @@ main() {
       -n|--dry-run) DRY_RUN=1 ;;
       -y|--yes)     ASSUME_YES=1 ;;
       -h|--help)    usage 0 ;;
-      repos|packages|fonts|services|link|defaults|unlink) steps+=("$1") ;;
+      repos|packages|fonts|wallpapers|services|link|defaults|unlink) steps+=("$1") ;;
       *) warn "unknown argument: $1"; usage 1 ;;
     esac
     shift

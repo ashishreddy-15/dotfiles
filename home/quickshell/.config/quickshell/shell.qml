@@ -10,6 +10,7 @@ import "notifications"
 import "osd"
 import "launcher"
 import "clipboard"
+import "wallpaper"
 
 ShellRoot {
     Bar {}
@@ -17,4 +18,5 @@ ShellRoot {
     Osd {}
     Launcher {}
     Clipboard {}
+    Wallpaper {}
 }

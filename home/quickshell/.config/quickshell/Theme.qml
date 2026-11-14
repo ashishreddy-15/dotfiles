@@ -31,6 +31,9 @@ Singleton {
 
     // Sizes
     readonly property int barHeight: 28
+    readonly property real wallpaperScrim: 0.35   // darkening along the top edge so the bar stays readable
+    readonly property real brightWallpaper: 110      // top-edge brightness above which the bar gets a background
+    readonly property real barBackdropOpacity: 0.72  // ...and how solid that background is
     readonly property real barOpacity: 0      // 0 = no background, text sits on the wallpaper; 1 = solid strip
     readonly property int radius:    6
     readonly property int pad:       10

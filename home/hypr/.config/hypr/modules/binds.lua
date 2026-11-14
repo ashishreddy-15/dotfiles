@@ -15,6 +15,7 @@ hl.bind(k("Return"),  app(terminal))
 hl.bind(k("E"),       app(fileManager))
 hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app launcher
 hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clipboard history
+hl.bind(k("W"),       hl.dsp.exec_cmd("qs ipc call wallpaper pick"))     -- choose wallpaper
 
 -- Shell
 hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the bar
