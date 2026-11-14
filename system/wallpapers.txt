@@ -36,21 +36,6 @@ dusk-pines      a35298f6e5e914f3a5366b17f32c8630ec9431f29fd8f5ec87470e6484c7cd13
 # fog-valley: fog filling a forested valley (4288 px)
 fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
-# dark-forest: dense pines from above, mist drifting over them (5184 px)
-dark-forest     34d07cec2823ca7fc04242bfc7b988a46d1f0feed23377cc8ef960e4e47737fe  https://images.unsplash.com/photo-1502252430442-aac78f397426?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
-# dusk-range: a mountain range in the last red light under a grey sky (7952 px)
-dusk-range      336ef065b901fdc028219278fe90b0f0ed08e3bede9e3b44d6cd631bf43c8a52  https://images.unsplash.com/photo-1477346611705-65d1883cee1e?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
-# night-ridge: the Milky Way over a dark valley, a few town lights (5751 px)
-night-ridge     2d33c6d35ffc06deef1e17a40a3bdd65fb54ab20d855e57e84de5d27e60061d7  https://images.unsplash.com/photo-1488866022504-f2584929ca5f?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
-# aurora: green northern lights over a black line of pines (7360 px)
-aurora          0ddd146b145b2bc635e922434936cbf83a27389e90bcb22e3e05921467e64230  https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
-# andromeda: the Andromeda galaxy on black (5412 px)
-andromeda       c1dd1671bd64226675d8fdf13a2301677eedbafa6a55f7e2e0313d8c5d309c56  https://images.unsplash.com/photo-1543722530-d2c3201371e7?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
 # ---- light and airy (the bar switches to dark text) ----
 
 # cloud-sea: a sea of clouds below mountains at dusk (4878 px)
