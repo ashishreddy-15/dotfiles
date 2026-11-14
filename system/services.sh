@@ -71,5 +71,15 @@ if command -v ddcutil >/dev/null; then
   udevadm trigger --subsystem-match=i2c-dev && udevadm settle && echo "i2c:      access rules re-applied (ddcutil)"
 fi
 
+# Our udev rules (system/udev/*.rules), e.g. the tablet pad's ExpressKeys: install them and apply them at once, so the
+# device does not have to be plugged in again.
+rules_dir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/udev"
+if compgen -G "$rules_dir/*.rules" >/dev/null; then
+  install -m 644 "$rules_dir"/*.rules /etc/udev/rules.d/
+  udevadm control --reload
+  udevadm trigger --subsystem-match=input --action=change && udevadm settle
+  echo "udev:     $(cd "$rules_dir" && echo *.rules) installed"
+fi
+
 # User-level units are handled by system/user-services.sh (runs without sudo).
 echo "Done."

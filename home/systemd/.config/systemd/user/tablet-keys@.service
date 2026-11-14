@@ -1,0 +1,13 @@
+# The ExpressKeys of a pen tablet: turns each key press into an action (home/bin/.local/bin/tablet-keys).
+# Started by udev while the pad is plugged in (system/udev/70-tablet-pad.rules) and stopped when it goes away.
+#   journalctl --user -u 'tablet-keys@*' -f
+[Unit]
+Description=Tablet ExpressKeys (%I)
+BindsTo=dev-input-%i.device
+After=dev-input-%i.device
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/tablet-keys /dev/input/%I
+Restart=on-failure
+RestartSec=2

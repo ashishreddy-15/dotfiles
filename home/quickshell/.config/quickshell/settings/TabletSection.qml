@@ -63,6 +63,33 @@ Page {
         }
     }
 
+    // ---- ExpressKeys: the four keys on the tablet, left to right ----
+    GroupLabel { visible: Tablet.present; text: "ExpressKeys" }
+    StyledText {
+        visible: Tablet.present
+        width: parent.width
+        bottomPadding: 6
+        text: Tablet.keysReady
+            ? "What each key on the tablet does, left to right. The pen's buttons are set in Xournal++: Edit > Preferences > Input System."
+            : "Needs one setup step first: run ./install.sh services (it asks for your password once)."
+        color: Tablet.keysReady ? Theme.dim : Theme.warn
+        font.pixelSize: Theme.fontSmall
+        wrapMode: Text.Wrap
+    }
+    Repeater {
+        model: Tablet.present ? 4 : 0
+        SettingRow {
+            id: keyRow
+            required property int index
+            title: "Key " + (index + 1) + (index === 0 ? " (left)" : index === 3 ? " (right)" : "")
+            Choice {
+                options: Tablet.actions.map(a => ({ label: a.label, value: a.id }))
+                value: Tablet.expressKeys[keyRow.index] ?? "none"
+                onPicked: v => Tablet.setKey(keyRow.index, v)
+            }
+        }
+    }
+
     // ---- test pad: draw with the pen; the line gets thicker the harder you press ----
     GroupLabel { visible: Tablet.present; text: "Try it (press harder for a thicker line)" }
     Rectangle {

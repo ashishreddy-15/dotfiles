@@ -11,6 +11,7 @@ import Quickshell.Hyprland
 //   keepRatio     trim the tablet's active area to the screen's shape, so circles stay round
 //   orientation   0, 90, 180 or 270 degrees (180 = left-handed)
 //   mode          "pen" (the pen's position is the pointer's) or "mouse" (it moves the pointer, like a mouse)
+//   expressKeys   the action of each ExpressKey (the tablet-keys helper reads this file at every press)
 // They are applied with `hyprctl eval 'hl.device({...})'` per tablet: whenever a choice changes, a tablet is plugged in,
 // you move to another screen (the area depends on that screen's shape) or Hyprland reloads its config.
 // hypr/modules/tablet.lua holds the default for when the shell is not running.
@@ -30,6 +31,17 @@ Singleton {
     property bool keepRatio: true
     property int orientation: 0
     property string mode: "pen"
+    // The ExpressKeys: an action id per key (left to right), done by the tablet-keys helper (home/bin/.local/bin).
+    property var expressKeys: ["undo", "redo", "pen", "eraser"]
+    property var actions: []            // [{ id, label }] the helper offers (`tablet-keys --actions`)
+    // The ExpressKeys need the udev rule (system/udev, installed by ./install.sh services).
+    property bool keysReady: false
+    Process {
+        id: rulesCheck
+        running: true
+        command: ["test", "-f", "/etc/udev/rules.d/70-tablet-pad.rules"]
+        onExited: code => root.keysReady = code === 0
+    }
 
     property int battery: -1            // percent, -1 = unknown
     property string batteryState: ""    // "Charging", "Discharging", "Full"...
@@ -48,9 +60,25 @@ Singleton {
         command: ["sh", "-c", 'mkdir -p "$(dirname "$1")" && printf "%s" "$2" > "$1"', "sh", root.stateFile, json]
     }
     function save() {
-        writer.json = JSON.stringify({ screen: screen, keepRatio: keepRatio, orientation: orientation, mode: mode })
+        writer.json = JSON.stringify({ screen: screen, keepRatio: keepRatio, orientation: orientation, mode: mode, expressKeys: expressKeys })
         writer.running = true
     }
+    function setKey(index, action) {
+        const keys = expressKeys.slice()
+        keys[index] = action
+        expressKeys = keys
+        save()                          // the helper reads the file at every press: nothing else to do
+    }
+    Process {
+        id: actionLister
+        running: true
+        command: [Quickshell.env("HOME") + "/.local/bin/tablet-keys", "--actions"]
+        stdout: StdioCollector {
+            onStreamFinished: root.actions = text.trim().split("\n").filter(l => l.includes("\t"))
+                .map(l => ({ id: l.split("\t")[0], label: l.split("\t")[1] }))
+        }
+    }
+
     function set(key, value) {
         root[key] = value
         save()
@@ -58,7 +86,11 @@ Singleton {
     }
 
     // ---- what is connected ----
-    function refresh() { if (!lister.running) lister.running = true; if (!batteryFinder.running) batteryFinder.running = true }
+    function refresh() {
+        if (!lister.running) lister.running = true
+        if (!batteryFinder.running) batteryFinder.running = true
+        if (!rulesCheck.running) rulesCheck.running = true
+    }
     Process {
         id: lister
         command: ["hyprctl", "devices", "-j"]
@@ -147,6 +179,7 @@ Singleton {
             if (d.keepRatio !== undefined) keepRatio = !!d.keepRatio
             if ([0, 90, 180, 270].includes(d.orientation)) orientation = d.orientation
             if (d.mode === "mouse" || d.mode === "pen") mode = d.mode
+            if (Array.isArray(d.expressKeys) && d.expressKeys.length > 0) expressKeys = d.expressKeys
         } catch (e) { /* first run: the defaults */ }
         refresh()
     }

@@ -37,3 +37,12 @@ for u in "${DISABLE[@]}"; do
     systemctl --user disable --now "$u" >/dev/null 2>&1 && echo "disabled (user): $u"
   fi
 done
+
+# Tablet ExpressKeys: udev starts tablet-keys@<event node> when a pad is plugged in (system/udev/70-tablet-pad.rules).
+# For a pad that is already plugged in when the rule is installed, start it now.
+if [[ -f /etc/udev/rules.d/70-tablet-pad.rules ]]; then
+  for dev in /sys/class/input/event*; do
+    [[ $(cat "$dev/device/name" 2>/dev/null) == Wacom*Pad ]] || continue
+    systemctl --user start "tablet-keys@${dev##*/}.service" && echo "started (user): tablet-keys@${dev##*/}"
+  done
+fi

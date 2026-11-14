@@ -1,0 +1,5 @@
+# Pen tablet pads (the ExpressKeys of a Wacom tablet): installed to /etc/udev/rules.d by `./install.sh services`.
+#   uaccess   the person logged in at this seat may read this one device (not the `input` group, which would mean
+#             every keyboard too)
+#   systemd   start the user service tablet-keys@<event node> while the pad is there; it stops when the pad goes away
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Wacom*Pad", TAG+="uaccess", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="tablet-keys@$kernel.service"
