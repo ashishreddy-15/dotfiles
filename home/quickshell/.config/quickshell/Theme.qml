@@ -53,11 +53,10 @@ Singleton {
 
     // ---- type ----
     readonly property string fontFamily: "Maple Mono NF"   // the one font used everywhere
-    // Sized to match kitty (font_size 11.5 pt = 15.3 px, measured: 9 px per cell), so the shell and the terminal read as one.
-    readonly property int fontSmall: 13     // secondary text: app names, hints
-    readonly property int fontBase:  15     // normal text everywhere, the bar included
-    readonly property int fontLarge: 17     // list entries in pickers
-    readonly property int fontXL:    20     // the search field of pickers
+    readonly property int fontSmall: 11     // secondary text: app names, hints
+    readonly property int fontBase:  12     // normal text everywhere, the bar included
+    readonly property int fontLarge: 14     // list entries in pickers
+    readonly property int fontXL:    16     // the search field of pickers
     readonly property int fontSize:    fontBase   // (older names, same values)
     readonly property int barFontSize: fontBase
 
@@ -65,8 +64,8 @@ Singleton {
     readonly property int pad:        10    // bar edge padding
     readonly property int padContent: 14    // inside a card that holds free-form content (notifications)
     // The control center lines every row up on one grid: a label column, then the value or slider.
-    readonly property int labelWidth: 96    // room for "wallpaper" (the longest label)
-    readonly property int valueX:     112   // where values and sliders start (10 inset + label column + gap)
+    readonly property int labelWidth: 76    // room for "wallpaper" (the longest label)
+    readonly property int valueX:     90    // where values and sliders start (10 inset + label column + gap)
 
     // ---- motion ----
     // Enter: durBase, ease out. Exit: durFast, ease out. Resizing a card: durBase. Hover and selection: durFast.
@@ -82,7 +81,7 @@ Singleton {
     readonly property real brightnessStep: 0.05   // one press of a brightness key (5%)
 
     // ---- the bar ----
-    readonly property int barHeight: 32
+    readonly property int barHeight: 28
     // The bar has no background, so its text must stand out from the wallpaper behind it. When the top edge
     // of the wallpaper is light (measured by Wallpaper.qml), the bar switches to dark text, like the macOS menu bar.
     readonly property real lightWallpaper: 105        // top-edge brightness (0-255) above which the bar text turns dark

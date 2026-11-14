@@ -35,7 +35,7 @@ static() {
     if [ -n "$hits" ]; then fail "hard-coded look values (use a Theme.* token):"; printf '%s\n' "$hits" | sed 's/^/          /'
     else ok "no hard-coded colours, durations, radii or font sizes"; fi
 
-    echo "static: Theme.qml agrees with Hyprland, kitty and hyprlock"
+    echo "static: Theme.qml agrees with Hyprland, hyprlock and the kitty font"
     local radius accent border text rounding
     radius=$(tv radiusCard); rounding=$(sed -nE 's/^ *rounding *= *([0-9]+).*/\1/p' "$look")
     [ "$radius" = "$rounding" ] && ok "corner radius $radius = Hyprland rounding" || fail "radiusCard $radius vs Hyprland rounding ${rounding:-?}"
@@ -53,11 +53,7 @@ static() {
     grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
     grep -qi "$text"   "$lock" && ok "text #$text in hyprlock" || fail "text #$text missing from hyprlock.conf"
 
-    # kitty: font family and size in px must equal the shell's base size (9 px per cell at 0.6 em; 1 pt = 4/3 px).
-    local pt base
-    pt=$(sed -nE 's/^ *font_size +([0-9.]+).*/\1/p' "$kitty"); base=$(tv fontBase)
-    if [ "$(awk "BEGIN{d=$pt*4/3-$base; print (d<1 && d>-1)}")" = 1 ]; then ok "fontBase ${base} px = kitty ${pt} pt"
-    else fail "fontBase $base px vs kitty ${pt} pt ($(awk "BEGIN{print $pt*4/3}") px)"; fi
+    # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")
     grep -q "$fam" "$kitty" && ok "font \"$fam\" in kitty" || fail "kitty does not use \"$fam\""
     grep -q "$fam" "$lock"  && ok "font \"$fam\" in hyprlock" || fail "hyprlock does not use \"$fam\""
