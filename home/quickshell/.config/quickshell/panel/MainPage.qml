@@ -59,6 +59,9 @@ Column {
         if (d?.state === UPowerDeviceState.Charging || d?.state === UPowerDeviceState.FullyCharged || d?.state === UPowerDeviceState.PendingCharge) return Theme.ok
         return pct <= 10 ? Theme.err : pct <= 20 ? Theme.warn : Theme.text
     }
+    // "performance" is selected but the system is holding it back (lap detected, high temperature)
+    readonly property bool perfDegraded: PowerProfiles.profile === PowerProfile.Performance
+        && PowerProfiles.degradationReason !== PerformanceDegradationReason.None
     function profileName() {
         switch (PowerProfiles.profile) {
         case PowerProfile.PowerSaver:  return "power saver"
@@ -86,12 +89,37 @@ Column {
         width: parent.width
         height: 32
 
-        StyledText {
-            x: 10
-            anchors.verticalCenter: parent.verticalCenter
+        // The battery text opens the battery page.
+        MouseArea {
+            id: batteryArea
             visible: root.hasBattery
-            text: root.batteryText()
-            color: root.batteryColor()
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            width: batteryText.implicitWidth + 20
+            height: 28
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.open("battery")
+
+            // Keyboard: Enter, Space or Right opens it.
+            activeFocusOnTab: true
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.open("battery"); event.accepted = true }
+            }
+            FocusRing { visible: batteryArea.activeFocus }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.radiusRow
+                color: batteryArea.containsMouse ? Theme.hover : Theme.clear
+                Behavior on color { ColorAnimation { duration: Theme.durFast } }
+            }
+            StyledText {
+                id: batteryText
+                x: 10
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.batteryText()
+                color: root.batteryColor()
+            }
         }
 
         MouseArea {
@@ -120,7 +148,7 @@ Column {
                 id: profileText
                 anchors.centerIn: parent
                 text: root.profileName() + "  " + Theme.glyphNext
-                color: Theme.dim
+                color: root.perfDegraded ? Theme.warn : Theme.dim
             }
         }
     }

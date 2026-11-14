@@ -32,6 +32,7 @@ dotfiles/
 │   ├── services.sh         #   system services (sudo)
 │   └── user-services.sh    #   systemd --user units (hypridle, polkit agent, quickshell)
 └── home/                   # stow packages, each mirrors $HOME
+    ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
     ├── kitty/              # terminal: font + colours
@@ -80,6 +81,10 @@ drop dependencies nothing else needs. A package in both lists is an error.
 
 **Hide a `/etc/xdg/autostart` entry:** copy one of the files in
 `home/autostart/.config/autostart/`, rename it to match the system entry, then run `./install.sh link`.
+
+**Hide an app from the launcher:** add `home/applications/.local/share/applications/<same file name as the system one>.desktop`
+containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
+(Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
 
 ## Repos
 

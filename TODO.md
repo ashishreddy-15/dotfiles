@@ -13,7 +13,7 @@ GTK apps dark + Carbon & Pewter + Maple Mono, control center as tiles + sliders 
 - [x] Mic slider (+ mute) under `sound`
 - [x] Media block (title, artist, previous / play-pause / next) when a player is running
 - [x] Keyboard navigation: arrows / Tab / Enter / Esc, with a visible focus ring
-- [ ] Battery detail (time to full/empty) and power-profile hint if `performance` is degraded
+- [x] Battery detail page (charge, state, time, power, energy, health) opened from the header; warning when performance is limited (lap detected / high temperature)
 
 ## 2. Notifications
 
@@ -40,7 +40,7 @@ quiet tiles, the control center's structure.
 
 - [ ] GTK apps (Nautilus, pavucontrol, blueman, file dialogs): force dark, recolour libadwaita to the palette,
       10 px corners, Maple Mono
-- [ ] Icons: remove the Sway-era leftovers (Rofi, Foot x3, Xarchiver, Tuned Switcher) and settle on one icon theme
+- [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
 - [ ] hyprlock: same tokens, frosted input card, your wallpaper instead of a blurred screenshot; fingerprint
 - [ ] Login screen (SDDM) theme and a matching cursor theme (optional)
 

@@ -28,4 +28,19 @@ Column {
             onClicked: PowerProfiles.profile = modelData.value
         }
     }
+
+    StyledText {
+        visible: PowerProfiles.profile === PowerProfile.Performance && PowerProfiles.degradationReason !== PerformanceDegradationReason.None
+        width: parent.width
+        leftPadding: 10
+        rightPadding: 10
+        topPadding: 6
+        bottomPadding: 6
+        text: PowerProfiles.degradationReason === PerformanceDegradationReason.LapDetected
+              ? "Performance is limited: the laptop is on your lap."
+              : "Performance is limited: the system is too hot."
+        color: Theme.warn
+        font.pixelSize: Theme.fontSmall
+        wrapMode: Text.Wrap
+    }
 }
