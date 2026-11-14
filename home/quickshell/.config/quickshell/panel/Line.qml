@@ -15,6 +15,12 @@ Item {
     width: parent.width
     height: 32
 
+    // Keyboard: Enter, Space or Right opens it.
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.clicked(); event.accepted = true }
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: Theme.radiusRow
@@ -50,4 +56,6 @@ Item {
         text: "›"
         color: Theme.dim
     }
+
+    FocusRing { visible: root.activeFocus }
 }

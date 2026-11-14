@@ -1,61 +1,71 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Services.Notifications
 import qs
 
-// Notification daemon + pop-ups. Pop-ups drop down from the top-centre of the main monitor.
-// Normal: fade after 5 s (paused while hovered). Critical: stay until clicked.
-// Click a pop-up to dismiss it; click an action to run it.
+// Notification pop-ups: a stack of cards under the bar, top-centre of the main screen, newest on top.
+// The data (and the D-Bus server) live in Notifs.qml. This file is only the window and the stack.
+//
+// Like the other floating pieces, the window has a fixed size with room for the cards' shadows; the cards
+// move inside it. New cards fade and zoom in, leaving ones fade out, and the rest slide to re-stack.
 Scope {
     id: root
 
-    readonly property int normalTimeout: 5000
-    readonly property int maxVisible: 4
-
-    NotificationServer {
-        id: server
-
-        keepOnReload: true
-        bodySupported: true
-        bodyMarkupSupported: true
-        actionsSupported: true
-        imageSupported: true
-
-        onNotification: n => { n.tracked = true }
-    }
+    readonly property int cardWidth: 400
+    readonly property int gap: 8
+    readonly property int cardMaxHeight: 150
+    // Room for the most cards we ever show, each as tall as allowed.
+    readonly property int stackMax: Notifs.maxPopups * cardMaxHeight + (Notifs.maxPopups - 1) * gap
 
     PanelWindow {
-        screen: ShellState.mainScreen
-        visible: server.trackedNotifications.values.length > 0
+        id: win
 
-        anchors.top: true                       // top only = horizontally centred
-        margins.top: Theme.barHeight + 6
-        exclusionMode: ExclusionMode.Ignore     // don't push windows down
-        implicitWidth: 400
-        implicitHeight: column.implicitHeight
+        screen: ShellState.mainScreen
+
+        // Stay mapped a moment after the last card is gone, so its exit animation can finish.
+        visible: Notifs.popups.count > 0 || linger.running
+        Timer { id: linger; interval: 350 }
+        Connections {
+            target: Notifs.popups
+            function onCountChanged() { linger.restart() }
+        }
+
+        readonly property int wantedTop: Theme.barHeight + 4
+        anchors.top: true                                    // top only = horizontally centred
+        margins.top: Math.max(0, wantedTop - Theme.shadowMargin)
+        exclusionMode: ExclusionMode.Ignore
+        implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
+        implicitHeight: wantedTop + root.stackMax + Theme.shadowMargin
         color: "transparent"
+        mask: Region { item: list }                          // only the cards take clicks
         WlrLayershell.namespace: "quickshell-notifications"
         WlrLayershell.layer: WlrLayer.Overlay
 
-        // A ListView keeps existing cards (and their timers) when another card closes.
-        // Bottom-to-top puts the newest notification at the top.
         ListView {
-            id: column
-            width: parent.width
-            implicitHeight: contentHeight
-            height: contentHeight
+            id: list
+            x: Theme.shadowMargin
+            y: win.wantedTop - win.margins.top
+            width: root.cardWidth
+            height: Math.min(contentHeight, root.stackMax)
             interactive: false
-            spacing: 8
-            verticalLayoutDirection: ListView.BottomToTop
-            model: server.trackedNotifications
+            spacing: root.gap
+            model: Notifs.popups
+            delegate: NotificationCard {}
 
-            delegate: NotificationCard {
-                required property int index
-                width: column.width
-                timeout: root.normalTimeout
-                // Only the newest few are shown; older ones wait until these close.
-                shown: index >= column.count - root.maxVisible
+            add: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
+                    NumberAnimation { property: "scale"; from: 0.97; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
+                }
+            }
+            remove: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
+                    NumberAnimation { property: "scale"; to: 0.97; duration: Theme.durFast; easing.type: Theme.easeOut }
+                }
+            }
+            displaced: Transition {
+                NumberAnimation { properties: "y"; duration: Theme.durBase; easing.type: Theme.easeOut }
             }
         }
     }

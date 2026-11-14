@@ -30,6 +30,10 @@ Variants {
         color: Qt.alpha(Theme.bg, Theme.barOpacity)
         WlrLayershell.namespace: "quickshell-bar"
 
+        // Keep awake: while on, the compositor does not report "idle", so hypridle does not dim, lock or sleep.
+        // (An inhibitor needs a visible window; the bar is always there.)
+        IdleInhibitor { window: bar; enabled: Modes.keepAwake }
+
         // Left: workspaces, then the focused app
         Row {
             spacing: 14

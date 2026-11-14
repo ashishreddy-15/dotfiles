@@ -41,6 +41,12 @@ Row {
             width: root.width / root.actions.length
             height: 32
 
+            // Keyboard: Enter or Space presses it.
+            activeFocusOnTab: true
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.activate(cell.modelData); event.accepted = true }
+            }
+
             Rectangle {
                 anchors { fill: parent; margins: 2 }
                 radius: Theme.radiusRow
@@ -59,6 +65,8 @@ Row {
                 text: cell.asking ? cell.modelData.name + "?" : cell.modelData.name
                 color: cell.asking ? Theme.warn : Theme.dim
             }
+
+            FocusRing { visible: cell.activeFocus }
         }
     }
 }

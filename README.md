@@ -140,10 +140,12 @@ journalctl --user -u quickshell -f       # logs / QML errors
 
   `Super + B` hides or shows the bar. If the main monitor is unplugged, the laptop's
   bar takes over the status area.
-- `notifications/`: Quickshell is the notification daemon. Pop-ups drop down from the
-  top-centre of the main monitor, newest on top, up to 4 at once. Normal ones close
-  after 5 s (paused while hovered); critical ones stay. Click to dismiss.
-  dunst (from the Sway spin) is kept out of Hyprland by a systemd drop-in.
+- `Notifs.qml` + `notifications/`: Quickshell is the notification daemon (dunst, from the Sway spin, is kept out of
+  Hyprland by a systemd drop-in). `Notifs.qml` receives them and keeps a **history** (until you dismiss them) and the
+  **pop-ups** on screen. Pop-ups are frosted cards under the bar, top-centre of the main monitor, newest on top,
+  up to 4 at once; each runs a thin timeout bar (5 s, paused while hovered; critical ones stay). Click a card or its `×`
+  to hide the pop-up (it stays in the history); an action link runs the action. Do Not Disturb hides pop-ups, except
+  critical ones, and everything still lands in the history (control center: tile arrow, or the Notifications page).
 - `osd/`: small volume / brightness indicator at the bottom-centre of the main monitor.
   Volume shows on any change; brightness shows when the brightness keys are used
   (they call `qs ipc call osd brightness`), so idle dimming stays silent.
@@ -175,14 +177,20 @@ journalctl --user -u quickshell -f       # logs / QML errors
   command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
 - `panel/`: the control center. Click the clock area of the bar (or `Super + A`) to open it; Esc or a click
   outside closes it. It is built from four kinds of control, each with one look and one behaviour:
-  **tiles** (on/off: Wi-Fi, Bluetooth; click toggles, the arrow opens details), **sliders** (levels: a
-  brightness slider per screen, volume; click `volume` to mute), **rows** (open something: wallpaper picker,
-  sound output) and **actions** (lock, logout, suspend, reboot, shutdown; the last three ask for a second click).
-  Details open as a separate **page** with a `‹ Title` header (Wi-Fi, Bluetooth, sound output, power profile),
-  never inline, so the panel doesn't jump; Esc or `‹` goes back. Order on the first page: status header
-  (battery, power profile), tiles, `display`, `sound`, power actions. Rows share one grid (`labelWidth`,
+  **tiles** (on/off: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake; click toggles, the arrow opens
+  details), **sliders** (levels: a brightness slider per screen, volume, mic; click `volume` or `mic` to mute),
+  **rows** (open something: wallpaper picker, sound output) and **actions** (lock, logout, suspend, reboot,
+  shutdown; the last three ask for a second click). Details open as a separate **page** with a `‹ Title` header
+  (Wi-Fi, Bluetooth, sound output, power profile, night light, notifications), never inline, so the panel doesn't
+  jump. Order on the first page: status header (battery, power profile), tiles, `display`, `sound`, `media` (only while
+  a player runs: title, artist, previous / play-pause / next), power actions. Rows share one grid (`labelWidth`,
   `valueX` in `Theme.qml`). Wi-Fi and Bluetooth scan only while their page is open.
-  `qs ipc call panel open <wifi|bt|output|profile|none>` opens it on a page.
+  **Keyboard:** Up / Down (or Tab) move between controls, Enter / Space activates, Left / Right adjust a slider (Right on
+  a tile opens its details), Esc or Backspace goes back a page (Esc closes on the first page); the focused control gets
+  an accent outline. `qs ipc call panel open <wifi|bt|output|profile|night|notifications|none>` opens it on a page.
+- `Modes.qml`: Do Not Disturb, night light (`hyprsunset -t <kelvin>`, 2500-6500 K) and keep awake (an idle inhibitor held
+  by the bar). Do Not Disturb and night light are remembered in `~/.local/state/dotfiles/modes.json`.
+  `qs ipc call modes toggleDnd | toggleNight | toggleAwake | setWarmth <kelvin>`.
 
 ### Wallpaper photos
 

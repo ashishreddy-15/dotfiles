@@ -18,6 +18,14 @@ Item {
     width: parent.width
     height: 32
 
+    // Keyboard: Left / Right nudge the level by 5%; Enter or Space presses the label (mute) if it is a button.
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Left) { root.moved(Math.max(0, root.value - 0.05)); event.accepted = true }
+        else if (event.key === Qt.Key_Right) { root.moved(Math.min(1, root.value + 0.05)); event.accepted = true }
+        else if (root.labelClickable && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) { root.labelClicked(); event.accepted = true }
+    }
+
     MouseArea {
         width: Theme.valueX
         height: parent.height
@@ -46,4 +54,6 @@ Item {
         text: root.valueText
         color: root.muted ? Theme.dim : Theme.text
     }
+
+    FocusRing { visible: root.activeFocus }
 }

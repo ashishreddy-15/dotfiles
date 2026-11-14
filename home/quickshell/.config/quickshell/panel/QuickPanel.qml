@@ -17,18 +17,25 @@ Scope {
     id: root
 
     readonly property int panelWidth: 340
-    readonly property int maxHeight: 560
+    readonly property int maxHeight: 780        // the first page is about 650 px; longer pages scroll
 
     IpcHandler {
         target: "panel"
         function toggle(): void { ShellState.togglePanel(Hyprland.focusedMonitor?.name ?? "") }
         function close(): void { ShellState.panelOpen = false }
-        // Open on a page: wifi, bt, output, profile, or none for the first page (used for testing).
+        // Open on a page: wifi, bt, output, profile, night, notifications, or none for the first page (used for testing).
         function open(page: string): void {
             ShellState.panelScreen = Hyprland.focusedMonitor?.name ?? ""
             ShellState.panelOpen = true
-            stage.go(["wifi", "bt", "output", "profile"].includes(page) ? page : "main")
+            stage.go(["wifi", "bt", "output", "profile", "night", "notifications"].includes(page) ? page : "main")
         }
+    }
+
+    // Move the keyboard focus to the next (or previous) control on the page.
+    function moveFocus(forward) {
+        const cur = card.Window.activeFocusItem ?? card
+        const next = cur.nextItemInFocusChain(forward)
+        if (next) next.forceActiveFocus()
     }
 
     Connections {
@@ -58,7 +65,8 @@ Scope {
         mask: Region { item: card }
         WlrLayershell.namespace: "quickshell-panel"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: ShellState.panelOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+        // Exclusive while open, like the pickers, so the keyboard works the moment it opens (Esc, arrows, Enter).
+        WlrLayershell.keyboardFocus: ShellState.panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         HyprlandFocusGrab {
             active: ShellState.panelOpen
@@ -77,8 +85,12 @@ Scope {
             maxHeight: root.maxHeight
 
             focus: true
-            // Esc goes back one page; on the first page it closes the panel.
+            // Keyboard: Esc goes back one page (on the first page it closes the panel), Backspace goes back too,
+            // Up / Down (and Tab) move between controls; each control handles Enter, Space and Left / Right itself.
             Keys.onEscapePressed: stage.detail ? stage.go("main") : ShellState.panelOpen = false
+            Keys.onUpPressed: root.moveFocus(false)
+            Keys.onDownPressed: root.moveFocus(true)
+            Keys.onPressed: event => { if (event.key === Qt.Key_Backspace && stage.detail) { stage.go("main"); event.accepted = true } }
 
             // Start from the first page again once the panel is out of sight.
             onShownChanged: if (shown === 0) stage.go("main")
@@ -109,6 +121,7 @@ Scope {
                     function go(name) {
                         if (name !== "main") detailPage = name
                         page = name
+                        card.forceActiveFocus()        // start from the top of the new page: the next Down picks its first control
                     }
 
                     MainPage {
@@ -130,13 +143,17 @@ Scope {
                         sourceComponent: stage.detailPage === "wifi" ? wifiPage
                                        : stage.detailPage === "bt" ? btPage
                                        : stage.detailPage === "output" ? outputPage
-                                       : stage.detailPage === "profile" ? profilePage : null
+                                       : stage.detailPage === "profile" ? profilePage
+                                       : stage.detailPage === "night" ? nightPage
+                                       : stage.detailPage === "notifications" ? notificationsPage : null
                     }
 
                     Component { id: wifiPage;    WifiPage      { onBack: stage.go("main") } }
                     Component { id: btPage;      BluetoothPage { onBack: stage.go("main") } }
                     Component { id: outputPage;  OutputPage    { onBack: stage.go("main") } }
                     Component { id: profilePage; ProfilePage   { onBack: stage.go("main") } }
+                    Component { id: nightPage;   NightPage     { onBack: stage.go("main") } }
+                    Component { id: notificationsPage; NotificationsPage { onBack: stage.go("main") } }
                 }
             }
         }

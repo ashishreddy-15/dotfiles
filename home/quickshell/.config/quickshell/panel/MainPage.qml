@@ -8,11 +8,11 @@ import Quickshell.Services.UPower
 import qs
 
 // The first page of the control center. Every control is one of four kinds, always in the same place:
-//   tile    on/off things (Wi-Fi, Bluetooth), in the grid at the top; the arrow opens the details
+//   tile    on/off things (Wi-Fi, Bluetooth, Do Not Disturb, night light, keep awake) at the top; the arrow opens details
 //   slider  levels (brightness, volume), grouped under "display" and "sound"
 //   row     things that open something (wallpaper picker, sound output page)
 //   action  the power buttons in the footer
-// Order, top to bottom: status header, tiles, display, sound, footer.
+// Order, top to bottom: status header, tiles, display, sound, media (only while a player runs), footer.
 Column {
     id: root
 
@@ -31,7 +31,10 @@ Column {
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property bool muted: sink?.audio?.muted ?? false
     readonly property real volume: sink?.audio?.volume ?? 0
-    PwObjectTracker { objects: [root.sink] }
+    readonly property var mic: Pipewire.defaultAudioSource
+    readonly property bool micMuted: mic?.audio?.muted ?? false
+    readonly property real micVolume: mic?.audio?.volume ?? 0
+    PwObjectTracker { objects: [root.sink, root.mic] }
 
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery?.isLaptopBattery ?? false
@@ -100,6 +103,13 @@ Column {
             cursorShape: Qt.PointingHandCursor
             onClicked: root.open("profile")
 
+            // Keyboard: Enter, Space or Right opens the power profile page.
+            activeFocusOnTab: true
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.open("profile"); event.accepted = true }
+            }
+            FocusRing { visible: profileArea.activeFocus }
+
             Rectangle {
                 anchors.fill: parent
                 radius: Theme.radiusRow
@@ -146,6 +156,32 @@ Column {
             onToggled: if (root.btAdapter) root.btAdapter.enabled = !root.btOn
             onDetail: root.open("bt")
         }
+        Tile {
+            width: parent.tileWidth
+            label: "Do not disturb"
+            // the number is how many notifications are waiting in the history
+            value: (Modes.dnd ? "on" : "off") + (Notifs.count > 0 ? "  ·  " + Notifs.count : "")
+            active: Modes.dnd
+            hasDetail: true
+            onToggled: Modes.toggleDnd()
+            onDetail: root.open("notifications")
+        }
+        Tile {
+            width: parent.tileWidth
+            label: "Night light"
+            value: Modes.nightLight ? Modes.kelvin + " K" : "off"
+            active: Modes.nightLight
+            hasDetail: true
+            onToggled: Modes.toggleNight()
+            onDetail: root.open("night")
+        }
+    }
+    Tile {
+        width: parent.width
+        label: "Keep awake"
+        value: Modes.keepAwake ? "the screen will not lock or sleep" : "off"
+        active: Modes.keepAwake
+        onToggled: Modes.toggleAwake()
     }
 
     // ---- display ----
@@ -194,11 +230,23 @@ Column {
         onLabelClicked: if (root.sink?.audio) root.sink.audio.muted = !root.sink.audio.muted
         onMoved: v => { if (root.sink?.audio) root.sink.audio.volume = v }
     }
+    SliderRow {
+        label: root.micMuted ? "muted" : "mic"
+        labelColor: root.micMuted ? Theme.warn : Theme.dim
+        labelClickable: true
+        value: root.micVolume
+        muted: root.micMuted
+        onLabelClicked: if (root.mic?.audio) root.mic.audio.muted = !root.mic.audio.muted
+        onMoved: v => { if (root.mic?.audio) root.mic.audio.volume = v }
+    }
     Line {
         label: "output"
         value: root.sink ? (root.sink.nickname || root.sink.description || root.sink.name) : "none"
         onClicked: root.open("output")
     }
+
+    // ---- media (only while a player is running) ----
+    MediaBlock { width: parent.width }
 
     // ---- footer ----
     Item {

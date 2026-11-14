@@ -18,6 +18,13 @@ Item {
 
     height: 52
 
+    // Keyboard: Enter or Space toggles (or opens the page, for tiles that only open one); Right opens the details.
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.toggle ? root.toggled() : root.detail(); event.accepted = true }
+        else if (event.key === Qt.Key_Right && root.hasDetail) { root.detail(); event.accepted = true }
+    }
+
     // Quiet by design: "on" is a light wash with the accent mark (the same sign a selected row has in a
     // picker); "off" is only a hairline outline. Nothing here should shout louder than the sliders and text.
     Rectangle {
@@ -87,4 +94,6 @@ Item {
             onClicked: root.detail()
         }
     }
+
+    FocusRing { visible: root.activeFocus }
 }

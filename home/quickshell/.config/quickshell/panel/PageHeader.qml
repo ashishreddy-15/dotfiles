@@ -16,6 +16,13 @@ Item {
     width: parent.width
     height: 36
 
+    // Keyboard: Enter or Space goes back; Right flips the switch. (Esc and Backspace go back from anywhere.)
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.back(); event.accepted = true }
+        else if (event.key === Qt.Key_Right && root.switchText !== "") { root.switched(); event.accepted = true }
+    }
+
     Rectangle {
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
         width: titleRow.width + 20
@@ -53,4 +60,6 @@ Item {
             onClicked: root.switched()
         }
     }
+
+    FocusRing { visible: root.activeFocus }
 }

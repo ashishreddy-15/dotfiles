@@ -1,0 +1,4 @@
+# Tools for testing the desktop UI automatically (not needed day to day). Small, no daemons.
+# They let a script press keys and click, so keyboard handling and buttons can be checked for real.
+wtype                      # types and presses keys into the focused window
+wlrctl                     # moves the pointer and clicks
