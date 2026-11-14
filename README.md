@@ -27,6 +27,7 @@ dotfiles/
 │   └── remove.txt          #   packages to uninstall (e.g. Thunar)
 ├── system/                 # root-level config (copied, never symlinked)
 │   ├── repos/*.repo        #   -> /etc/yum.repos.d/
+│   ├── sddm/               #   login screen theme "carbon" -> /usr/share/sddm/themes/, and /etc/sddm.conf.d/
 │   ├── fonts.txt           #   fonts to download (pinned URL + sha256)
 │   ├── wallpapers.txt      #   Unsplash photos to download (pinned URL + sha256)
 │   ├── services.sh         #   system services (sudo)
@@ -47,7 +48,7 @@ dotfiles/
 
 | Command                     | What it does                                              |
 |-----------------------------|-----------------------------------------------------------|
-| `./install.sh`              | all steps: `repos packages fonts wallpapers link services defaults` |
+| `./install.sh`              | all steps: `repos packages fonts wallpapers link services sddm defaults` |
 | `./install.sh <step>...`    | only those steps, e.g. `./install.sh link`                |
 | `./install.sh -n`           | dry run                                                   |
 | `./install.sh -y`           | don't ask dnf for confirmation                            |
@@ -105,6 +106,13 @@ list when installed (for example `sudo dnf install adw-gtk3-theme`).
 accepted until you click Pair or Allow (Esc declines). The agent behind this is `bt-agent` (user service
 `bt-agent.service`; logs: `journalctl --user -u bt-agent -f`). Only `bluetoothd` can call it (system bus policy), and
 the computer is pairable only while Settings > Bluetooth is open.
+
+**Login screen (SDDM):** the "carbon" theme in `system/sddm/carbon/` has the same look as the lock screen (blurred
+wallpaper, one card with the time, date, user and password; session and power buttons under it). Install or update it
+with `./install.sh sddm` (sudo). It copies Maple Mono and your current wallpaper into the theme, because the login
+screen cannot read your home folder, so run it again after changing the wallpaper. Preview without logging out:
+`sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/carbon`. The cursor is Adwaita everywhere (shell, GTK
+apps, login screen).
 
 ## Repos
 

@@ -2,7 +2,7 @@
 #
 # Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
 #
-#   ./install.sh                 run every step (repos packages fonts wallpapers link services defaults)
+#   ./install.sh                 run every step (repos packages fonts wallpapers link services sddm defaults)
 #   ./install.sh link            run only the given step(s)
 #   ./install.sh -n              dry run: show what would happen, change nothing
 #   ./install.sh -y              don't ask dnf for confirmation
@@ -18,6 +18,8 @@
 #   link      symlink home/<pkg>/ into $HOME with GNU stow
 #             (existing real files are moved to ~/.dotfiles-backup/<time>/ first,
 #             then the Hyprland config is checked with --verify-config)
+#   sddm      the login screen: the "carbon" theme from system/sddm/ (with Maple Mono and your wallpaper copied in,
+#             since the login screen cannot read your home folder) and /etc/sddm.conf.d/10-dotfiles.conf
 #   defaults  set default applications (MIME_DEFAULTS below)
 
 set -Eeuo pipefail
@@ -27,7 +29,7 @@ DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 STOW_DIR="$DOTFILES/home"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 REMOVE_LIST="$DOTFILES/packages/remove.txt"
-ALL_STEPS=(repos packages fonts wallpapers link services defaults)
+ALL_STEPS=(repos packages fonts wallpapers link services sddm defaults)
 
 # Default applications: "<desktop file> <mime type>..."
 MIME_DEFAULTS=(
@@ -215,6 +217,28 @@ list_pkgs() {
   for d in "$STOW_DIR"/*/; do basename "$d"; done
 }
 
+# Login screen: the carbon theme (system/sddm/carbon). SDDM runs as its own user and cannot read $HOME, so the font
+# and the current wallpaper are copied into the theme. Re-run after changing the wallpaper to update it there too.
+step_sddm() {
+  step "Login screen (SDDM)"
+  command -v sddm >/dev/null 2>&1 || { ok "sddm is not installed: skipped"; return 0; }
+  need_sudo
+  local src="$DOTFILES/system/sddm" dest=/usr/share/sddm/themes/carbon
+  local font="$HOME/.local/share/fonts/dotfiles/maple-mono-nf/MapleMono-NF-Regular.ttf"
+  local wall
+  wall=$(cat "$HOME/.local/state/dotfiles/wallpaper" 2>/dev/null)
+  [[ -f "$wall" ]] || wall=$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f 2>/dev/null | sort | head -1)
+
+  run sudo install -d -m 755 "$dest" /etc/sddm.conf.d
+  run sudo install -m 644 "$src"/carbon/* "$dest"/
+  if [[ -f "$font" ]]; then run sudo install -m 644 "$font" "$dest/MapleMono-NF-Regular.ttf"
+  else warn "Maple Mono not found (run ./install.sh fonts first): the login screen uses a plain monospace font"; fi
+  if [[ -f "$wall" ]]; then run sudo install -m 644 "$wall" "$dest/background.jpg"
+  else warn "no wallpaper found (run ./install.sh wallpapers): the login screen has a plain background"; fi
+  run sudo install -m 644 "$src/10-dotfiles.conf" /etc/sddm.conf.d/10-dotfiles.conf
+  ok "login screen: carbon (preview without logging out: sddm-greeter-qt6 --test-mode --theme $dest)"
+}
+
 step_link() {
   step "Linking dotfiles (stow)"
   local pkgs
@@ -381,7 +405,7 @@ main() {
       -n|--dry-run) DRY_RUN=1 ;;
       -y|--yes)     ASSUME_YES=1 ;;
       -h|--help)    usage 0 ;;
-      repos|packages|fonts|wallpapers|services|link|defaults|unlink) steps+=("$1") ;;
+      repos|packages|fonts|wallpapers|services|link|sddm|defaults|unlink) steps+=("$1") ;;
       *) warn "unknown argument: $1"; usage 1 ;;
     esac
     shift

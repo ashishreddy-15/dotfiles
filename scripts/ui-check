@@ -69,6 +69,15 @@ static() {
         if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/gtk.css; then ok "$name #$hex in the GTK stylesheets"
         else fail "$name #$hex missing from the GTK stylesheets (home/gtk)"; fi
     done
+    # The login screen (SDDM) keeps copies of the palette and corners.
+    local sddm="$root/system/sddm/carbon/Main.qml"
+    if [ -f "$sddm" ]; then
+        for name in bg raised border text dim bright accent err; do
+            hex=$(tv "$name" | tr -d '"#')
+            grep -qi "\"#$hex\"" "$sddm" && ok "$name #$hex in the login screen" || fail "$name #$hex missing from system/sddm/carbon/Main.qml"
+        done
+        grep -qE "radiusCard: *$radius\b" "$sddm" && ok "login screen card corners $radius" || fail "login screen radiusCard is not $radius"
+    fi
     # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")
     grep -q "$fam" "$kitty" && ok "font \"$fam\" in kitty" || fail "kitty does not use \"$fam\""

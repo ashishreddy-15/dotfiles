@@ -1,0 +1,8 @@
+[SddmGreeterTheme]
+Name=Carbon
+Description=Login screen in the dotfiles' look (Carbon & Pewter): blurred wallpaper, one card, Maple Mono
+Author=dotfiles
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf

@@ -56,7 +56,8 @@ quiet tiles, the control center's structure.
 - [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
 - [x] hyprlock: same tokens, a card with the time, date and password, your wallpaper (blurred) instead of a screenshot.
       Fingerprint: not possible, this laptop has no reader
-- [ ] Login screen (SDDM) theme and a matching cursor theme (optional)
+- [x] Login screen (SDDM): "carbon" theme like the lock screen (`./install.sh sddm`); cursor: Adwaita everywhere
+- [ ] Run `./install.sh sddm` (needs sudo) and look at the real login screen (power buttons only show there)
 
 ## 5. System
 
@@ -80,7 +81,7 @@ quiet tiles, the control center's structure.
 - [ ] Power confirmation (lock / logout / suspend / reboot / shutdown): not pressed on purpose
 - [ ] Wi-Fi: connect to a saved network, enter a password for a new one; Bluetooth: pair and connect a device
 - [ ] Notification actions and click-to-dismiss
-- [ ] hyprlock: how it looks, unlocking, fingerprint
+- [x] hyprlock: how it looks, unlocking (no fingerprint reader on this laptop)
 - [ ] Tray right-click menu; launching an app from the launcher with Enter
 - [ ] Frosted cards on a light wallpaper (e.g. `misty-ridges`)
 
