@@ -21,6 +21,6 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         text: Qt.formatDateTime(clock.date, "HH:mm")
         color: Theme.barBright
-        font.weight: Font.Medium
+        font.weight: Theme.barFontWeightStrong
     }
 }

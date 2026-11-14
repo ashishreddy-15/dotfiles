@@ -55,6 +55,8 @@ Singleton {
 
     // ---- type ----
     readonly property string fontFamily: "Maple Mono NF"   // the one font used everywhere
+    readonly property int barFontWeight: Font.DemiBold    // the bar's text: a step heavier, so it reads over the wallpaper
+    readonly property int barFontWeightStrong: Font.Bold       // what leads in the bar (the clock's time)
     readonly property int fontSmall: 11     // secondary text: app names, hints
     readonly property int fontBase:  12     // normal text everywhere, the bar included
     readonly property int fontLarge: 14     // list entries in pickers

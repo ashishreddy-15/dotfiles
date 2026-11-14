@@ -30,8 +30,6 @@ forest-path     a612bb6dbb66d6fa64bb3fac1d06bd2f82bdecbb3855e2ce7234412830b56122
 # moss-valley: green valley with rock spires, hazy light
 moss-valley     6046324a97ba27cc7548f47af4f99be2c217c85a2cf99062601ae0645bf0f963  https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
 
-# canyon: mossy canyon with a river (Iceland)
-canyon          9ae082321600f490356255cb0b231aba3206bcd05047aa14f7c924e3f3f8cda0  https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
 
 # cloud-peak: snowy peak rising out of cloud, nearly black and white
 cloud-peak      e03c86a54e4d2c25fb6e9fd06d996fda1de9fc7879730f070e9e4577b110252e  https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
