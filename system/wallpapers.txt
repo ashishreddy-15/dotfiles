@@ -3,7 +3,9 @@
 # listed here are removed by the same step (your own images go in ~/Pictures/Wallpapers and are never touched).
 #
 # Format:  <name>  <sha256>  <url>
-# Each URL asks Unsplash's image CDN for a 2560x1600 smart crop (so portrait photos fit a landscape screen).
+# Each URL asks Unsplash's image CDN for a 2560x1600 smart crop at quality 90 (so portrait photos fit a landscape screen;
+# a 16:9 monitor shows it with a strip off the top and bottom). Pick originals at least ~4800 px wide: the CDN then
+# scales down, which keeps them sharp on a 1440p monitor (smaller ones get scaled up and look soft).
 # The CDN returns identical bytes every time, so the checksums are pinned. A failed download or a changed
 # checksum only skips that photo with a warning; it never stops the install.
 # Photographer names are not recorded here (Unsplash blocks automated page lookups). To add one, find the
@@ -12,25 +14,49 @@
 # To add a photo: take the long id from its image URL (photo-<id>), build the URL below, download it once,
 # run `sha256sum` on it, and add a line. To remove one, delete its line (and the file).
 
-# The set: atmospheric, muted, natural (chosen to match fog-forest), dark enough for the bar's text or light enough
-# for its dark text.
+# The set: natural and muted, to go with the palette; checked at 100% for sharpness.
 
-# fog-forest: aerial fog over pine forest
-fog-forest      aa871527c1942498f33a4cfb4f92d2fa271fd83006b8d09b3aa76bb25e9e5b16  https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# ---- dark and moody ----
 
-# fog-valley: fog filling a forested valley
-fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# fog-forest: aerial fog over pine forest (original 7952 px)
+fog-forest      aa871527c1942498f33a4cfb4f92d2fa271fd83006b8d09b3aa76bb25e9e5b16  https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
-# forest-light: dark misty forest, soft light through the trees
-forest-light    edc65922cd566ddfc1cbd5fe8618de0c07c94f2d8a546280fe9f96bd8825f809  https://images.unsplash.com/photo-1448375240586-882707db888b?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# forest-light: dark misty forest, soft light through the trees (6000 px)
+forest-light    4a7644f893c0d7a231e80be7594a21bd19e53587feb08119ca774c8cac63d934  https://images.unsplash.com/photo-1448375240586-882707db888b?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
-# forest-path: deep forest, a path through it
-forest-path     a612bb6dbb66d6fa64bb3fac1d06bd2f82bdecbb3855e2ce7234412830b56122  https://images.unsplash.com/photo-1516214104703-d870798883c5?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# forest-path: deep forest, a path through it (5184 px)
+forest-path     a612bb6dbb66d6fa64bb3fac1d06bd2f82bdecbb3855e2ce7234412830b56122  https://images.unsplash.com/photo-1516214104703-d870798883c5?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
-# moss-valley: green valley with rock spires, hazy light
-moss-valley     6046324a97ba27cc7548f47af4f99be2c217c85a2cf99062601ae0645bf0f963  https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# teal-peaks: snow peaks against a teal night sky, mist below (4928 px)
+teal-peaks      e4835d3c5dbbef7eb4581142805e13766ec24c419a668c873907c8f3a5d282cb  https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
+# dusk-pines: pines and a far peak at sunset (6000 px)
+dusk-pines      a35298f6e5e914f3a5366b17f32c8630ec9431f29fd8f5ec87470e6484c7cd13  https://images.unsplash.com/photo-1511497584788-876760111969?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
+# fog-valley: fog filling a forested valley (4288 px)
+fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
-# cloud-sea: a sea of clouds below mountains at dusk
-cloud-sea       9d8f272b1bb77e13f41552a11d42f670ae543ac69e3185bc459891f88cc345e5  https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# ---- light and airy (the bar switches to dark text) ----
+
+# fog-summit: a snowy ridge rising out of cloud, almost black and white (5472 px)
+fog-summit      e03c86a54e4d2c25fb6e9fd06d996fda1de9fc7879730f070e9e4577b110252e  https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# cloud-sea: a sea of clouds below mountains at dusk (4878 px)
+cloud-sea       9d8f272b1bb77e13f41552a11d42f670ae543ac69e3185bc459891f88cc345e5  https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# ---- daylight ----
+
+# alpine-valley: glacier valley, snow mountains, pines in front (5760 px)
+alpine-valley   72874b3bd66f90d389ebd8d97149488c2d8da31b33dadb52b9d58f632d10ba71  https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# snow-peak: a granite peak with fresh snow over a golden plain (5184 px)
+snow-peak       73b7154d5bed470fdaac976f8899ca423b010f953d6de46bd743d7603ebd8dcc  https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# granite-wall: a granite cliff, tall pines in morning backlight (5616 px)
+granite-wall    64948041cc5ac560ef25b606feaacfc9568bf7470a97a00b234151ba7d5e0c9d  https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# green-hills: green hills, cloud spilling over a ridge, low sun (7372 px)
+green-hills     8f57f67e02fb049f4a05600680f2c3a069a5d84c6b0b194967af9015bc109979  https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# moss-valley: green valley with rock spires, hazy light (3506 px: a little soft, kept as it was the one in use)
+moss-valley     6046324a97ba27cc7548f47af4f99be2c217c85a2cf99062601ae0645bf0f963  https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy

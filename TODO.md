@@ -128,3 +128,4 @@ quiet tiles, the control center's structure.
 - A VPN tile (forgetting a network is done, in Settings)
 - Schedules for Do Not Disturb and night light
 - A calendar popup from the clock
+- [x] Wallpapers: 13 sharp photos (originals 4300-8000 px, checked at 100%), dark / light / daylight; moss-valley is the one soft one (3506 px)
