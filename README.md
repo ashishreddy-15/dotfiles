@@ -164,9 +164,10 @@ journalctl --user -u quickshell -f       # logs / QML errors
   sailboat-night, earth-night, fog-forest, misty-ridges; all made or fetched by `./install.sh wallpapers`)
   and `~/Pictures/Wallpapers` (**put your own images there**; png, jpg, webp). The picker labels each as
   generated, photo or yours. The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
-  The bar has no background of its own. When the top edge of a wallpaper is light (measured when
-  you pick it), the bar automatically gets a dark blurred background so its text stays readable;
-  `brightWallpaper` and `barBackdropOpacity` in `Theme.qml` tune that.
+  The bar has no background of its own, so its text follows the wallpaper, like the macOS menu bar: when
+  the top edge of a wallpaper is light (measured when you pick it), the bar switches to dark text, and
+  to light text on dark wallpapers. The colours fade over 0.4 s with the wallpaper; the warning/error/ok
+  colours get darker versions too. `lightWallpaper` (the switch point) and the `bar*` colours are in `Theme.qml`.
 - `panel/`: quick settings. Click the clock area of the bar (or `Super + A`) to open a panel under it:
   volume slider (click `vol` to mute) and output device, Wi-Fi (on/off, networks, password prompt for new
   secured ones), Bluetooth (on/off, devices, scan and pair), wallpaper (opens the picker) and the power

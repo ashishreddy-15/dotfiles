@@ -14,8 +14,8 @@ StatusItem {
     attention: (dev?.isLaptopBattery ?? false) && (percent <= 30 || charging)
     label: "bat"
     value: percent + "%" + (charging ? "+" : "")
-    valueColor: charging || full ? Theme.ok
-              : percent <= 10 ? Theme.err
-              : percent <= 20 ? Theme.warn
-              : Theme.text
+    valueColor: charging || full ? Theme.barOk
+              : percent <= 10 ? Theme.barErr
+              : percent <= 20 ? Theme.barWarn
+              : Theme.barText
 }

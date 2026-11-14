@@ -14,7 +14,7 @@ StatusItem {
 
     label: "vol"
     value: !sink ? "--" : muted ? "muted" : percent + "%"
-    valueColor: muted ? Theme.warn : Theme.text
+    valueColor: muted ? Theme.barWarn : Theme.barText
     attention: muted
 
     // PipeWire only reports volume for nodes something is tracking.

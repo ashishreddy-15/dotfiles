@@ -28,12 +28,3 @@ hl.layer_rule({
     match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|panel)$" },
     no_anim = true,
 })
-
--- When the wallpaper is light, the bar gets a translucent background (Bar.qml); blur what is behind it.
--- ignore_alpha: fully transparent pixels (the normal, dark-wallpaper case) are left alone.
-hl.layer_rule({
-    name  = "blur-bar",
-    match = { namespace = "^quickshell-bar$" },
-    blur  = true,
-    ignore_alpha = 0.1,
-})

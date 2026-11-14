@@ -17,6 +17,6 @@ StatusItem {
          : !Networking.wifiEnabled ? "off"
          : ssid ? (ssid.length > 16 ? ssid.slice(0, 15) + "…" : ssid)
          : "--"
-    valueColor: (wired || ssid) ? Theme.text : Theme.warn
+    valueColor: (wired || ssid) ? Theme.barText : Theme.barWarn
     attention: !(wired || ssid)
 }

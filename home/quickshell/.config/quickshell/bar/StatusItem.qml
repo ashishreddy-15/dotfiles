@@ -6,11 +6,11 @@ import qs
 Row {
     property string label
     property string value
-    property color valueColor: Theme.text
+    property color valueColor: Theme.barText
     property bool attention: true
 
     spacing: 5
 
-    StyledText { text: parent.label; color: Theme.dim; font.pixelSize: Theme.barFontSize }
-    StyledText { text: parent.value; color: parent.valueColor; font.pixelSize: Theme.barFontSize }
+    BarText { text: parent.label; color: Theme.barDim }
+    BarText { text: parent.value; color: parent.valueColor }
 }

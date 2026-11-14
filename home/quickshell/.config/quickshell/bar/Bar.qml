@@ -4,7 +4,8 @@ import Quickshell.Wayland
 import qs
 
 // Menu bar, one per monitor: thin, edge to edge, with no background by default,
-// so the text looks like part of the wallpaper (Theme.barOpacity).
+// so the text looks like part of the wallpaper (Theme.barOpacity). The text colours follow the wallpaper:
+// light text on dark ones, dark text on light ones (Theme.barText and friends).
 //
 //   [1] 2  3   App name                              (status when it matters)   Sat 14 Nov  12:40
 //
@@ -26,9 +27,7 @@ Variants {
         visible: ShellState.barVisible
         anchors { top: true; left: true; right: true }
         implicitHeight: Theme.barHeight
-        // Transparent on dark wallpapers; a dark (blurred, see rules.lua) background on light ones.
-        color: Qt.alpha(Theme.bg, ShellState.topLuminance > Theme.brightWallpaper ? Theme.barBackdropOpacity : Theme.barOpacity)
-        Behavior on color { ColorAnimation { duration: 400 } }
+        color: Qt.alpha(Theme.bg, Theme.barOpacity)
         WlrLayershell.namespace: "quickshell-bar"
 
         // Left: workspaces, then the focused app

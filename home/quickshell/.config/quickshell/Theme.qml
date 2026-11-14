@@ -31,9 +31,21 @@ Singleton {
 
     // Sizes
     readonly property int barHeight: 28
-    readonly property real wallpaperScrim: 0.35   // darkening along the top edge so the bar stays readable
-    readonly property real brightWallpaper: 110      // top-edge brightness above which the bar gets a background
-    readonly property real barBackdropOpacity: 0.72  // ...and how solid that background is
+    // The bar has no background, so its text must stand out from the wallpaper behind it. When the top edge
+    // of the wallpaper is light (measured by Wallpaper.qml), the bar switches to dark text, like the macOS menu bar.
+    readonly property real lightWallpaper: 105        // top-edge brightness (0-255) above which the bar text turns dark
+    readonly property real wallpaperScrim: 0.35       // darkening along the top edge, under light text
+    readonly property real wallpaperScrimLight: 0.30  // whitening along the top edge, under dark text
+    readonly property bool barOnLight: ShellState.topLuminance > lightWallpaper
+
+    // Bar colours: the normal palette, or darker versions of it for light wallpapers.
+    readonly property color barText:   barOnLight ? "#1b1e21" : text
+    readonly property color barDim:    barOnLight ? "#4e555b" : dim
+    readonly property color barBright: barOnLight ? "#000000" : bright
+    readonly property color barAccent: barOnLight ? "#34495c" : accent
+    readonly property color barOk:     barOnLight ? "#2b6249" : ok
+    readonly property color barWarn:   barOnLight ? "#7a5a0b" : warn
+    readonly property color barErr:    barOnLight ? "#8a2c33" : err
     readonly property real barOpacity: 0      // 0 = no background, text sits on the wallpaper; 1 = solid strip
     readonly property int radius:    6
     readonly property int pad:       10

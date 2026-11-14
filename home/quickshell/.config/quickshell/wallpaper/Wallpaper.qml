@@ -175,14 +175,23 @@ Scope {
             Component.onCompleted: show()
             Connections { target: root; function onCurrentChanged() { win.show() } }
 
-            // The bar has no background of its own, so darken the top edge a little for legibility
-            // on busy or bright images. Invisible on the dark wallpapers.
+            // The bar has no background of its own: darken the top edge a little under light text, or
+            // whiten it a little under dark text (see Theme.barOnLight), so the bar stays readable on
+            // mid-tone images. Barely visible on very dark or very light ones.
             Rectangle {
                 anchors { top: parent.top; left: parent.left; right: parent.right }
                 height: 90
                 gradient: Gradient {
-                    GradientStop { position: 0; color: Qt.rgba(0, 0, 0, Theme.wallpaperScrim) }
-                    GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0) }
+                    GradientStop {
+                        position: 0
+                        color: Theme.barOnLight ? Qt.rgba(1, 1, 1, Theme.wallpaperScrimLight) : Qt.rgba(0, 0, 0, Theme.wallpaperScrim)
+                        Behavior on color { ColorAnimation { duration: 400 } }
+                    }
+                    GradientStop {
+                        position: 1
+                        color: Theme.barOnLight ? Qt.rgba(1, 1, 1, 0) : Qt.rgba(0, 0, 0, 0)
+                        Behavior on color { ColorAnimation { duration: 400 } }
+                    }
                 }
             }
         }

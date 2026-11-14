@@ -14,6 +14,6 @@ StatusItem {
          : connected.length === 0 ? "on"
          : connected.length === 1 ? (connected[0].name.length > 16 ? connected[0].name.slice(0, 15) + "…" : connected[0].name)
          : connected.length
-    valueColor: connected.length > 0 ? Theme.text : Theme.dim
+    valueColor: connected.length > 0 ? Theme.barText : Theme.barDim
     attention: connected.length > 0
 }
