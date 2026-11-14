@@ -1,0 +1,6 @@
+# Quickshell: the desktop shell (bar, launcher, notifications, wallpaper, OSDs).
+# quickshell comes from the restricted COPR in system/repos/; the rest are Fedora.
+quickshell
+qt6-qtsvg                  # SVG icons in QML
+qt6-qt5compat              # Qt5Compat.GraphicalEffects (blur/shadows, used by most configs)
+qt6-qtimageformats         # webp/tiff etc. for wallpapers and images

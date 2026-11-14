@@ -1,0 +1,4 @@
+# Packages to REMOVE (if installed). Unused dependencies go with them.
+# This file is special: it is never installed from.
+Thunar                     # replaced by nautilus
+thunar-archive-plugin

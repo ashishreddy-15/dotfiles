@@ -1,0 +1,21 @@
+# Hyprland COPR (sdegler/hyprland), restricted to only the packages
+# Hyprland needs that Fedora does not ship (or ships too old).
+#
+# Same repo id/filename that `dnf copr enable` would create, so `dnf copr list`
+# still recognises it. Anything NOT in includepkgs is invisible to dnf, so this
+# COPR can never replace Fedora's kitty, waybar, cliphist, etc.
+#
+# If a future Hyprland update fails with "nothing provides X", X is a new
+# dependency: add it to includepkgs below and re-run `./install.sh repos`.
+
+[copr:copr.fedorainfracloud.org:sdegler:hyprland]
+name=Copr repo for hyprland owned by sdegler
+baseurl=https://download.copr.fedorainfracloud.org/results/sdegler/hyprland/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/sdegler/hyprland/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+includepkgs=hyprland,hyprland-uwsm,hyprland-guiutils,hyprland-qt-support,hyprland-protocols-devel,xdg-desktop-portal-hyprland,hyprpolkitagent,hyprlock,hypridle,hyprpaper,hyprsunset,hyprpicker,uwsm,aquamarine,aquamarine-devel,hyprutils,hyprutils-devel,hyprlang,hyprlang-devel,hyprcursor,hyprcursor-devel,hyprgraphics,hyprgraphics-devel,hyprtoolkit,hyprtoolkit-devel,hyprwire,hyprwire-devel,hyprwayland-scanner-devel,glaze-devel

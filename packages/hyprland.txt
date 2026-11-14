@@ -1,0 +1,11 @@
+# Hyprland core: comes from the restricted COPR (system/repos/).
+# One package per line; '#' starts a comment.
+# Bar, launcher, notifications and wallpaper are done in Quickshell (quickshell.txt).
+hyprland
+hyprland-uwsm              # login-manager session that runs Hyprland under systemd (uwsm)
+xdg-desktop-portal-hyprland  # screen sharing, screenshots for apps
+hyprpolkitagent            # password prompts for GUI apps (until done in Quickshell)
+hypridle                   # idle -> lock / screen off / suspend
+hyprlock                   # fallback lock screen if the Quickshell lock ever crashes
+hyprsunset                 # blue-light filter
+hyprpicker                 # colour picker

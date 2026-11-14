@@ -1,0 +1,18 @@
+# Quickshell COPR (errornointernet/quickshell, linked from quickshell.org),
+# restricted to Quickshell and its one dependency that Fedora doesn't ship.
+#
+# Fedora's own quickshell package is an older 0.2.x snapshot; this gives 0.3.x.
+# Note: quickshell uses Qt private APIs, so when Fedora bumps Qt (e.g. 6.11 -> 6.12)
+# dnf may hold the Qt update back until this COPR rebuilds. That's expected.
+
+[copr:copr.fedorainfracloud.org:errornointernet:quickshell]
+name=Copr repo for quickshell owned by errornointernet
+baseurl=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+includepkgs=quickshell,cpptrace,cpptrace-devel

@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+#
+# Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
+#
+#   ./install.sh                 run every step (repos packages services link defaults)
+#   ./install.sh link            run only the given step(s)
+#   ./install.sh -n              dry run: show what would happen, change nothing
+#   ./install.sh -y              don't ask dnf for confirmation
+#   ./install.sh unlink          remove all dotfile symlinks from $HOME
+#
+# Steps:
+#   repos     install repo files from system/repos/ into /etc/yum.repos.d/
+#   packages  dnf install everything in packages/*.txt,
+#             then dnf remove everything in packages/remove.txt
+#   services  run system/services.sh (disable unneeded services)
+#   link      symlink home/<pkg>/ into $HOME with GNU stow
+#             (existing real files are moved to ~/.dotfiles-backup/<time>/ first)
+#   defaults  set default applications (MIME_DEFAULTS below)
+
+set -Eeuo pipefail
+shopt -s nullglob
+
+DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+STOW_DIR="$DOTFILES/home"
+BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+REMOVE_LIST="$DOTFILES/packages/remove.txt"
+ALL_STEPS=(repos packages services link defaults)
+
+# Default applications: "<desktop file> <mime type>..."
+MIME_DEFAULTS=(
+  "org.gnome.Nautilus.desktop inode/directory"
+)
+
+DRY_RUN=0
+ASSUME_YES=0
+
+# ---------- output helpers ----------
+if [[ -t 1 ]]; then
+  C_B=$'\e[1m' C_G=$'\e[32m' C_Y=$'\e[33m' C_R=$'\e[31m' C_0=$'\e[0m'
+else
+  C_B='' C_G='' C_Y='' C_R='' C_0=''
+fi
+step() { printf '\n%s==> %s%s\n' "$C_B" "$*" "$C_0"; }
+info() { printf '  %s\n' "$*"; }
+ok()   { printf '  %s✓%s %s\n' "$C_G" "$C_0" "$*"; }
+warn() { printf '  %s!%s %s\n' "$C_Y" "$C_0" "$*" >&2; }
+die()  { printf '%serror:%s %s\n' "$C_R" "$C_0" "$*" >&2; exit 1; }
+
+trap 'die "failed at line $LINENO: $BASH_COMMAND"' ERR
+
+# Run a command, or just print it in dry-run mode.
+run() {
+  if (( DRY_RUN )); then
+    printf '  [dry-run] %s\n' "$*"
+  else
+    "$@"
+  fi
+}
+
+# Print the comment block at the top of this file.
+usage() { awk 'NR>2 && /^#/ {sub(/^# ?/, ""); print; next} NR>2 {exit}' "${BASH_SOURCE[0]}"; exit "${1:-0}"; }
+
+# Read package names from a list file: strip comments and blank lines.
+read_list() { sed -e 's/#.*//' -e 's/[[:space:]]\+$//' -e '/^[[:space:]]*$/d' "$1"; }
+
+# ---------- preflight ----------
+preflight() {
+  (( EUID != 0 )) || die "run as your normal user, not root (sudo is used only where needed)"
+
+  # shellcheck source=/dev/null
+  . /etc/os-release
+  [[ "${ID:-}" == fedora ]] || die "this script targets Fedora (found: ${ID:-unknown})"
+
+  local missing=()
+  for cmd in dnf stow sudo; do
+    command -v "$cmd" >/dev/null || missing+=("$cmd")
+  done
+  (( ${#missing[@]} == 0 )) || die "missing commands: ${missing[*]}  (sudo dnf install ${missing[*]})"
+
+  [[ -d "$STOW_DIR" ]] || die "stow directory not found: $STOW_DIR"
+}
+
+need_sudo() {
+  (( DRY_RUN )) && return 0
+  sudo -v || die "sudo authentication failed"
+}
+
+# ---------- steps ----------
+step_repos() {
+  step "Repositories"
+  local src name dest
+  for src in "$DOTFILES"/system/repos/*.repo; do
+    name=$(basename "$src")
+    dest="/etc/yum.repos.d/$name"
+    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+      ok "$name (up to date)"
+      continue
+    fi
+    if [[ -f "$dest" ]]; then
+      warn "$name differs from installed copy; replacing:"
+      diff -u "$dest" "$src" | sed 's/^/      /' || true
+    fi
+    need_sudo
+    run sudo install -m 0644 -o root -g root "$src" "$dest"
+    ok "$name installed"
+  done
+
+  # Warn about other Hyprland COPRs that would compete with ours.
+  local f ours
+  for f in /etc/yum.repos.d/*hypr*.repo; do
+    ours=0
+    for src in "$DOTFILES"/system/repos/*.repo; do
+      [[ "$(basename "$src")" == "$(basename "$f")" ]] && ours=1
+    done
+    (( ours )) || warn "another Hyprland repo is present: $f (consider removing it)"
+  done
+}
+
+step_packages() {
+  step "Packages"
+  local list p pkgs=() unwanted=()
+  for list in "$DOTFILES"/packages/*.txt; do
+    [[ "$list" == "$REMOVE_LIST" ]] && continue
+    mapfile -t -O "${#pkgs[@]}" pkgs < <(read_list "$list")
+    info "$(basename "$list"): $(read_list "$list" | wc -l) packages"
+  done
+  [[ -f "$REMOVE_LIST" ]] && mapfile -t unwanted < <(read_list "$REMOVE_LIST")
+
+  # A package listed for both install and removal is a mistake in the lists.
+  for p in "${unwanted[@]}"; do
+    [[ " ${pkgs[*]} " == *" $p "* ]] && die "'$p' is in remove.txt and in an install list"
+  done
+
+  local yes=()
+  (( ASSUME_YES )) && yes=(-y)
+
+  # Install first, so replacements (e.g. nautilus) exist before removals.
+  local missing=()
+  for p in "${pkgs[@]}"; do
+    rpm -q "$p" >/dev/null 2>&1 || missing+=("$p")
+  done
+  if (( ${#missing[@]} )); then
+    info "to install: ${missing[*]}"
+    need_sudo
+    run sudo dnf install "${yes[@]}" "${missing[@]}"
+  else
+    ok "all ${#pkgs[@]} packages already installed"
+  fi
+
+  local present=()
+  for p in "${unwanted[@]}"; do
+    rpm -q "$p" >/dev/null 2>&1 && present+=("$p")
+  done
+  if (( ${#present[@]} )); then
+    info "to remove (plus their unused dependencies): ${present[*]}"
+    need_sudo
+    run sudo dnf remove "${yes[@]}" "${present[@]}"
+  else
+    ok "nothing to remove"
+  fi
+}
+
+step_services() {
+  step "Services"
+  need_sudo
+  if (( DRY_RUN )); then
+    info "[dry-run] sudo bash system/services.sh"
+  else
+    sudo bash "$DOTFILES/system/services.sh"
+  fi
+}
+
+# Move any real file that would block stow into the backup dir.
+backup_conflicts() {
+  local pkg=$1 src rel target resolved
+  while IFS= read -r -d '' src; do
+    rel=${src#"$STOW_DIR/$pkg/"}
+    target="$HOME/$rel"
+    [[ -e "$target" || -L "$target" ]] || continue
+
+    # Already a link into this repo: nothing to do.
+    if [[ -L "$target" ]]; then
+      resolved=$(readlink -f "$target" || true)
+      [[ "$resolved" == "$STOW_DIR/"* ]] && continue
+    fi
+    [[ -d "$target" && ! -L "$target" ]] && die "$target is a directory but $pkg provides a file there"
+
+    run mkdir -p "$(dirname "$BACKUP_DIR/$rel")"
+    run mv "$target" "$BACKUP_DIR/$rel"
+    warn "backed up ~/$rel -> ${BACKUP_DIR/#"$HOME"/"~"}/$rel"
+  done < <(find "$STOW_DIR/$pkg" \( -type f -o -type l \) -print0)
+}
+
+list_pkgs() {
+  local d
+  for d in "$STOW_DIR"/*/; do basename "$d"; done
+}
+
+step_link() {
+  step "Linking dotfiles (stow)"
+  local pkgs
+  mapfile -t pkgs < <(list_pkgs)
+  (( ${#pkgs[@]} )) || { ok "no packages in home/"; return; }
+
+  local p
+  for p in "${pkgs[@]}"; do backup_conflicts "$p"; done
+
+  # Simulate first so a problem in one package leaves $HOME untouched.
+  local out
+  out=$(stow --no-folding -n -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}" 2>&1) \
+    || die "stow simulation failed; nothing was changed:"$'\n'"$out"
+  run stow --no-folding -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}"
+  ok "linked: ${pkgs[*]}"
+}
+
+step_defaults() {
+  step "Default applications"
+  command -v xdg-mime >/dev/null || { warn "xdg-mime not found (dnf install xdg-utils); skipping"; return 0; }
+  local entry app types t
+  for entry in "${MIME_DEFAULTS[@]}"; do
+    read -r app types <<<"$entry"
+    if ! [[ -f "/usr/share/applications/$app" || -f "$HOME/.local/share/applications/$app" ]]; then
+      warn "$app is not installed; skipping"
+      continue
+    fi
+    for t in $types; do
+      if [[ "$(xdg-mime query default "$t" 2>/dev/null)" == "$app" ]]; then
+        ok "$t -> $app (already set)"
+      else
+        run xdg-mime default "$app" "$t"
+        ok "$t -> $app"
+      fi
+    done
+  done
+}
+
+step_unlink() {
+  step "Unlinking dotfiles"
+  local pkgs
+  mapfile -t pkgs < <(list_pkgs)
+  (( ${#pkgs[@]} )) || return 0
+  run stow -d "$STOW_DIR" -t "$HOME" -D "${pkgs[@]}"
+  ok "removed links for: ${pkgs[*]}"
+}
+
+# ---------- main ----------
+main() {
+  local steps=()
+  while (( $# )); do
+    case $1 in
+      -n|--dry-run) DRY_RUN=1 ;;
+      -y|--yes)     ASSUME_YES=1 ;;
+      -h|--help)    usage 0 ;;
+      repos|packages|services|link|defaults|unlink) steps+=("$1") ;;
+      *) warn "unknown argument: $1"; usage 1 ;;
+    esac
+    shift
+  done
+  (( ${#steps[@]} )) || steps=("${ALL_STEPS[@]}")
+
+  preflight
+  (( DRY_RUN )) && info "${C_Y}dry run: no changes will be made${C_0}"
+
+  local s
+  for s in "${steps[@]}"; do "step_$s"; done
+
+  step "Done"
+  [[ -d "$BACKUP_DIR" ]] && info "replaced files were saved in ${BACKUP_DIR/#"$HOME"/"~"}"
+  return 0
+}
+
+main "$@"
