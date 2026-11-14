@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# screenshot: take a screenshot of exactly what is on screen when you press the key, pop-ups and the control center
+# included. The screen is frozen first, so nothing can close or change while you choose.
+#
+#   screenshot          freeze, then drag a region or click a window (Esc cancels)        Print
+#   screenshot screen   the focused monitor                                               Shift + Print
+#   screenshot all      every monitor                                                     Ctrl + Print
+#
+# Each shot is saved to ~/Pictures/Screenshots/ and copied to the clipboard, and a notification says so.
+#
+# Why freeze: picking a region opens an overlay (slurp) that takes the keyboard, and things that close when they lose
+# it (the control center, pickers) would be gone before the shot. hyprpicker -r shows a still frame of every monitor on
+# top of everything; grim then captures the chosen part of that frame.
+set -u
+
+mode=${1:-region}
+dir="$HOME/Pictures/Screenshots"
+file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+mkdir -p "$dir"
+
+# Selection colours: the shell's palette (quickshell/Theme.qml): a dim wash, a pewter outline.
+slurp_style=(-b '#11111166' -c '#6c7f91ff' -s '#6c7f9122' -B '#d0d3d614' -w 1)
+
+freeze_pid=""
+unfreeze() { [ -n "$freeze_pid" ] && kill "$freeze_pid" 2>/dev/null; freeze_pid=""; }
+trap unfreeze EXIT
+
+case $mode in
+    region)
+        hyprpicker -r -z -q >/dev/null 2>&1 &
+        freeze_pid=$!
+        sleep 0.2                                   # let the still frame appear on every monitor
+        # Windows on the visible workspaces become click targets; dragging still selects any region.
+        boxes=$(hyprctl -j monitors | python3 -c '
+import json, subprocess, sys
+active = {m["activeWorkspace"]["id"] for m in json.load(sys.stdin)}
+for c in json.loads(subprocess.run(["hyprctl", "-j", "clients"], capture_output=True, text=True).stdout):
+    if c["workspace"]["id"] in active and c.get("mapped", True) and not c.get("hidden", False):
+        (x, y), (w, h) = c["at"], c["size"]
+        print(f"{x},{y} {w}x{h}")')
+        region=$(printf '%s\n' "$boxes" | slurp "${slurp_style[@]}") || exit 0     # Esc: nothing taken
+        grim -g "$region" "$file" || exit 1
+        ;;
+    screen)
+        output=$(hyprctl -j monitors | python3 -c 'import json,sys; print(next(m["name"] for m in json.load(sys.stdin) if m["focused"]))')
+        grim -o "$output" "$file" || exit 1
+        ;;
+    all)
+        grim "$file" || exit 1
+        ;;
+    *)
+        sed -n '2,10p' "$0"; exit 2 ;;
+esac
+unfreeze
+
+wl-copy --type image/png < "$file"
+notify-send -a Screenshot -i "$file" "Screenshot taken" "Copied, and saved as ~/Pictures/Screenshots/$(basename "$file")"

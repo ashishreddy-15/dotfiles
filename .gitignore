@@ -2,5 +2,6 @@
 *.swp
 *~
 .DS_Store
-# local-only overrides (never committed)
+# local-only overrides (never committed): files named *.local, but not the .local folders stow links into ~
 *.local
+!.local/

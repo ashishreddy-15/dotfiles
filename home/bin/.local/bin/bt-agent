@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""bt-agent: the Bluetooth pairing agent. Every question BlueZ asks while pairing is put to you in the shell first.
+
+BlueZ cannot pair a device by itself: it asks an "agent" to confirm a code, for a PIN, or whether a device may connect.
+Quickshell can start a pairing (Settings > Bluetooth) but has no agent, and blueman's applet is turned off by these
+dotfiles, so without one a pairing just hangs. This agent answers nothing on its own: it passes each request to the
+shell's pairing prompt (bluetooth/PairingPrompt.qml, through `qs ipc call bluetooth ask ...`), waits, and answers
+with what you chose there (the prompt replies through Answer() on the session bus). If the shell cannot be reached,
+the request is declined.
+
+Runs as the user service bt-agent.service.   Logs: journalctl --user -u bt-agent -f
+"""
+import sys
+from gi.repository import Gio, GLib
+
+AGENT_PATH = "/dotfiles/BluetoothAgent"
+CAPABILITY = "KeyboardDisplay"          # can show a code and type one (through the shell's prompt)
+SESSION_NAME = "dev.dotfiles.BluetoothAgent"
+SESSION_PATH = "/dev/dotfiles/BluetoothAgent"
+
+AGENT_XML = """
+<node>
+  <interface name="org.bluez.Agent1">
+    <method name="Release"/>
+    <method name="RequestPinCode"><arg type="o" direction="in"/><arg type="s" direction="out"/></method>
+    <method name="DisplayPinCode"><arg type="o" direction="in"/><arg type="s" direction="in"/></method>
+    <method name="RequestPasskey"><arg type="o" direction="in"/><arg type="u" direction="out"/></method>
+    <method name="DisplayPasskey"><arg type="o" direction="in"/><arg type="u" direction="in"/><arg type="q" direction="in"/></method>
+    <method name="RequestConfirmation"><arg type="o" direction="in"/><arg type="u" direction="in"/></method>
+    <method name="RequestAuthorization"><arg type="o" direction="in"/></method>
+    <method name="AuthorizeService"><arg type="o" direction="in"/><arg type="s" direction="in"/></method>
+    <method name="Cancel"/>
+  </interface>
+</node>
+"""
+SESSION_XML = """
+<node>
+  <interface name="dev.dotfiles.BluetoothAgent">
+    <method name="Answer">
+      <arg type="u" name="id" direction="in"/>
+      <arg type="b" name="accept" direction="in"/>
+      <arg type="s" name="value" direction="in"/>
+    </method>
+  </interface>
+</node>
+"""
+
+def log(*a): print(*a, file=sys.stderr, flush=True)
+
+system = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
+session = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+
+pending = {}          # id -> (method, invocation): requests waiting for your answer
+next_id = [1]
+
+def device_name(path):
+    try:
+        v = system.call_sync("org.bluez", path, "org.freedesktop.DBus.Properties", "Get",
+                             GLib.Variant("(ss)", ("org.bluez.Device1", "Alias")), None, Gio.DBusCallFlags.NONE, 2000, None)
+        return v.unpack()[0]
+    except GLib.Error:
+        return path.rsplit("/", 1)[-1].replace("dev_", "").replace("_", ":")
+
+def reject(invocation, why="Rejected"):
+    invocation.return_dbus_error("org.bluez.Error.Rejected", why)
+
+def tell_shell(args, on_fail=None):
+    """Run `qs ipc call bluetooth ...`; if the shell is not there, call on_fail."""
+    try:
+        proc = Gio.Subprocess.new(["qs", "ipc", "call", "bluetooth"] + args, Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE)
+    except GLib.Error as e:
+        log("cannot run qs:", e.message)
+        if on_fail: on_fail()
+        return
+    def done(p, res):
+        try:
+            ok = p.wait_check_finish(res)
+        except GLib.Error:
+            ok = False
+        if not ok and on_fail: on_fail()
+    proc.wait_check_async(None, done)
+
+def ask(method, invocation, kind, device, value=""):
+    rid = next_id[0]; next_id[0] += 1
+    pending[rid] = (method, invocation)
+    log("asking:", kind, device, value)
+    def unreachable():
+        if rid in pending:
+            log("the shell did not answer; declining")
+            reject(pending.pop(rid)[1], "No prompt available")
+    tell_shell(["ask", str(rid), kind, device_name(device), value], unreachable)
+
+def on_agent_call(conn, sender, path, iface, method, params, invocation):
+    args = params.unpack()
+    if method == "RequestPinCode":         ask(method, invocation, "pin", args[0], "0000")
+    elif method == "RequestPasskey":       ask(method, invocation, "passkey", args[0])
+    elif method == "RequestConfirmation":  ask(method, invocation, "confirm", args[0], "%06d" % args[1])
+    elif method == "RequestAuthorization": ask(method, invocation, "authorize", args[0])
+    elif method == "AuthorizeService":     ask(method, invocation, "service", args[0], args[1])
+    elif method == "DisplayPinCode":
+        tell_shell(["ask", "0", "show", device_name(args[0]), args[1]]); invocation.return_value(None)
+    elif method == "DisplayPasskey":
+        tell_shell(["ask", "0", "show", device_name(args[0]), "%06d" % args[1]]); invocation.return_value(None)
+    elif method == "Cancel":
+        # BlueZ gave up (timeout, or the device went away): drop what is waiting and close the prompt.
+        for rid, (_, inv) in list(pending.items()):
+            reject(inv, "Canceled"); del pending[rid]
+        tell_shell(["cancel"])
+        invocation.return_value(None)
+    else:                                  # Release
+        invocation.return_value(None)
+
+def on_session_call(conn, sender, path, iface, method, params, invocation):
+    rid, accept, value = params.unpack()
+    item = pending.pop(rid, None)
+    invocation.return_value(None)
+    if not item:
+        return
+    method, inv = item
+    log("answer:", method, "accepted" if accept else "declined")
+    if not accept:
+        reject(inv)
+    elif method == "RequestPinCode":
+        inv.return_value(GLib.Variant("(s)", (value or "0000",)))
+    elif method == "RequestPasskey":
+        try:
+            inv.return_value(GLib.Variant("(u)", (int(value),)))
+        except ValueError:
+            reject(inv, "Not a number")
+    else:
+        inv.return_value(None)
+
+system.register_object(AGENT_PATH, Gio.DBusNodeInfo.new_for_xml(AGENT_XML).interfaces[0], on_agent_call, None, None)
+session.register_object(SESSION_PATH, Gio.DBusNodeInfo.new_for_xml(SESSION_XML).interfaces[0], on_session_call, None, None)
+Gio.bus_own_name_on_connection(session, SESSION_NAME, Gio.BusNameOwnerFlags.NONE, None, None)
+
+def register():
+    for method, args in (("RegisterAgent", GLib.Variant("(os)", (AGENT_PATH, CAPABILITY))),
+                         ("RequestDefaultAgent", GLib.Variant("(o)", (AGENT_PATH,)))):
+        try:
+            system.call_sync("org.bluez", "/org/bluez", "org.bluez.AgentManager1", method, args, None, Gio.DBusCallFlags.NONE, 5000, None)
+        except GLib.Error as e:
+            if "AlreadyExists" not in e.message:
+                log("could not", method + ":", e.message)
+                return
+    log("registered as the default pairing agent")
+
+# Register now, and again whenever bluetoothd (re)starts.
+Gio.bus_watch_name_on_connection(system, "org.bluez", Gio.BusNameWatcherFlags.NONE,
+                                 lambda c, n, o: register(), lambda c, n: log("bluetoothd went away"))
+GLib.MainLoop().run()

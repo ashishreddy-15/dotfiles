@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+"""appearance: read and change the look of GTK apps (like nwg-look). Used by the control center's "appearance" page.
+
+  appearance get                  print the current settings as key=value lines
+  appearance dump                 the current settings and every list, as one JSON object (for the shell)
+  appearance list <kind>          list what is installed: gtk | icons | cursors | fonts
+  appearance set <key> <value>    change one setting and apply it everywhere
+  appearance sync                 push the settings.ini files (which live in the dotfiles repo) into gsettings
+  appearance icons                (re)build the "Carbon" icon theme: Adwaita with its folders in the palette's pewter
+
+Keys: color-scheme (default | prefer-dark | prefer-light), gtk-theme, icon-theme, cursor-theme, cursor-size,
+      font (family), font-size (points).
+
+A change is written to ~/.config/gtk-3.0/settings.ini and ~/.config/gtk-4.0/settings.ini (symlinks into the dotfiles
+repo, so it can be committed), to gsettings (what GTK4 / libadwaita and portals read) and, for the cursor, to the
+running Hyprland.
+
+Light and dark: a theme with a "-dark" twin (adw-gtk3 / adw-gtk3-dark) is listed once, and the colour scheme picks the
+twin. GTK3 cannot ask for the scheme in css either, so ~/.config/gtk-3.0/scheme.css is pointed at dark.css (the palette)
+or light.css (stock colours).
+"""
+import configparser, json, os, re, subprocess, sys
+
+HOME = os.path.expanduser("~")
+INI = [f"{HOME}/.config/gtk-3.0/settings.ini", f"{HOME}/.config/gtk-4.0/settings.ini"]
+SCHEMA = "org.gnome.desktop.interface"
+GTK_ROOTS = ["/usr/share/themes", f"{HOME}/.themes", f"{HOME}/.local/share/themes"]
+SCHEME_CSS = f"{HOME}/.config/gtk-3.0/scheme.css"
+
+# The Carbon icon theme: Adwaita's folder icons with its five blues swapped for pewter of the same lightness
+# (the middle one is Theme.accent). Everything else is inherited from Adwaita.
+ADWAITA = "/usr/share/icons/Adwaita/scalable"
+CARBON = f"{HOME}/.local/share/icons/Carbon"
+FOLDER_BLUES = {"#438de6": "#56687a", "#62a0ea": "#6c7f91", "#a4caee": "#a3b1be", "#afd4ff": "#b3c0cc", "#c0d5ea": "#c1cbd4"}
+
+def gs_get(key):
+    out = subprocess.run(["gsettings", "get", SCHEMA, key], capture_output=True, text=True).stdout.strip()
+    return out[1:-1] if out.startswith("'") else out
+
+def gs_set(key, value):
+    subprocess.run(["gsettings", "set", SCHEMA, key, value], check=False)
+
+def read_ini(path):
+    c = configparser.RawConfigParser(strict=False); c.optionxform = str
+    c.read(path)
+    return c["Settings"] if c.has_section("Settings") else {}
+
+def write_ini(path, key, value):
+    """Change one key in place (keeps comments and the symlink)."""
+    lines = open(path).read().splitlines() if os.path.exists(path) else ["[Settings]"]
+    for i, l in enumerate(lines):
+        if re.match(rf"\s*{re.escape(key)}\s*=", l):
+            lines[i] = f"{key}={value}"
+            break
+    else:
+        lines.append(f"{key}={value}")
+    with open(path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+
+def split_font(spec):
+    m = re.match(r"^(.*?)\s+([0-9.]+)$", spec.strip())
+    return (m.group(1), m.group(2)) if m else (spec, "10")
+
+def gtk_exists(name):
+    return name == "Adwaita" or any(os.path.isdir(os.path.join(r, name)) for r in GTK_ROOTS)
+
+def gtk_base(name):
+    """adw-gtk3-dark -> adw-gtk3 (when the light twin exists)."""
+    return name[:-5] if name.endswith("-dark") and gtk_exists(name[:-5]) else name
+
+def apply_gtk(base, dark):
+    """Use the dark or light twin of a GTK theme, and the matching GTK3 css."""
+    name = base + "-dark" if dark and gtk_exists(base + "-dark") else base
+    gs_set("gtk-theme", name)
+    for p in INI: write_ini(p, "gtk-theme-name", name)
+    if os.path.isdir(os.path.dirname(SCHEME_CSS)):
+        tmp = SCHEME_CSS + ".new"
+        if os.path.lexists(tmp): os.remove(tmp)
+        os.symlink("dark.css" if dark else "light.css", tmp)
+        os.replace(tmp, SCHEME_CSS)
+
+def build_icons():
+    srcs = [f"{ADWAITA}/places/{f}" for f in sorted(os.listdir(f"{ADWAITA}/places"))
+            if f.startswith(("folder", "user-home", "user-desktop"))] if os.path.isdir(f"{ADWAITA}/places") else []
+    if not srcs:
+        return False
+    srcs.append(f"{ADWAITA}/mimetypes/inode-directory.svg")
+    tmp = CARBON + ".new"
+    subprocess.run(["rm", "-rf", tmp])
+    for sub in ("places", "mimetypes"): os.makedirs(f"{tmp}/scalable/{sub}")
+    for src in srcs:
+        if not os.path.isfile(src): continue
+        svg = open(src).read()
+        for blue, pewter in FOLDER_BLUES.items(): svg = re.sub(blue, pewter, svg, flags=re.I)
+        open(f"{tmp}/scalable/{os.path.basename(os.path.dirname(src))}/{os.path.basename(src)}", "w").write(svg)
+    open(f"{tmp}/index.theme", "w").write("""[Icon Theme]
+Name=Carbon
+Comment=Adwaita with folders in the Carbon & Pewter palette (made by `appearance icons`)
+Inherits=Adwaita,hicolor
+Directories=scalable/places,scalable/mimetypes
+
+[scalable/places]
+Context=Places
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/mimetypes]
+Context=MimeTypes
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+""")
+    subprocess.run(["rm", "-rf", CARBON])
+    os.rename(tmp, CARBON)
+    return True
+
+def current():
+    ini = read_ini(INI[1])
+    family, size = split_font(ini.get("gtk-font-name", gs_get("font-name")))
+    scheme = gs_get("color-scheme")
+    return {
+        "color-scheme": scheme,
+        "gtk-theme": gtk_base(gs_get("gtk-theme")),
+        "icon-theme": gs_get("icon-theme"),
+        "cursor-theme": gs_get("cursor-theme"),
+        "cursor-size": gs_get("cursor-size").replace("uint32 ", ""),
+        "font": family,
+        "font-size": size,
+    }
+
+def theme_dirs(kind):
+    roots = ["/usr/share/themes", f"{HOME}/.themes", f"{HOME}/.local/share/themes"] if kind == "gtk" else \
+            ["/usr/share/icons", f"{HOME}/.icons", f"{HOME}/.local/share/icons"]
+    found = {"Adwaita"} if kind == "gtk" else set()     # GTK ships Adwaita inside the toolkit
+    for r in roots:
+        if not os.path.isdir(r): continue
+        for n in os.listdir(r):
+            p = os.path.join(r, n)
+            has = lambda sub: os.path.isdir(os.path.join(p, sub))
+            if kind == "gtk":
+                ok = has("gtk-3.0") or has("gtk-4.0")
+            elif kind == "cursors":
+                ok = has("cursors")
+            else:    # icons: a theme with an index.theme that is not only a cursor theme (Adwaita is both)
+                ok = os.path.isfile(os.path.join(p, "index.theme")) and (not has("cursors") or has("16x16") or has("symbolic"))
+            if ok: found.add(n)
+    for hidden in ("default", "hicolor", "locolor", "Emacs", "Default"): found.discard(hidden)
+    if kind == "gtk":    # a dark twin is not a choice of its own: the colour scheme picks it
+        found = {n for n in found if not (n.endswith("-dark") and n[:-5] in found)}
+    return sorted(found)
+
+def fonts():
+    out = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True).stdout
+    fams = {f.split(",")[0].strip() for f in out.splitlines() if f.strip()}
+    return sorted(fams, key=str.lower)
+
+def apply(key, value):
+    cur = current()
+    if key == "color-scheme":
+        if value not in ("default", "prefer-dark", "prefer-light"): sys.exit(f"bad color-scheme: {value}")
+        gs_set("color-scheme", value)
+        for p in INI: write_ini(p, "gtk-application-prefer-dark-theme", "1" if value == "prefer-dark" else "0")
+        apply_gtk(cur["gtk-theme"], value == "prefer-dark")
+    elif key == "gtk-theme":
+        apply_gtk(gtk_base(value), cur["color-scheme"] == "prefer-dark")
+    elif key == "icon-theme":
+        gs_set("icon-theme", value)
+        for p in INI: write_ini(p, "gtk-icon-theme-name", value)
+    elif key == "cursor-theme":
+        gs_set("cursor-theme", value)
+        for p in INI: write_ini(p, "gtk-cursor-theme-name", value)
+        subprocess.run(["hyprctl", "setcursor", value, cur["cursor-size"]], capture_output=True)
+    elif key == "cursor-size":
+        if not value.isdigit(): sys.exit("cursor-size must be a number")
+        gs_set("cursor-size", value)
+        for p in INI: write_ini(p, "gtk-cursor-theme-size", value)
+        subprocess.run(["hyprctl", "setcursor", cur["cursor-theme"], value], capture_output=True)
+    elif key in ("font", "font-size"):
+        family = value if key == "font" else cur["font"]
+        size = value if key == "font-size" else cur["font-size"]
+        spec = f"{family} {size}"
+        gs_set("font-name", spec)
+        gs_set("document-font-name", spec)
+        for p in INI: write_ini(p, "gtk-font-name", spec)
+    else:
+        sys.exit(f"unknown key: {key}")
+
+def sync():
+    ini = read_ini(INI[1])
+    dark = ini.get("gtk-application-prefer-dark-theme", "0") == "1"
+    if ini.get("gtk-icon-theme-name") == "Carbon": build_icons()
+    if ini.get("gtk-theme-name"): apply_gtk(gtk_base(ini["gtk-theme-name"]), dark)
+    pairs = [("color-scheme", "prefer-dark" if dark else "default"), ("icon-theme", ini.get("gtk-icon-theme-name")),
+             ("cursor-theme", ini.get("gtk-cursor-theme-name")), ("cursor-size", ini.get("gtk-cursor-theme-size"))]
+    for k, v in pairs:
+        if v: gs_set(k, v)
+    spec = ini.get("gtk-font-name")
+    if spec:
+        gs_set("font-name", spec); gs_set("document-font-name", spec)
+    print("synced gsettings from", INI[1])
+
+def main(a):
+    if not a: sys.exit(__doc__)
+    if a[0] == "get":
+        for k, v in current().items(): print(f"{k}={v}")
+    elif a[0] == "dump":
+        print(json.dumps({"current": current(), "gtk": theme_dirs("gtk"), "icons": theme_dirs("icons"),
+                          "cursors": theme_dirs("cursors"), "fonts": fonts()}))
+    elif a[0] == "list" and len(a) == 2:
+        names = fonts() if a[1] == "fonts" else theme_dirs(a[1]) if a[1] in ("gtk", "icons", "cursors") else sys.exit("kind: gtk | icons | cursors | fonts")
+        print("\n".join(names))
+    elif a[0] == "set" and len(a) == 3:
+        apply(a[1], a[2])
+    elif a[0] == "sync":
+        sync()
+    elif a[0] == "icons":
+        print(CARBON if build_icons() else "Adwaita's folder icons not found") 
+    else:
+        sys.exit(__doc__)
+
+main(sys.argv[1:])
