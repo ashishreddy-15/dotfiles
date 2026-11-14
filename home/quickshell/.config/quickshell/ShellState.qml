@@ -21,10 +21,7 @@ Singleton {
     property string panelScreen: ""
     function togglePanel(screenName) { panelScreen = screenName; panelOpen = !panelOpen }
 
-    // Wallpaper: its name for the panel, and a request from the panel to open the picker.
-    property string wallpaperName: ""
-    signal pickWallpaper()
-    // The appearance page asks for the font picker.
+    // The appearance page asks for the font picker (the page itself opens with Super + Shift + A).
     signal pickFont()
 
     // Where pop-ups (notifications, volume/brightness) appear: the main monitor,

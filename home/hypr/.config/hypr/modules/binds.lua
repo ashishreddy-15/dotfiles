@@ -17,6 +17,7 @@ hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app l
 hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clipboard history
 hl.bind(k("W"),       hl.dsp.exec_cmd("qs ipc call wallpaper pick"))     -- choose wallpaper
 hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call panel toggle"))       -- quick settings
+hl.bind(k("SHIFT + A"), hl.dsp.exec_cmd("qs ipc call panel open appearance"))   -- appearance (GTK theme, fonts, cursor)
 
 -- Shell
 hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the bar

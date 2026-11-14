@@ -88,7 +88,7 @@ drop dependencies nothing else needs. A package in both lists is an error.
 containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
 (Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
 
-**Change how GTK apps look:** open the control center, then `appearance` (colour scheme, GTK / icon / cursor theme, cursor
+**Change how GTK apps look:** press `Super + Shift + A` (colour scheme, GTK / icon / cursor theme, cursor
 size, font and size). It runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
@@ -194,7 +194,7 @@ journalctl --user -u quickshell -f       # logs / QML errors
   outside closes it. It is built from four kinds of control, each with one look and one behaviour:
   **tiles** (on/off: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake; click toggles, the arrow opens
   details), **sliders** (levels: a brightness slider per screen, volume, mic; click `volume` or `mic` to mute),
-  **rows** (open something: wallpaper picker, sound output) and **actions** (lock, logout, suspend, reboot,
+  **rows** (open something: the sound output page) and **actions** (lock, logout, suspend, reboot,
   shutdown; the last three ask for a second click). Details open as a separate **page** with a `‹ Title` header
   (Wi-Fi, Bluetooth, sound output, power profile, night light, notifications), never inline, so the panel doesn't
   jump. Order on the first page: status header (battery, power profile), tiles, `display`, `sound`, `media` (only while
@@ -284,6 +284,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + V` | clipboard history |
 | `Super + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
+| `Super + Shift + A` | appearance: GTK theme, colour scheme, fonts, icons, cursor |
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |

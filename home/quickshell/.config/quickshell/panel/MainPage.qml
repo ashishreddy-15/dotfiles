@@ -10,7 +10,7 @@ import qs
 // The first page of the control center. Every control is one of four kinds, always in the same place:
 //   tile    on/off things (Wi-Fi, Bluetooth, Do Not Disturb, night light, keep awake) at the top; the arrow opens details
 //   slider  levels (brightness, volume), grouped under "display" and "sound"
-//   row     things that open something (wallpaper picker, sound output page)
+//   row     things that open something (the sound output page)
 //   action  the power buttons in the footer
 // Order, top to bottom: status header, tiles, display, sound, media (only while a player runs), footer.
 Column {
@@ -239,17 +239,6 @@ Column {
                 elide: Text.ElideRight
             }
         }
-    }
-    Line {
-        label: "appearance"
-        value: "gtk apps"
-        onClicked: root.open("appearance")
-    }
-
-    Line {
-        label: "wallpaper"
-        value: ShellState.wallpaperName
-        onClicked: { root.done(); ShellState.pickWallpaper() }
     }
 
     // ---- sound ----

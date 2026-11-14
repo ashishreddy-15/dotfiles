@@ -49,17 +49,8 @@ Scope {
         stdout: StdioCollector { onStreamFinished: ShellState.topLuminance = parseFloat(text) || 0 }
     }
     onCurrentChanged: {
-        ShellState.wallpaperName = baseName(current)
         if (current !== "") { measure.image = current; measure.running = true }
     }
-
-    // The quick-settings panel can ask for the picker.
-    Connections {
-        target: ShellState
-        function onPickWallpaper() { scan.running = true; later.restart() }
-    }
-    // Open once the control center has finished closing (it holds the keyboard focus until it is unmapped).
-    Timer { id: later; interval: Theme.durFast + 130; onTriggered: picker.open = true }
 
     function set(path) {
         if (!path || path === current) return
