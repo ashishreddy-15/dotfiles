@@ -36,7 +36,7 @@ Scope {
     readonly property var shown: {
         const q = picker.query.trim().toLowerCase()
         const list = q === "" ? entries : entries.filter(e => e.text.toLowerCase().includes(q))
-        return list.slice(0, picker.maxResults).map(e => ({ title: e.text || "(blank)", entry: e }))
+        return list.slice(0, 100).map(e => ({ title: e.text || "(blank)", entry: e }))
     }
 
     Picker {

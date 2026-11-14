@@ -1,0 +1,33 @@
+# Photos from Unsplash (https://unsplash.com/license: free to use). Downloaded by `./install.sh wallpapers`
+# into ~/.local/share/wallpapers/<name>.jpg, next to the generated wallpapers. They are not stored in this repo.
+#
+# Format:  <name>  <sha256>  <url>
+# Each URL asks Unsplash's image CDN for a 2560x1600 smart crop (so portrait photos fit a landscape screen).
+# The CDN returns identical bytes every time, so the checksums are pinned. A failed download or a changed
+# checksum only skips that photo with a warning; it never stops the install.
+# Photographer names are not recorded here (Unsplash blocks automated page lookups). To add one, find the
+# photo on unsplash.com and note it in the comment.
+#
+# To add a photo: take the long id from its image URL (photo-<id>), build the URL below, download it once,
+# run `sha256sum` on it, and add a line. To remove one, delete its line (and the file).
+
+# black-sand: dark sand ripples, near-monochrome
+black-sand      2f9f3f1d22f20f648d17a0ab62e5374131487c132d7e17512913e54e4b272b73  https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# night-ridge: stars over a dark ridge
+night-ridge     0a956a4e1e11a2a6afd54ca527dcb3779eaed17e44b5f9f1f025afd9859b3445  https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# mountain-stars: rocky peak under a starry sky
+mountain-stars  650d34aefb95f76ab179a1c79a8bee9ab4be97d26e57c608b702ede89ce291ba  https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# sailboat-night: a small boat on mirror-still water at night
+sailboat-night  301c63c3724f06722faaf6a0c0dcb70d6cd68f860fb4ba928c62a6aa07d9af51  https://images.unsplash.com/photo-1534447677768-be436bb09401?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# earth-night: Earth's city lights from orbit
+earth-night     9b2bc269215f87abb3390f64e863e668b1d8409814f2e5ad270be993bc795fac  https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# fog-forest: aerial fog over pine forest
+fog-forest      aa871527c1942498f33a4cfb4f92d2fa271fd83006b8d09b3aa76bb25e9e5b16  https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# misty-ridges: layered soft ridges (the one light photo)
+misty-ridges    7b35ce29d76b418fb4a98bcc9daf7f0b5fbc5c18fcc1584aed46555602325263  https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy

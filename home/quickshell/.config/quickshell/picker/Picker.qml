@@ -10,8 +10,9 @@ import qs
 // the focused monitor. The launcher and the clipboard history are both built on it.
 //
 // The user of this component supplies:
-//   items       the rows to show, already filtered and ranked (at most maxResults):
+//   items       the rows to show, already filtered and ranked, as many as you like:
 //               [{ title, subtitle?, icon? , ...anything else you need back }]
+//               maxResults rows are visible at once; longer lists scroll (arrows or wheel).
 //   onActivated called with the chosen item when Enter is pressed or a row is clicked
 // and reads `query` (what is typed) to compute items.
 //
@@ -29,11 +30,14 @@ Scope {
     property string query: ""
     property var items: []
     property int selected: 0
+    property int offset: 0              // index of the first visible row when the list is longer than maxResults
     property string placeholder: "Search"
     property string namespace: "quickshell-picker"
     property int maxResults: 8
 
     signal activated(var item)
+
+    readonly property var visibleItems: items.slice(offset, offset + maxResults)
 
     readonly property int searchHeight: 54
     readonly property int rowHeight: 40
@@ -49,7 +53,27 @@ Scope {
         activated(item)
     }
 
-    onOpenChanged: if (open) { query = ""; selected = 0 }
+    onOpenChanged: if (open) { query = ""; selected = 0; offset = 0 }
+
+    // Move the highlight by `step` rows (wrapping) and scroll so it stays visible.
+    function move(step) {
+        const n = items.length
+        if (n === 0) return
+        selected = (selected + step + n) % n
+    }
+    // PageUp / PageDown: jump a page and stop at the ends (no wrapping).
+    function page(step) {
+        if (items.length > 0) selected = Math.max(0, Math.min(items.length - 1, selected + step))
+    }
+    onSelectedChanged: {
+        if (selected < offset) offset = selected
+        else if (selected >= offset + maxResults) offset = selected - maxResults + 1
+    }
+    // The list can shrink or load late (e.g. clipboard history): keep the highlight and window inside it.
+    onItemsChanged: {
+        if (selected >= items.length) selected = Math.max(0, items.length - 1)
+        offset = Math.max(0, Math.min(offset, items.length - maxResults))
+    }
 
     PanelWindow {
         id: win
@@ -95,6 +119,8 @@ Scope {
             transformOrigin: Item.Top
             y: (1 - shown) * -8
 
+            WheelHandler { onWheel: e => root.move(e.angleDelta.y > 0 ? -1 : 1) }
+
             clip: true                               // list rows are revealed as the card grows
             radius: Theme.radius + 4
             color: Theme.surface
@@ -114,7 +140,7 @@ Scope {
                         id: input
                         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 20; rightMargin: 20 }
                         text: root.query
-                        onTextChanged: { root.query = text; root.selected = 0 }
+                        onTextChanged: { root.query = text; root.selected = 0; root.offset = 0 }
                         color: Theme.bright
                         selectionColor: Theme.border
                         font.family: Theme.fontFamily
@@ -128,13 +154,16 @@ Scope {
                         }
 
                         Keys.onPressed: event => {
-                            const n = root.items.length
                             if (event.key === Qt.Key_Escape) {
                                 root.open = false
-                            } else if (event.key === Qt.Key_Down || (event.key === Qt.Key_Tab && n)) {
-                                root.selected = (root.selected + 1) % Math.max(n, 1)
+                            } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
+                                root.move(1)
                             } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) {
-                                root.selected = (root.selected - 1 + Math.max(n, 1)) % Math.max(n, 1)
+                                root.move(-1)
+                            } else if (event.key === Qt.Key_PageDown) {
+                                root.page(root.maxResults)
+                            } else if (event.key === Qt.Key_PageUp) {
+                                root.page(-root.maxResults)
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                 root.chooseSelected()
                             } else {
@@ -143,6 +172,12 @@ Scope {
                             event.accepted = true
                         }
 
+                        StyledText {
+                            visible: root.items.length > root.maxResults
+                            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                            text: (root.selected + 1) + "/" + root.items.length
+                            color: Theme.dim
+                        }
                         StyledText {
                             visible: input.text === ""
                             text: root.placeholder
@@ -169,13 +204,13 @@ Scope {
                     bottomPadding: root.listPadding
 
                     Repeater {
-                        model: root.items
+                        model: root.visibleItems
 
                         Rectangle {
                             id: row
                             required property var modelData
                             required property int index
-                            readonly property bool active: index === root.selected
+                            readonly property bool active: index + root.offset === root.selected
 
                             x: root.listPadding
                             width: parent.width - 2 * root.listPadding
@@ -223,7 +258,7 @@ Scope {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onPositionChanged: root.selected = row.index
+                                onPositionChanged: root.selected = row.index + root.offset
                                 onClicked: root.choose(row.modelData)
                             }
                         }

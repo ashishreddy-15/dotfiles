@@ -104,14 +104,17 @@ Scope {
 
     // ---- picker ----
     function baseName(path) { return path.split("/").pop().replace(/\.[^.]+$/, "") }
-    function folderName(path) { return path.split("/").slice(-2, -1)[0] }
+    // What to show next to a name: yours (from ~/Pictures), a generated PNG, or a downloaded photo.
+    function kind(path) {
+        if (path.startsWith(home + "/Pictures")) return "yours"
+        return path.toLowerCase().endsWith(".png") ? "generated" : "photo"
+    }
 
     readonly property var listed: {
         const q = picker.query.trim().toLowerCase()
         return files
             .filter(f => q === "" || baseName(f).toLowerCase().includes(q))
-            .slice(0, picker.maxResults)
-            .map(f => ({ title: baseName(f), subtitle: f === current ? "current" : folderName(f), path: f }))
+            .map(f => ({ title: baseName(f), subtitle: f === current ? "current" : kind(f), path: f }))
     }
 
     Picker {

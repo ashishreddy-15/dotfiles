@@ -42,7 +42,7 @@ Scope {
             .map(a => ({ app: a, s: score(a, q) }))
             .filter(r => r.s > 0)
             .sort((x, y) => y.s - x.s || x.app.name.length - y.app.name.length)
-            .slice(0, picker.maxResults)
+            .slice(0, 40)
             .map(r => ({
                 title: r.app.name,
                 subtitle: r.app.genericName !== r.app.name ? r.app.genericName : "",

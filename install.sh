@@ -300,6 +300,43 @@ step_wallpapers() {
   else
     python3 "$gen"
   fi
+  download_photos
+}
+
+# Download the photos listed in system/wallpapers.txt (pinned URL + sha256). Unlike fonts these are
+# optional, so a problem with one photo only warns and moves on.
+download_photos() {
+  local manifest="$DOTFILES/system/wallpapers.txt" dest="$HOME/.local/share/wallpapers"
+  [[ -f "$manifest" ]] || return 0
+  local cmd
+  for cmd in curl sha256sum; do
+    command -v "$cmd" >/dev/null || { warn "missing $cmd; skipping photos"; return 0; }
+  done
+  mkdir -p "$dest"
+
+  local name sha url file tmp got
+  while read -r name sha url; do
+    file="$dest/$name.jpg"
+    if [[ -f "$file" && "$(sha256sum "$file" | cut -d' ' -f1)" == "$sha" ]]; then
+      ok "$name.jpg (up to date)"
+      continue
+    fi
+    if (( DRY_RUN )); then
+      info "[dry-run] download $name.jpg"
+      continue
+    fi
+    tmp=$(mktemp)
+    if ! curl -fsSL --retry 3 --max-time 120 -o "$tmp" "$url"; then
+      warn "$name: download failed; skipped"; rm -f "$tmp"; continue
+    fi
+    got=$(sha256sum "$tmp" | cut -d' ' -f1)
+    if [[ "$got" != "$sha" ]]; then
+      warn "$name: checksum changed upstream; skipped (update system/wallpapers.txt if you trust the new file)"
+      rm -f "$tmp"; continue
+    fi
+    mv "$tmp" "$file"
+    ok "$name.jpg downloaded"
+  done < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest")
 }
 
 step_defaults() {

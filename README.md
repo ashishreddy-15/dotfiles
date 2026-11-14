@@ -28,6 +28,7 @@ dotfiles/
 ├── system/                 # root-level config (copied, never symlinked)
 │   ├── repos/*.repo        #   -> /etc/yum.repos.d/
 │   ├── fonts.txt           #   fonts to download (pinned URL + sha256)
+│   ├── wallpapers.txt      #   Unsplash photos to download (pinned URL + sha256)
 │   ├── services.sh         #   system services (sudo)
 │   └── user-services.sh    #   systemd --user units (hypridle, polkit agent, quickshell)
 └── home/                   # stow packages, each mirrors $HOME
@@ -159,8 +160,10 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + W`
   picks one; `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
   It lists `~/.local/share/wallpapers` (five generated ones that look clearly different: carbon, contours,
-  dusk, pewter-glow, slate; made by `./install.sh wallpapers`, which remakes them when the designs change) and `~/Pictures/Wallpapers` (**put your own images there**;
-  png, jpg, webp). The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
+  dusk, pewter-glow, slate, plus seven photos from Unsplash: black-sand, night-ridge, mountain-stars,
+  sailboat-night, earth-night, fog-forest, misty-ridges; all made or fetched by `./install.sh wallpapers`)
+  and `~/Pictures/Wallpapers` (**put your own images there**; png, jpg, webp). The picker labels each as
+  generated, photo or yours. The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
   The bar has no background of its own. When the top edge of a wallpaper is light (measured when
   you pick it), the bar automatically gets a dark blurred background so its text stays readable;
   `brightWallpaper` and `barBackdropOpacity` in `Theme.qml` tune that.
@@ -170,6 +173,17 @@ journalctl --user -u quickshell -f       # logs / QML errors
   actions `lock logout suspend reboot shutdown`; logout, reboot and shutdown ask for a second click.
   Wi-Fi and Bluetooth scan only while their list is open. Esc or a click outside closes it.
   `qs ipc call panel open <out|wifi|bt>` opens it with a list expanded.
+
+### Wallpaper photos
+
+The photos come from [Unsplash](https://unsplash.com/license) (free to use under the Unsplash License) and are
+downloaded at install time from the list in `system/wallpapers.txt`, not stored in this repo. Each entry
+is pinned by checksum; a failed or changed download only skips that photo with a warning. I could not look up
+the photographers' names automatically (Unsplash blocks automated page lookups), so they are not listed;
+add them as comments in `wallpapers.txt` if you know them. Add or remove photos by editing that file.
+
+The picker (and so the launcher and clipboard history) scrolls: arrows, Page Up/Down or the mouse wheel move
+through lists longer than eight rows, and a small `3/12` counter shows where you are.
 
 ## Desktop
 
