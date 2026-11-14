@@ -97,6 +97,9 @@ Scope {
         function next(): void { root.next() }
         function set(path: string): void { root.set(path) }
         function pick(): void { scan.running = true; picker.open = !picker.open }
+        // Open the picker with text typed, and choose the highlighted entry (same as pressing Enter).
+        function search(text: string): void { scan.running = true; picker.setQuery(text) }
+        function choose(): void { picker.chooseSelected() }
     }
 
     // ---- picker ----
@@ -142,6 +145,7 @@ Scope {
                 required property bool isA
                 anchors.fill: parent
                 asynchronous: true
+                cache: false                       // a regenerated file must not be shown from an old copy
                 fillMode: Image.PreserveAspectCrop
                 // Decode at screen size, not at the file's (possibly huge) size.
                 sourceSize.width: Math.round(win.modelData.width * win.modelData.devicePixelRatio)
