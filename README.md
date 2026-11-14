@@ -161,6 +161,13 @@ edit `~/.bashrc`) and the versions in `packages/sdkman.txt` (Temurin 25 LTS, Mav
 SDKMAN, so new shells stay fast; `sdk` loads it the first time you type it. To change a version: `sdk install java
 <version>`, `sdk default java <version>`, and update `packages/sdkman.txt`.
 
+**Pen tablet:** Settings > Tablet (shown when one is connected; written for the Wacom Intuos BT S): which screen it
+covers (default: the one you are working on), keep proportions (trims the active area to that screen's shape; it
+follows you between the 16:10 laptop and the 16:9 monitor), orientation (180° for left-handed), pen or mouse mode,
+the battery, and a pad to try it. `quickshell/Tablet.qml` applies the choices live with `hyprctl eval`
+(`qs ipc call tablet status` shows what it applied); `hypr/modules/tablet.lua` is the default without the shell.
+Pressure curves are set in the drawing app; the pen buttons and ExpressKeys keep their defaults for now.
+
 ## Repos
 
 Hyprland isn't in the official Fedora 45 repos, and Fedora's Quickshell is an old

@@ -4,6 +4,7 @@
 
 require("modules.monitors")   -- outputs, positions, workspace -> monitor
 require("modules.input")      -- keyboard, touchpad
+require("modules.tablet")     -- pen tablets (the shell refines it: Settings > Tablet)
 require("modules.look")       -- gaps, borders, blur, animations
 require("modules.rules")      -- window rules
 require("modules.binds")      -- keybindings
