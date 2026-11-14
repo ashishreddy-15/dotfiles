@@ -88,6 +88,10 @@ quiet tiles, the control center's structure.
 
 ## 7. Ideas (not committed to)
 
+- [x] Bar: amber coffee cup while Keep awake is on (click to turn off)
+- [x] Notification centre (Super + N, bell in the bar with a count; crossed bell while Silence is on), grouped by app
+- [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
+- [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
 - [x] Control center redesign: a row of round toggles, pill sliders with icons, media card, footer (battery, settings, power)
 - [x] Power menu on Super + X (actions shared with the control center: Power.qml)
 

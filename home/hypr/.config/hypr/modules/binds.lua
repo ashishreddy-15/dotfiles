@@ -19,6 +19,7 @@ hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clip
 hl.bind(k("W"),       app(browser))                                      -- browser (Brave Origin)
 hl.bind(k("SHIFT + W"), hl.dsp.exec_cmd("qs ipc call wallpaper pick"))   -- choose wallpaper
 hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call panel toggle"))       -- quick settings
+hl.bind(k("N"),       hl.dsp.exec_cmd("qs ipc call notifications toggle"))  -- notification centre
 hl.bind(k("I"),       hl.dsp.exec_cmd("qs ipc call settings toggle"))     -- settings (Wi-Fi, Bluetooth, sound, wallpaper...)
 hl.bind(k("SHIFT + A"), hl.dsp.exec_cmd("qs ipc call settings toggleSection appearance"))   -- settings, on Appearance
 

@@ -59,6 +59,7 @@ Variants {
 
                 Recording { anchors.verticalCenter: parent.verticalCenter }
                 ModeIcons { anchors.verticalCenter: parent.verticalCenter }
+                NotificationBell { visible: bar.full && (Notifs.count > 0 || Modes.dnd); anchors.verticalCenter: parent.verticalCenter }
                 Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
 
                 // Status items and the clock: click anywhere here to open the quick-settings panel.

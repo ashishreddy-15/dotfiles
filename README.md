@@ -126,6 +126,13 @@ monitor. Press the same key again, or click the red "rec 0:12" in the bar, to st
 `~/Videos/Recordings/`, with a notification. Silent by default; `screenrecord screen --audio` also records what the
 computer plays (`home/bin/.local/bin/screenrecord`).
 
+**Notifications:** pop-ups appear top-centre for a few seconds. Everything you have not dealt with stays in the
+**notification centre** (`Super + N`, or the bell in the bar, which shows how many and turns into a crossed bell while
+Silence is on): a panel at the right edge, grouped by app ("2 more" expands), with each notification's buttons and x to
+dismiss, Silence and Clear all at the top. Opening it clears the pop-ups. Every notification is also kept for 7 days in
+an archive on disk (`~/.local/state/dotfiles/notifications.jsonl`, only readable by you, plain text): Settings >
+Notifications shows it by day (Today, Yesterday, This week, All) with search and Clear history.
+
 ## Repos
 
 Hyprland isn't in the official Fedora 45 repos, and Fedora's Quickshell is an old
@@ -314,6 +321,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + W` | browser (Brave Origin) |
 | `Super + Shift + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
+| `Super + N` | notification centre (also: the bell in the bar) |
 | `Super + I` | settings (toggle) |
 | `Super + X` | power menu: lock, log out, suspend, reboot, shut down (letters L O S R P; log out / reboot / shut down ask twice) |
 | `Super + Shift + A` | settings, on Appearance (GTK theme, colour scheme, fonts, icons, cursor) |

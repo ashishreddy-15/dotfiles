@@ -19,6 +19,7 @@ import "power"
 ShellRoot {
     Bar {}
     Notifications {}
+    NotificationCenter {}
     Osd {}
     Launcher {}
     Clipboard {}

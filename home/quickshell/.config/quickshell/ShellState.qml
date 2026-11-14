@@ -37,6 +37,9 @@ Singleton {
     property string wallpaperCurrent: ""
     signal wallpaperChosen(string path)
 
+    // Notification centre (notifications/NotificationCenter.qml): the bell in the bar and Super + N toggle it.
+    property bool centerOpen: false
+
     // The control center's power button asks the power menu (power/PowerMenu.qml) to open.
     signal openPowerMenu()
 

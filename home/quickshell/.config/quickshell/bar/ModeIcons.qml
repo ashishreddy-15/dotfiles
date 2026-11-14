@@ -3,13 +3,12 @@ import qs
 
 // Small icons for modes that are easy to forget, shown only while they are on (the bar's "quiet" rule):
 //   coffee cup      Keep awake: the screen will not lock or sleep (amber: it matters for security)
-//   crossed bell    Silence (Do Not Disturb): pop-ups are held back
-// Click one to turn that mode off.
+// Click it to turn that mode off. (Silence shows as a crossed bell in NotificationBell.qml.)
 Row {
     id: root
 
     spacing: 12
-    visible: Modes.keepAwake || Modes.dnd
+    visible: Modes.keepAwake
 
     component ModeIcon: BarText {
         id: icon
@@ -29,5 +28,4 @@ Row {
     }
 
     ModeIcon { text: Theme.glyphAwake; color: Theme.barWarn; on: Modes.keepAwake; onTurnOff: Modes.toggleAwake() }
-    ModeIcon { text: Theme.glyphSilent; color: Theme.barText; on: Modes.dnd; onTurnOff: Modes.toggleDnd() }
 }

@@ -67,12 +67,15 @@ Singleton {
     // ---- glyphs ----
     // One icon set: the FontAwesome symbols that ship inside Maple Mono NF, so every icon has the same weight and
     // sits on the same baseline as the text. Write icons through these names, never as a literal character.
+    readonly property string glyphDown:    "\uf107"   // chevron down: expand
+    readonly property string glyphUp:      "\uf106"   // chevron up: collapse
     readonly property string glyphNext:    "\uf105"   // chevron right: opens a page / a menu
     readonly property string glyphBack:    "\uf104"   // chevron left: back
     readonly property string glyphClose:   "\uf00d"   // x
     readonly property string glyphMark:    "\uf111"   // filled dot: the chosen item in a list
     readonly property string glyphWifi:      "\uf1eb"
     readonly property string glyphBluetooth: "\uf293"
+    readonly property string glyphBell:      "\uf0f3"   // bell: notifications
     readonly property string glyphSilent:    "\uf1f6"   // bell with a line through it: Do Not Disturb
     readonly property string glyphNight:     "\uf186"   // moon: night light
     readonly property string glyphAwake:     "\uf0f4"   // coffee cup: keep awake
