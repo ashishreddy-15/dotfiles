@@ -24,15 +24,16 @@ Row {
             required property var modelData
             readonly property bool current: modelData.active   // shown on this monitor right now
 
-            StyledText { text: "["; color: Theme.accent; opacity: item.current ? 1 : 0 }
+            StyledText { text: "["; color: Theme.accent; opacity: item.current ? 1 : 0; font.pixelSize: Theme.barFontSize }
             StyledText {
+                font.pixelSize: Theme.barFontSize
                 text: item.modelData.id
                 color: item.current ? Theme.bright
                      : item.modelData.urgent ? Theme.warn
                      : hover.hovered ? Theme.text
                      : Theme.dim
             }
-            StyledText { text: "]"; color: Theme.accent; opacity: item.current ? 1 : 0 }
+            StyledText { text: "]"; color: Theme.accent; opacity: item.current ? 1 : 0; font.pixelSize: Theme.barFontSize }
 
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             TapHandler { onTapped: item.modelData.activate() }

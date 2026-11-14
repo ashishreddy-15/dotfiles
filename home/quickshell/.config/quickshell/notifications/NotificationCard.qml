@@ -10,7 +10,7 @@ Rectangle {
 
     required property var modelData
     readonly property var n: modelData
-    readonly property bool critical: n.urgency === NotificationUrgency.Critical
+    readonly property bool critical: n?.urgency === NotificationUrgency.Critical
     property int timeout: 5000
     property bool shown: true
 
@@ -26,11 +26,11 @@ Rectangle {
     Timer {
         running: card.shown && !card.critical && !hover.hovered
         interval: card.timeout
-        onTriggered: card.n.expire()
+        onTriggered: card.n?.expire()
     }
 
     HoverHandler { id: hover }
-    TapHandler { onTapped: card.n.dismiss() }
+    TapHandler { onTapped: card.n?.dismiss() }
 
     RowLayout {
         id: content
@@ -39,13 +39,13 @@ Rectangle {
 
         // Picture sent with the notification (album art, contact photo...), if any
         ClippingRectangle {
-            visible: card.n.image !== ""
+            visible: card.n?.image !== ""
             Layout.preferredWidth: 40
             Layout.preferredHeight: 40
             Layout.alignment: Qt.AlignTop
             radius: Theme.radius
             color: "transparent"
-            Image { anchors.fill: parent; source: card.n.image; fillMode: Image.PreserveAspectCrop }
+            Image { anchors.fill: parent; source: card.n?.image; fillMode: Image.PreserveAspectCrop }
         }
 
         ColumnLayout {
@@ -54,14 +54,14 @@ Rectangle {
 
             StyledText {
                 mono: false
-                text: card.n.appName || "Notification"
+                text: card.n?.appName || "Notification"
                 color: card.critical ? Theme.err : Theme.dim
                 font.pixelSize: Theme.fontSize - 1
             }
             StyledText {
                 mono: false
                 Layout.fillWidth: true
-                text: card.n.summary
+                text: card.n?.summary
                 font.weight: Font.DemiBold
                 color: Theme.bright
                 elide: Text.ElideRight
@@ -70,7 +70,7 @@ Rectangle {
                 mono: false
                 Layout.fillWidth: true
                 visible: text !== ""
-                text: card.n.body
+                text: card.n?.body
                 textFormat: Text.StyledText
                 wrapMode: Text.Wrap
                 maximumLineCount: 4
@@ -79,12 +79,12 @@ Rectangle {
 
             // Action buttons, e.g. "Reply", "Open"
             Row {
-                visible: card.n.actions.length > 0
+                visible: card.n?.actions.length > 0
                 spacing: 14
                 topPadding: 4
 
                 Repeater {
-                    model: card.n.actions
+                    model: card.n?.actions
                     StyledText {
                         required property var modelData
                         mono: false

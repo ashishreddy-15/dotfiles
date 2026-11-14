@@ -28,7 +28,8 @@ Singleton {
     readonly property string uiFont:   "Asap"            // panels, notifications, launcher
     readonly property string monoFont: "Maple Mono NF"   // bar, numbers, icons
     readonly property int uiWidth:  92    // Asap width axis: 75 (narrow) .. 100 (normal) .. 125 (wide)
-    readonly property int fontSize: 13
+    readonly property int fontSize: 13      // notifications, launcher, panels
+    readonly property int barFontSize: 12   // the bar (Maple Mono)
 
     // Sizes
     readonly property int barHeight: 28

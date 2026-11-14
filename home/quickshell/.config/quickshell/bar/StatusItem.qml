@@ -11,6 +11,6 @@ Row {
 
     spacing: 5
 
-    StyledText { mono: false; text: parent.label; color: Theme.dim }
-    StyledText { mono: false; text: parent.value; color: parent.valueColor }
+    StyledText { text: parent.label; color: Theme.dim; font.pixelSize: Theme.barFontSize }
+    StyledText { text: parent.value; color: parent.valueColor; font.pixelSize: Theme.barFontSize }
 }

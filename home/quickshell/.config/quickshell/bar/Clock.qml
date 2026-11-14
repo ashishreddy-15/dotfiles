@@ -3,7 +3,7 @@ import Quickshell
 import qs
 
 StyledText {
-    mono: false
+    font.pixelSize: Theme.barFontSize
     text: Qt.formatDateTime(clock.date, "ddd d MMM   HH:mm")
 
     SystemClock {

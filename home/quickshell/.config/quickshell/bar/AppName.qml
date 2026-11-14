@@ -11,8 +11,8 @@ StyledText {
     readonly property bool here: win?.monitor === Hyprland.monitorFor(screen)
     readonly property string appId: win?.wayland?.appId ?? ""
 
-    mono: false
-    font.weight: Font.DemiBold
+    font.pixelSize: Theme.barFontSize
+    font.weight: Font.Medium
     visible: here && appId !== ""
     // Prefer the app's proper name ("Files") over its id ("org.gnome.Nautilus").
     text: DesktopEntries.heuristicLookup(appId)?.name ?? appId

@@ -100,7 +100,7 @@ update back for a few days until the COPR rebuilds Quickshell. That's expected.
 ## Look
 
 Palette "Carbon & Pewter": neutral near-black base (#111111), dim grey text, one pewter (grey-blue) accent, muted
-status colours. Fonts: **Maple Mono NF** (bar, terminal, icons) and **Asap** (interface,
+status colours. Fonts: **Maple Mono NF** (bar at 12 px, terminal, icons) and **Asap** (notifications, launcher, panels;
 slightly condensed). Neither is in Fedora, so `./install.sh fonts` downloads the
 exact versions listed in `system/fonts.txt` and verifies their checksums.
 
