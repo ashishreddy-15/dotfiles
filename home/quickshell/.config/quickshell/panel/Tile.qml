@@ -18,12 +18,28 @@ Item {
 
     height: 52
 
+    // Quiet by design: "on" is a light wash with the accent mark (the same sign a selected row has in a
+    // picker); "off" is only a hairline outline. Nothing here should shout louder than the sliders and text.
     Rectangle {
         anchors.fill: parent
         radius: Theme.radiusRow
-        color: root.active ? Qt.alpha(Theme.accent, area.containsMouse ? 0.40 : 0.30)
-                           : (area.containsMouse ? Theme.selected : Theme.hover)
+        color: root.active ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
+                           : (area.containsMouse ? Theme.hover : Theme.clear)
+        border.width: 1
+        border.color: root.active ? Theme.clear : Theme.border
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
+        Behavior on border.color { ColorAnimation { duration: Theme.durFast } }
+
+        Rectangle {
+            x: 5
+            anchors.verticalCenter: parent.verticalCenter
+            width: 2
+            height: 18
+            radius: 1
+            color: Theme.accent
+            opacity: root.active ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+        }
     }
 
     MouseArea {
@@ -47,7 +63,7 @@ Item {
         StyledText {
             width: parent.width
             text: root.value
-            color: root.active ? Theme.text : Theme.dim
+            color: Theme.dim
             font.pixelSize: Theme.fontSmall
             elide: Text.ElideRight
         }

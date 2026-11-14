@@ -219,7 +219,8 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size or 
   animation. A card lives in a fixed-size window that leaves `shadowMargin` free on each side; only the card
   resizes, never the window (resizing a layer window makes the compositor smear the old frame).
 - **Hover and selection** are a light wash over the card (`hover`, `selected`); the selected row in a list also
-  gets an accent mark. They fade in `durFast`.
+  gets an accent mark. They fade in `durFast`. An "on" tile uses the same sign (wash + accent mark); an "off" tile is
+  only a hairline outline. Solid accent fills are avoided: they shout over the text.
 - **Type.** Sizes come from `fontSmall` 11, `fontBase` 12 (also the bar), `fontLarge` 14, `fontXL` 16.
 - **Motion.** `durFast` 90 ms, `durBase` 140 ms, `durSlow` 240 ms, `durAmbient` 400 ms (wallpaper and bar
   colours), all ease-out (`easeOut`; `easeInOut` for cross-fades). Enter is `durBase`, exit `durFast`.

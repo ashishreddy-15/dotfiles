@@ -34,6 +34,7 @@ Singleton {
     readonly property color clear:    Qt.rgba(1, 1, 1, 0)      // "no wash": animates cleanly to hover/selected
     readonly property color hover:    Qt.rgba(1, 1, 1, 0.07)
     readonly property color selected: Qt.rgba(1, 1, 1, 0.12)
+    readonly property color selectedHover: Qt.rgba(1, 1, 1, 0.17)   // a selected / "on" item under the pointer
 
     // ---- shape ----
     // One rule: a row inside a card has radius = card radius - the gap to the card's edge (10 - 4 = 6),
