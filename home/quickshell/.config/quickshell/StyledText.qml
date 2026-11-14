@@ -8,7 +8,5 @@ Text {
     font.family: mono ? Theme.monoFont : Theme.uiFont
     font.pixelSize: Theme.fontSize
     font.variableAxes: mono ? ({}) : ({ "wdth": Theme.uiWidth })
-    // Greyscale smoothing: subpixel (coloured) smoothing breaks on transparent backgrounds.
-    renderType: Text.CurveRendering
     verticalAlignment: Text.AlignVCenter
 }

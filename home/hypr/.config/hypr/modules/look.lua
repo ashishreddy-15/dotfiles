@@ -25,6 +25,7 @@ hl.config({
     misc = {
         force_default_wallpaper = 0,      -- no anime mascot; Quickshell will draw the wallpaper
         disable_hyprland_logo   = true,
+        disable_splash_rendering = true,  -- no joke text at the bottom of empty screens
         focus_on_activate       = true,   -- apps asking for focus (e.g. a link opening Brave) get it
     },
 })
