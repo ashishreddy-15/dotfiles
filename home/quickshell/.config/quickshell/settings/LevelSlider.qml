@@ -42,5 +42,6 @@ Item {
         text: root.valueText
     }
 
-    FocusRing { visible: root.activeFocus; anchors.margins: -3 }
+    // A little roomier than the others: the value text should not touch the ring.
+    FocusRing { visible: root.activeFocus; anchors { margins: -3; leftMargin: -8; rightMargin: -8 } }
 }

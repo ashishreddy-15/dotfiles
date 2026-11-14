@@ -9,14 +9,10 @@ Rectangle {
     property bool checked: false
     signal toggled()
 
-    // Keyboard: Enter or Space flips it; Left switches it off, Right switches it on.
+    // Keyboard: Space or Enter flips it. The arrows do not: they move around (Left goes back to the sidebar).
     activeFocusOnTab: true
     Keys.onPressed: event => {
-        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) root.toggled()
-        else if (event.key === Qt.Key_Left) { if (root.checked) root.toggled() }
-        else if (event.key === Qt.Key_Right) { if (!root.checked) root.toggled() }
-        else return
-        event.accepted = true
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.toggled(); event.accepted = true }
     }
 
     implicitWidth: 40

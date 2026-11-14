@@ -93,7 +93,7 @@ containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true
 centred, with a sidebar: Wi-Fi, Bluetooth, Sound, Display (brightness, night light), Wallpaper (thumbnails), Notifications
 (Do Not Disturb, history), Power (profile, battery) and Appearance (colour scheme, GTK / icon / cursor theme, cursor size, fonts).
 Keyboard: it opens on the sidebar (Up / Down change section); Right, Enter or Tab go into the section, where Tab or Up / Down
-move between controls, Enter and Space press, Left / Right adjust (switches, choices, steppers, sliders, the wallpaper grid);
+move between controls, Enter and Space press, Left / Right adjust (choices, steppers, sliders, the wallpaper grid; switches only take Space / Enter);
 Left on a plain row or Shift+Tab from the first control goes back to the sidebar. Appearance runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.

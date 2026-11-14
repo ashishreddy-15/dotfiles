@@ -34,9 +34,10 @@ Item {
         }
     }
 
+    // The control, a little in from the right edge, so its keyboard focus ring (drawn just outside it) is not cut off.
     Item {
         id: slot
-        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+        anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
         width: childrenRect.width
         height: childrenRect.height
     }

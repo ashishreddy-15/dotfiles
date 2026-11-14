@@ -14,7 +14,7 @@ import "../ui"
 //   Super + Shift + A      Appearance       (qs ipc call settings toggleSection appearance | open <section>)
 //   Esc, a click outside   close
 // Keyboard: it opens with the focus on the sidebar: Up / Down change section, Right / Enter / Tab go into the section.
-// Inside a section Tab (or Up / Down) moves between the controls, Enter and Space press, Left / Right adjust (switches,
+// Inside a section Tab (or Up / Down) moves between the controls, Enter and Space press, Left / Right adjust (
 // choices, steppers, sliders). Left on a plain row, or Shift+Tab / Up from the first control, goes back to the sidebar.
 // Sections: wifi, bluetooth, sound, display, wallpaper, notifications, power, appearance. Each one is a file in this folder;
 // it is loaded only while it is showing (so scanning for networks and devices stops when Settings is closed).
