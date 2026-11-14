@@ -144,12 +144,16 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `osd/`: small volume / brightness indicator at the bottom-centre of the main monitor.
   Volume shows on any change; brightness shows when the brightness keys are used
   (they call `qs ipc call osd brightness`), so idle dimming stays silent.
-- `launcher/`: Spotlight-style app launcher (`Super + Space`). Opens in the upper third of
-  the focused monitor; results appear as you type (name, then description/keywords, then
-  letters-in-order). Up/Down or Tab to move, Enter to open, Esc or click outside to close.
-  The window has a fixed size and only the card inside it grows and shrinks; Hyprland's own
-  fade is switched off for it (`rules.lua`). Resizing the window per keystroke made the old
-  version smear. `qs ipc call launcher search <text>` opens it with text prefilled.
+- `picker/Picker.qml`: the shared Spotlight-style window (search field + list) that the launcher and
+  the clipboard history are built on. Up/Down or Tab to move, Enter to choose, Esc or a click
+  outside to close. The window has a fixed size and only the card inside it grows and shrinks;
+  Hyprland's own fade is switched off for these windows (`rules.lua`). Resizing the window per
+  keystroke made the first version smear. New pickers (power menu, ...) should reuse it.
+- `launcher/`: app launcher (`Super + Space`). Results appear as you type (name, then
+  description/keywords, then letters-in-order). `qs ipc call launcher search <text>` opens it prefilled.
+- `clipboard/`: clipboard history (`Super + V`) from `cliphist` (fed by `wl-paste --watch` in
+  `autostart.lua`). Shows the latest entries; typing filters the whole history. Enter copies the entry
+  back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
 
 ## Desktop
 
@@ -165,21 +169,23 @@ Log in by picking **Hyprland (uwsm-managed)** in SDDM. The config is Lua
 `monitors`, `input`, `look`, `rules`, `binds`, `autostart`. Hyprland reloads
 on save; `./install.sh link` also checks it with `Hyprland --verify-config`.
 
-Monitors: laptop `eDP-1` (1920x1200) on the left, Samsung `HDMI-A-1` (2560x1440)
+Monitors: laptop `eDP-1` (1920x1200, scaled 1.2) on the left, Samsung `HDMI-A-1` (2560x1440)
 in the centre as the main screen. Workspaces 1-9 are on the main screen, 10 on the laptop.
+Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions follow automatically.
 
 | Keys | Action |
 |---|---|
 | `Super + Return` / `E` / `Space` | terminal (kitty) / files (Nautilus) / app launcher |
 | `Super + Q` | close window |
-| `Super + F` / `M` / `V` | fullscreen / maximize / toggle floating |
+| `Super + F` / `M` | fullscreen / maximize |
+| `Super + Shift + Space` | toggle floating |
 | `Super + arrows` or `h j k l` | move focus (crosses to the other monitor at the edge) |
 | `Super + Shift + arrows` or `h j k l` | move window |
 | `Super + ,` / `.` | focus laptop / main monitor (`+ Shift`: send window there) |
 | `Super + 1..0` | workspace 1-10 (`+ Shift`: move window there) |
 | `Super + Tab` | previous workspace |
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
-| `Super + Shift + V` | clipboard history |
+| `Super + V` | clipboard history |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |

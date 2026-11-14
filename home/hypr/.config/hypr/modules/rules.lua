@@ -21,10 +21,10 @@ hl.window_rule({
     float = true,
 })
 
--- The launcher animates itself (fade, zoom, height) inside its window. Hyprland's own layer fade
--- smears when Quickshell unmaps the window, so switch it off for this one.
+-- The launcher and clipboard pickers animate themselves (fade, zoom, height) inside their window.
+-- Hyprland's own layer fade smears when Quickshell unmaps the window, so switch it off for them.
 hl.layer_rule({
-    name  = "no-anim-launcher",
-    match = { namespace = "^quickshell-launcher$" },
+    name  = "no-anim-pickers",
+    match = { namespace = "^quickshell-(launcher|clipboard)$" },
     no_anim = true,
 })

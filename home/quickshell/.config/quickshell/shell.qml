@@ -9,10 +9,12 @@ import "bar"
 import "notifications"
 import "osd"
 import "launcher"
+import "clipboard"
 
 ShellRoot {
     Bar {}
     Notifications {}
     Osd {}
     Launcher {}
+    Clipboard {}
 }

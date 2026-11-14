@@ -14,7 +14,7 @@ local fileManager = "nautilus --new-window"
 hl.bind(k("Return"),  app(terminal))
 hl.bind(k("E"),       app(fileManager))
 hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app launcher
-hl.bind(k("SHIFT + V"), hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
+hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clipboard history
 
 -- Shell
 hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the bar
@@ -27,7 +27,7 @@ hl.bind(k("SHIFT + E"), hl.dsp.exec_cmd("uwsm stop"))               -- log out
 hl.bind(k("Q"),         hl.dsp.window.close())
 hl.bind(k("F"),         hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(k("M"),         hl.dsp.window.fullscreen({ mode = "maximized" }))
-hl.bind(k("V"),         hl.dsp.window.float({ action = "toggle" }))
+hl.bind(k("SHIFT + Space"), hl.dsp.window.float({ action = "toggle" }))
 hl.bind(k("P"),         hl.dsp.window.pseudo())
 hl.bind(k("T"),         hl.dsp.layout("togglesplit"))
 
