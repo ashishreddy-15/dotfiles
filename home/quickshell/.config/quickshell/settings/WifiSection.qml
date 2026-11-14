@@ -61,6 +61,9 @@ Page {
                       : (entry.secured && !entry.modelData.known ? Theme.glyphLock + "  " : "") + Math.round(entry.modelData.signalStrength * 100) + "%"
                 detailColor: entry.modelData.connected ? Theme.ok : Theme.dim
                 onClicked: root.activate(entry.modelData)
+                // Saved networks can be forgotten (the password is deleted).
+                actionText: entry.modelData.known ? "Forget" : ""
+                onAction: entry.modelData.forget()
             }
 
             // Password prompt under the network that needs one

@@ -45,7 +45,7 @@ quiet tiles, the control center's structure.
 - [x] Settings: keyboard navigation (sidebar, Tab / arrows between controls, Enter / Space, Left / Right, scrolling to the focused row)
 - [x] Bluetooth pairing: agent (`bt-agent`) that asks in the shell; pairable only while Settings > Bluetooth is open; trusted after pairing
 - [x] Paired the Rockerz 650 Pro through the prompt
-- [ ] Settings: a "forget network" action; Bluetooth: forget / remove a device
+- [x] Settings: "Forget" for saved Wi-Fi networks, "Remove" for paired Bluetooth devices (hover or focus, two clicks or Delete twice)
 
 ## 4. Beyond the shell
 

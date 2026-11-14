@@ -79,6 +79,10 @@ Page {
                   : modelData.paired ? "paired" : "pair"
             detailColor: modelData.connected ? Theme.ok : Pairing.hasFailed(modelData) ? Theme.warn : Theme.dim
 
+            // Paired devices can be removed (unpaired; pair again to use it).
+            actionText: modelData.paired ? "Remove" : ""
+            onAction: modelData.forget()
+
             // Pairing is started through Pairing.qml, which trusts and connects the device once it has worked.
             onClicked: {
                 if (modelData.pairing) modelData.cancelPair()
