@@ -1,0 +1,14 @@
+# Fonts that Fedora doesn't package. Installed by `./install.sh fonts` into
+# ~/.local/share/fonts/dotfiles/<name>/ (per user, no root, no extra repo).
+#
+# Format:  <name>  <sha256>  <url>
+# Every download is pinned to an exact version and checked against its sha256.
+# To update a font: change the URL, run `sha256sum` on the new file, update the hash.
+# .zip files are unpacked (only .ttf/.otf are kept); .ttf/.otf are copied as-is.
+
+# Maple Mono NF v7.9: monospace for the bar, terminal and lock screen (includes Nerd Font icons)
+maple-mono-nf  59098b87c895d871635d37680e88000ae2b2b25b55428195b228ec589e35fb89  https://github.com/subframe7536/maple-font/releases/download/v7.9/MapleMono-NF.zip
+
+# Asap (variable: weight + width): interface font, slightly condensed, soft corners
+asap           7bf29bcab72f7d00de600e964a3fc206620050d8448ddd976822378d0fe18028  https://raw.githubusercontent.com/google/fonts/95f4904fc8bcf26d3420fe315560c96417c6dec7/ofl/asap/Asap%5Bwdth%2Cwght%5D.ttf
+asap-italic    a21e12f9babf2d02526003b27dff884b6d1cd0fed883ffe7740725626a11dd59  https://raw.githubusercontent.com/google/fonts/95f4904fc8bcf26d3420fe315560c96417c6dec7/ofl/asap/Asap-Italic%5Bwdth%2Cwght%5D.ttf

@@ -26,12 +26,15 @@ dotfiles/
 │   └── remove.txt          #   packages to uninstall (e.g. Thunar)
 ├── system/                 # root-level config (copied, never symlinked)
 │   ├── repos/*.repo        #   -> /etc/yum.repos.d/
+│   ├── fonts.txt           #   fonts to download (pinned URL + sha256)
 │   ├── services.sh         #   system services (sudo)
-│   └── user-services.sh    #   systemd --user units (hypridle, polkit agent)
+│   └── user-services.sh    #   systemd --user units (hypridle, polkit agent, quickshell)
 └── home/                   # stow packages, each mirrors $HOME
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
-    ├── systemd/            # drop-ins: run hypr* services only in Hyprland, not Sway
+    ├── kitty/              # terminal: font + colours
+    ├── quickshell/         # the desktop shell (QML): Theme.qml, shell.qml, bar/
+    ├── systemd/            # quickshell.service + drop-ins limiting hypr* services to Hyprland
     └── uwsm/               # ~/.config/uwsm/env-hyprland: session environment
 ```
 
@@ -93,6 +96,31 @@ If an update fails with `nothing provides <X>`, add `<X>` to that repo's
 
 Quickshell uses Qt private APIs. When Fedora updates Qt, dnf may hold the Qt
 update back for a few days until the COPR rebuilds Quickshell. That's expected.
+
+## Look
+
+Palette "Abyss & Ice": near-black base, soft grey text, one pale icy accent, muted
+status colours. Fonts: **Maple Mono NF** (bar, terminal, icons) and **Asap** (interface,
+slightly condensed). Neither is in Fedora, so `./install.sh fonts` downloads the
+exact versions listed in `system/fonts.txt` and verifies their checksums.
+
+The palette is defined in `home/quickshell/.config/quickshell/Theme.qml` and repeated
+in `hypr/modules/look.lua`, `hypr/hyprlock.conf` and `kitty/kitty.conf`. Change all
+four to re-theme.
+
+## Quickshell
+
+Runs as `quickshell.service` (Hyprland sessions only) and reloads when a file is saved.
+
+```sh
+systemctl --user restart quickshell      # restart
+journalctl --user -u quickshell -f       # logs / QML errors
+```
+
+- `Theme.qml`: colours, fonts, sizes, and which monitor is the main one
+- `shell.qml`: entry point listing each piece
+- `bar/`: one bar per monitor. The main monitor gets the full bar; others show
+  only their workspaces and the clock, unless the main monitor is unplugged.
 
 ## Desktop
 

@@ -14,6 +14,7 @@ fi
 ENABLE=(
   hypridle.service          # idle -> lock / screens off / suspend
   hyprpolkitagent.service   # password prompts for GUI apps
+  quickshell.service        # desktop shell: bar, notifications, launcher
 )
 
 DISABLE=(

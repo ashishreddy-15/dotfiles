@@ -2,7 +2,7 @@
 #
 # Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
 #
-#   ./install.sh                 run every step (repos packages link services defaults)
+#   ./install.sh                 run every step (repos packages fonts link services defaults)
 #   ./install.sh link            run only the given step(s)
 #   ./install.sh -n              dry run: show what would happen, change nothing
 #   ./install.sh -y              don't ask dnf for confirmation
@@ -12,6 +12,7 @@
 #   repos     install repo files from system/repos/ into /etc/yum.repos.d/
 #   packages  dnf install everything in packages/*.txt,
 #             then dnf remove everything in packages/remove.txt
+#   fonts     download fonts in system/fonts.txt (pinned + checksummed) to ~/.local/share/fonts
 #   services  run system/services.sh (root) and system/user-services.sh (user units)
 #   link      symlink home/<pkg>/ into $HOME with GNU stow
 #             (existing real files are moved to ~/.dotfiles-backup/<time>/ first,
@@ -25,7 +26,7 @@ DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 STOW_DIR="$DOTFILES/home"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 REMOVE_LIST="$DOTFILES/packages/remove.txt"
-ALL_STEPS=(repos packages link services defaults)
+ALL_STEPS=(repos packages fonts link services defaults)
 
 # Default applications: "<desktop file> <mime type>..."
 MIME_DEFAULTS=(
@@ -231,6 +232,62 @@ step_link() {
   (( DRY_RUN )) || verify_configs || die "fix the config above, then re-run ./install.sh link"
 }
 
+# Download fonts listed in system/fonts.txt (pinned URL + sha256) into the user font dir.
+step_fonts() {
+  step "Fonts"
+  local manifest="$DOTFILES/system/fonts.txt" dest_root="$HOME/.local/share/fonts/dotfiles"
+  [[ -f "$manifest" ]] || { ok "no system/fonts.txt"; return 0; }
+  local cmd
+  for cmd in curl sha256sum unzip fc-cache; do
+    command -v "$cmd" >/dev/null || die "missing command: $cmd"
+  done
+
+  local name sha url dest tmp file changed=0
+  while read -r name sha url; do
+    dest="$dest_root/$name"
+    # The .sha256 marker records what is installed, so unchanged fonts are skipped.
+    if [[ -f "$dest/.sha256" && "$(<"$dest/.sha256")" == "$sha" ]]; then
+      ok "$name (up to date)"
+      continue
+    fi
+    if (( DRY_RUN )); then
+      info "[dry-run] download $name from $url"
+      continue
+    fi
+
+    info "downloading $name ..."
+    tmp=$(mktemp -d)
+    file="$tmp/${url##*/}"
+    if ! curl -fsSL --retry 3 -o "$file" "$url"; then
+      rm -rf "$tmp"; die "download failed: $url"
+    fi
+    if [[ "$(sha256sum "$file" | cut -d' ' -f1)" != "$sha" ]]; then
+      rm -rf "$tmp"; die "checksum mismatch for $name (file changed upstream or download corrupted); nothing installed"
+    fi
+
+    # Build the new font dir next to the old one, then swap, so a failure leaves the old font intact.
+    mkdir -p "$tmp/out"
+    case "${file,,}" in
+      *.zip)       unzip -qq -j "$file" '*.ttf' '*.otf' -d "$tmp/out" 2>/dev/null || true ;;
+      *.ttf|*.otf) cp "$file" "$tmp/out/$name.${file##*.}" ;;
+      *)           rm -rf "$tmp"; die "$name: unsupported file type: ${file##*/}" ;;
+    esac
+    compgen -G "$tmp/out/*" >/dev/null || { rm -rf "$tmp"; die "$name: no font files found in download"; }
+    printf '%s\n' "$sha" > "$tmp/out/.sha256"
+    mkdir -p "$dest_root"
+    rm -rf "$dest"
+    mv "$tmp/out" "$dest"
+    rm -rf "$tmp"
+    ok "$name installed ($(find "$dest" -type f ! -name .sha256 | wc -l) files)"
+    changed=1
+  done < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest")
+
+  if (( changed )); then
+    fc-cache -f "$dest_root"
+    ok "font cache refreshed"
+  fi
+}
+
 step_defaults() {
   step "Default applications"
   command -v xdg-mime >/dev/null || { warn "xdg-mime not found (dnf install xdg-utils); skipping"; return 0; }
@@ -269,7 +326,7 @@ main() {
       -n|--dry-run) DRY_RUN=1 ;;
       -y|--yes)     ASSUME_YES=1 ;;
       -h|--help)    usage 0 ;;
-      repos|packages|services|link|defaults|unlink) steps+=("$1") ;;
+      repos|packages|fonts|services|link|defaults|unlink) steps+=("$1") ;;
       *) warn "unknown argument: $1"; usage 1 ;;
     esac
     shift

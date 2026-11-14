@@ -1,12 +1,12 @@
--- Plain, neutral look for now; theming comes with the Quickshell setup.
+-- Colours: "Abyss & Ice" (same palette as quickshell/Theme.qml).
 hl.config({
     general = {
         gaps_in     = 4,
         gaps_out    = 8,
         border_size = 2,
         col = {
-            active_border   = "rgba(89b4faee)",
-            inactive_border = "rgba(45475aaa)",
+            active_border   = "rgba(a3b9c4ee)",
+            inactive_border = "rgba(2a3037ee)",
         },
         resize_on_border = true,   -- drag window edges to resize
         layout           = "dwindle",
@@ -14,7 +14,7 @@ hl.config({
 
     decoration = {
         rounding = 8,
-        shadow   = { enabled = true, range = 8, render_power = 3, color = 0xaa11111b },
+        shadow   = { enabled = true, range = 8, render_power = 3, color = 0xaa08090b },
         blur     = { enabled = true, size = 4, passes = 2 },
     },
 
