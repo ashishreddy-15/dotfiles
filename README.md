@@ -35,6 +35,7 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
+    ├── bash/               # ~/.bashrc.d: options, aliases, the prompt (Fedora's ~/.bashrc loads them)
     ├── bin/                # ~/.local/bin: appearance (GTK look), bt-agent (Bluetooth pairing), screenshot, screenrecord
     ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
@@ -134,6 +135,15 @@ Silence is on): a panel at the right edge, grouped by app ("2 more" expands), wi
 dismiss, Silence and Clear all at the top. Opening it clears the pop-ups. Every notification is also kept for 7 days in
 an archive on disk (`~/.local/state/dotfiles/notifications.jsonl`, only readable by you, plain text): Settings >
 Notifications shows it by day (Today, Yesterday, This week, All) with search and Clear history.
+
+**Shell (bash):** `home/bash/.bashrc.d/` (Fedora's own `~/.bashrc` loads every file there, so it is left alone).
+The prompt `~/dotfiles  main  3.2s ✗1 ❯` shows the folder, the git branch, how long the last command took (from 2 s),
+and its exit code when it failed; `user@host` over SSH and `(venv)` when one is active. It starts no programs when it
+is drawn (the branch is read from `.git/HEAD`, the time from `$EPOCHREALTIME`): about 0.07 ms per prompt.
+Aliases: `din` / `dup` / `drm` / `dse` = dnf install / upgrade / remove / search (also `dinfo`, `dprov`, `dls`,
+`dhist`); `ll`, `la`, `lt`; `..`, `...`, `dots`, `mkcd`; git `gs`, `gd`, `gds`, `ga`, `gc`, `gca`, `gp`, `gl`,
+`gsw`, `glog`; `sc` / `scu` (systemctl), `jf` / `jfu` (follow logs); `reload`. Up / Down search the history for what
+you have typed; `cp` and `mv` ask before overwriting, `rm` asks once before deleting many files or a folder.
 
 ## Repos
 

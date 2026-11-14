@@ -92,6 +92,8 @@ quiet tiles, the control center's structure.
 - [x] Notification centre (Super + N, bell in the bar with a count; crossed bell while Silence is on), grouped by app
 - [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
+- [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
+      file aliases, history and completion settings (home/bash)
 - [x] Apps: Resources from Flathub (installed; Flatpak apps get the palette); Loupe, Papers, Calculator, Disk Usage
       Analyzer added to packages/desktop.txt
 - [ ] Run `./install.sh packages` (needs sudo) to install Loupe, Papers, Calculator and Disk Usage Analyzer
