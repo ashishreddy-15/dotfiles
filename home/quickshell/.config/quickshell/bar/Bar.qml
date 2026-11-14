@@ -3,8 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import qs
 
-// Mac-style menu bar, one per monitor: thin, edge to edge, translucent
-// (Hyprland blurs what's behind it, see hypr/modules/rules.lua).
+// Menu bar, one per monitor: thin, edge to edge, with no background by default,
+// so the text looks like part of the wallpaper (Theme.barOpacity).
 //
 //   [1] 2  3   App name                              (status when it matters)   Sat 14 Nov  12:40
 //

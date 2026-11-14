@@ -123,7 +123,8 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `Theme.qml`: colours, fonts, sizes, and which monitor is the main one
 - `shell.qml`: entry point listing each piece
 - `ShellState.qml`: on/off switches reachable from keybinds (`qs ipc call bar toggle`)
-- `bar/`: Mac-style menu bar on every monitor: thin, edge to edge, translucent with blur.
+- `bar/`: menu bar on every monitor with no background, so its text sits directly on the
+  wallpaper (`barOpacity` in `Theme.qml`; raise it for a solid strip).
   Left: workspaces (`[1] 2 3`) and the focused app's name. Right: clock.
   The bar is "quiet": status only appears on the main monitor when it needs attention:
 
