@@ -9,13 +9,11 @@ local function k(keys) return mod .. " + " .. keys end
 
 local terminal    = "kitty"
 local fileManager = "nautilus --new-window"
--- Temporary launcher until the Quickshell one exists.
-local launcher    = "rofi -show drun -run-command 'uwsm app -- {cmd}'"
 
 -- Apps
 hl.bind(k("Return"),  app(terminal))
 hl.bind(k("E"),       app(fileManager))
-hl.bind(k("Space"),   hl.dsp.exec_cmd(launcher))
+hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app launcher
 hl.bind(k("SHIFT + V"), hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
 
 -- Shell

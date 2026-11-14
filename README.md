@@ -144,6 +144,9 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `osd/`: small volume / brightness indicator at the bottom-centre of the main monitor.
   Volume shows on any change; brightness shows when the brightness keys are used
   (they call `qs ipc call osd brightness`), so idle dimming stays silent.
+- `launcher/`: Spotlight-style app launcher (`Super + Space`). Opens in the upper third of
+  the focused monitor; results appear as you type (name, then description/keywords, then
+  letters-in-order). Up/Down or Tab to move, Enter to open, Esc or click outside to close.
 
 ## Desktop
 
@@ -164,7 +167,7 @@ in the centre as the main screen. Workspaces 1-9 are on the main screen, 10 on t
 
 | Keys | Action |
 |---|---|
-| `Super + Return` / `E` / `Space` | terminal (kitty) / files (Nautilus) / launcher |
+| `Super + Return` / `E` / `Space` | terminal (kitty) / files (Nautilus) / app launcher |
 | `Super + Q` | close window |
 | `Super + F` / `M` / `V` | fullscreen / maximize / toggle floating |
 | `Super + arrows` or `h j k l` | move focus (crosses to the other monitor at the edge) |

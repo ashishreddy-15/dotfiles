@@ -8,9 +8,11 @@ import Quickshell
 import "bar"
 import "notifications"
 import "osd"
+import "launcher"
 
 ShellRoot {
     Bar {}
     Notifications {}
     Osd {}
+    Launcher {}
 }
