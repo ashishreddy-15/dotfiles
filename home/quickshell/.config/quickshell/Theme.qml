@@ -133,12 +133,12 @@ Singleton {
     // of the wallpaper is light (measured by Wallpaper.qml), the bar switches to dark text, like the macOS menu bar.
     readonly property real lightWallpaper: 105        // top-edge brightness (0-255) above which the bar text turns dark
     readonly property real wallpaperScrim: 0.35       // darkening along the top edge, under light text
-    readonly property real wallpaperScrimLight: 0.30  // whitening along the top edge, under dark text
+    readonly property real wallpaperScrimLight: 0.42  // whitening along the top edge, under dark text (dim text there: ~4.5:1)
     readonly property bool barOnLight: ShellState.topLuminance > lightWallpaper
 
     // Bar colours: the normal palette, or darker versions of it for light wallpapers.
     readonly property color barText:   barOnLight ? "#1b1e21" : text
-    readonly property color barDim:    barOnLight ? "#4e555b" : dim
+    readonly property color barDim:    barOnLight ? "#33393e" : dim
     readonly property color barBright: barOnLight ? "#000000" : bright
     readonly property color barAccent: barOnLight ? "#34495c" : accent
     readonly property color barOk:     barOnLight ? "#2b6249" : ok
