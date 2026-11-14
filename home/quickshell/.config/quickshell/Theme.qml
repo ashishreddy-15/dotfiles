@@ -58,6 +58,7 @@ Singleton {
     readonly property int fontBase:  12     // normal text everywhere, the bar included
     readonly property int fontLarge: 14     // list entries in pickers
     readonly property int fontMark:  8      // the selection dot (a filled circle is heavy at text size)
+    readonly property int fontIcon:  28     // the big icons of the power menu
     readonly property int fontXL:    16     // the search field of pickers
     readonly property int fontSize:    fontBase   // (older names, same values)
     readonly property int barFontSize: fontBase
@@ -73,7 +74,11 @@ Singleton {
     readonly property string glyphMinus:   "\uf068"
     readonly property string glyphPlus:    "\uf067"
     readonly property string glyphCheck:   "\uf00c"   // tick: a ticked menu entry
-    readonly property string glyphLock:    "\uf023"   // padlock: secured network
+    readonly property string glyphLock:    "\uf023"   // padlock: secured network, lock the screen
+    readonly property string glyphLogout:  "\uf08b"   // sign out
+    readonly property string glyphSuspend: "\uf186"   // moon
+    readonly property string glyphReboot:  "\uf01e"   // circular arrow
+    readonly property string glyphPower:   "\uf011"   // power symbol
     readonly property string glyphPrev:    "\uf048"
     readonly property string glyphPlay:    "\uf04b"
     readonly property string glyphPause:   "\uf04c"

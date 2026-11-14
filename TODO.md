@@ -77,7 +77,7 @@ quiet tiles, the control center's structure.
 - [x] Keyboard navigation of the control center (tested: arrows, Enter/Space, Right/Left, Backspace, Esc, focus return)
 - [ ] Media buttons: play-pause was hit by accident and works; previous / next not tried
 - [x] Enter / Esc / arrows in the launcher, clipboard and wallpaper pickers (tested)
-- [ ] Keys: `Super + A / V / W / I / Space / B`, `Super + Shift + A / W / R`, `Super + Ctrl + R`, `Print` (+ Shift / Ctrl), `Super + [` and `]`, the XF86 brightness keys (Hyprland ignores binds from virtual keyboards, so only a physical keypress can test these)
+- [ ] Keys: `Super + A / V / W / I / X / Space / B`, `Super + Shift + A / W / R`, `Super + Ctrl + R`, `Print` (+ Shift / Ctrl), `Super + [` and `]`, the XF86 brightness keys (Hyprland ignores binds from virtual keyboards, so only a physical keypress can test these)
 - [x] Control center clicks: clock opens it, tiles, `›` arrow, `‹` back, sliders, mic mute (tested)
 - [ ] Power confirmation (lock / logout / suspend / reboot / shutdown): not pressed on purpose
 - [ ] Wi-Fi: connect to a saved network, enter a password for a new one (Bluetooth pairing: done, the Rockerz works)
@@ -87,6 +87,8 @@ quiet tiles, the control center's structure.
 - [ ] Frosted cards on a light wallpaper (e.g. `misty-ridges`)
 
 ## 7. Ideas (not committed to)
+
+- [x] Power menu on Super + X (actions shared with the control center: Power.qml)
 
 - Clipboard: image thumbnails, delete an entry, pin entries
 - [x] Screenshots that freeze the screen first (Print / Shift+Print / Ctrl+Print), saved and copied

@@ -14,6 +14,7 @@ import "wallpaper"
 import "panel"
 import "settings"
 import "bluetooth"
+import "power"
 
 ShellRoot {
     Bar {}
@@ -25,4 +26,5 @@ ShellRoot {
     QuickPanel {}
     SettingsWindow {}
     PairingPrompt {}
+    PowerMenu {}
 }

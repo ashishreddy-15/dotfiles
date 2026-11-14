@@ -28,6 +28,7 @@ hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the 
 -- Session
 hl.bind(k("Escape"),    hl.dsp.exec_cmd("loginctl lock-session"))   -- lock (via hypridle -> hyprlock)
 hl.bind(k("SHIFT + E"), hl.dsp.exec_cmd("uwsm stop"))               -- log out
+hl.bind(k("X"),         hl.dsp.exec_cmd("qs ipc call power toggle"))  -- power menu: lock, log out, suspend, reboot, shut down
 
 -- Windows
 hl.bind(k("Q"),         hl.dsp.window.close())

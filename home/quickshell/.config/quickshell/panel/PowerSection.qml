@@ -11,18 +11,12 @@ Row {
     property string confirming: ""
     signal done()                       // an action was started; the panel can close
 
-    readonly property var actions: [
-        { name: "lock",     ask: false, command: ["loginctl", "lock-session"] },
-        { name: "logout",   ask: true,  command: ["uwsm", "stop"] },
-        { name: "suspend",  ask: false, command: ["systemctl", "suspend"] },
-        { name: "reboot",   ask: true,  command: ["systemctl", "reboot"] },
-        { name: "shutdown", ask: true,  command: ["systemctl", "poweroff"] }
-    ]
+    readonly property var actions: Power.actions        // Power.qml: shared with the power menu (Super + X)
 
     function activate(a) {
         if (a.ask && confirming !== a.name) { confirming = a.name; reset.restart(); return }
         confirming = ""
-        Quickshell.execDetached(a.command)
+        Power.run(a)
         done()
     }
 

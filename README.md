@@ -316,6 +316,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + Shift + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
 | `Super + I` | settings (toggle) |
+| `Super + X` | power menu: lock, log out, suspend, reboot, shut down (letters L O S R P; log out / reboot / shut down ask twice) |
 | `Super + Shift + A` | settings, on Appearance (GTK theme, colour scheme, fonts, icons, cursor) |
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` | screenshot: the screen freezes, then drag a region or click a window (Esc cancels) |

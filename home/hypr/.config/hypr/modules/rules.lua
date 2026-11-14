@@ -25,7 +25,7 @@ hl.window_rule({
 -- Hyprland's own layer fade smears when Quickshell unmaps the window, so switch it off for them.
 hl.layer_rule({
     name  = "no-anim-pickers",
-    match = { namespace = "^quickshell-(bar|launcher|clipboard|wallpapers|settings|pairing|panel|osd|notifications|traymenu)$" },
+    match = { namespace = "^quickshell-(bar|launcher|clipboard|wallpapers|settings|pairing|power|panel|osd|notifications|traymenu)$" },
     no_anim = true,
 })
 
@@ -33,7 +33,7 @@ hl.layer_rule({
 -- margin around a card (where its shadow is), so only the card itself is frosted.
 hl.layer_rule({
     name  = "blur-cards",
-    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|settings|pairing|panel|osd|notifications|traymenu)$" },
+    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|settings|pairing|power|panel|osd|notifications|traymenu)$" },
     blur  = true,
     ignore_alpha = 0.5,
 })
