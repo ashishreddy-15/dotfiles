@@ -38,9 +38,6 @@ fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67
 
 # ---- light and airy (the bar switches to dark text) ----
 
-# fog-summit: a snowy ridge rising out of cloud, almost black and white (5472 px)
-fog-summit      e03c86a54e4d2c25fb6e9fd06d996fda1de9fc7879730f070e9e4577b110252e  https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
-
 # cloud-sea: a sea of clouds below mountains at dusk (4878 px)
 cloud-sea       9d8f272b1bb77e13f41552a11d42f670ae543ac69e3185bc459891f88cc345e5  https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
