@@ -46,11 +46,30 @@ Variants {
             anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
 
             Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
-            Network { visible: bar.full && attention }
-            BluetoothStatus { visible: bar.full && attention }
-            Volume { visible: bar.full && attention }
-            Battery { visible: bar.full && attention }
-            Clock {}
+
+            // Status items and the clock: click anywhere here to open the quick-settings panel.
+            Item {
+                implicitWidth: statusArea.implicitWidth
+                implicitHeight: statusArea.implicitHeight
+                anchors.verticalCenter: parent.verticalCenter
+
+                Row {
+                    id: statusArea
+                    spacing: 16
+
+                    Network { visible: bar.full && attention }
+                    BluetoothStatus { visible: bar.full && attention }
+                    Volume { visible: bar.full && attention }
+                    Battery { visible: bar.full && attention }
+                    Clock {}
+                }
+
+                MouseArea {
+                    anchors { fill: parent; margins: -6 }
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ShellState.togglePanel(bar.modelData.name)
+                }
+            }
         }
     }
 }

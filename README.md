@@ -164,6 +164,12 @@ journalctl --user -u quickshell -f       # logs / QML errors
   The bar has no background of its own. When the top edge of a wallpaper is light (measured when
   you pick it), the bar automatically gets a dark blurred background so its text stays readable;
   `brightWallpaper` and `barBackdropOpacity` in `Theme.qml` tune that.
+- `panel/`: quick settings. Click the clock area of the bar (or `Super + A`) to open a panel under it:
+  volume slider (click `vol` to mute) and output device, Wi-Fi (on/off, networks, password prompt for new
+  secured ones), Bluetooth (on/off, devices, scan and pair), wallpaper (opens the picker) and the power
+  actions `lock logout suspend reboot shutdown`; logout, reboot and shutdown ask for a second click.
+  Wi-Fi and Bluetooth scan only while their list is open. Esc or a click outside closes it.
+  `qs ipc call panel open <out|wifi|bt>` opens it with a list expanded.
 
 ## Desktop
 
@@ -197,6 +203,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
 | `Super + V` | clipboard history |
 | `Super + W` | choose wallpaper |
+| `Super + A` | quick settings (also: click the clock) |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |

@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import qs
 
-// "vol 62%" / "vol muted". Scroll to change, click to mute.
+// "vol 62%" / "vol muted". Scroll to change the volume (the panel has the mute switch).
 // Quiet: shown only while muted (changes are shown by the OSD at the bottom).
 StatusItem {
     id: root
@@ -20,9 +20,6 @@ StatusItem {
     // PipeWire only reports volume for nodes something is tracking.
     PwObjectTracker { objects: [root.sink] }
 
-    TapHandler {
-        onTapped: if (root.sink?.audio) root.sink.audio.muted = !root.sink.audio.muted
-    }
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: event => {
@@ -31,5 +28,4 @@ StatusItem {
             root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + step))
         }
     }
-    HoverHandler { cursorShape: Qt.PointingHandCursor }
 }

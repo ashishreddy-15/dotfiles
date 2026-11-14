@@ -21,11 +21,11 @@ hl.window_rule({
     float = true,
 })
 
--- The pickers (launcher, clipboard, wallpapers) animate themselves (fade, zoom, height) inside their window.
+-- The pickers and the quick-settings panel (launcher, clipboard, wallpapers, panel) animate themselves (fade, zoom, height) inside their window.
 -- Hyprland's own layer fade smears when Quickshell unmaps the window, so switch it off for them.
 hl.layer_rule({
     name  = "no-anim-pickers",
-    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers)$" },
+    match = { namespace = "^quickshell-(launcher|clipboard|wallpapers|panel)$" },
     no_anim = true,
 })
 

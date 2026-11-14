@@ -48,7 +48,16 @@ Scope {
             "print(sum(px) / len(px))", image]
         stdout: StdioCollector { onStreamFinished: ShellState.topLuminance = parseFloat(text) || 0 }
     }
-    onCurrentChanged: if (current !== "") { measure.image = current; measure.running = true }
+    onCurrentChanged: {
+        ShellState.wallpaperName = baseName(current)
+        if (current !== "") { measure.image = current; measure.running = true }
+    }
+
+    // The quick-settings panel can ask for the picker.
+    Connections {
+        target: ShellState
+        function onPickWallpaper() { scan.running = true; picker.open = true }
+    }
 
     function set(path) {
         if (!path || path === current) return

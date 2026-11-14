@@ -11,6 +11,7 @@ import "osd"
 import "launcher"
 import "clipboard"
 import "wallpaper"
+import "panel"
 
 ShellRoot {
     Bar {}
@@ -19,4 +20,5 @@ ShellRoot {
     Launcher {}
     Clipboard {}
     Wallpaper {}
+    QuickPanel {}
 }
