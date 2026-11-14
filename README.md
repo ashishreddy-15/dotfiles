@@ -88,8 +88,8 @@ drop dependencies nothing else needs. A package in both lists is an error.
 containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
 (Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
 
-**Change how GTK apps look:** press `Super + Shift + A` (colour scheme, GTK / icon / cursor theme, cursor
-size, font and size). It runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
+**Change how GTK apps look:** press `Super + Shift + A` (again, or Esc, to close). It is a settings window of its own with a sidebar:
+Style (colour scheme, GTK theme), Icons & cursor (icon and cursor theme, cursor size) and Fonts (size, and a searchable family list). It runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
 GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita
@@ -174,7 +174,7 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `clipboard/`: clipboard history (`Super + V`) from `cliphist` (fed by `wl-paste --watch` in
   `autostart.lua`). Shows the latest entries; typing filters the whole history. Enter copies the entry
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
-- `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + W`
+- `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + Shift + W`
   picks one; `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
   It lists `~/.local/share/wallpapers` (five generated ones that look clearly different: carbon, contours,
   dusk, pewter-glow, slate, plus seven photos from Unsplash: black-sand, night-ridge, mountain-stars,
@@ -282,9 +282,10 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + Tab` | previous workspace |
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
 | `Super + V` | clipboard history |
-| `Super + W` | choose wallpaper |
+| `Super + W` | browser (Brave Origin) |
+| `Super + Shift + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
-| `Super + Shift + A` | appearance: GTK theme, colour scheme, fonts, icons, cursor |
+| `Super + Shift + A` | appearance settings: GTK theme, colour scheme, fonts, icons, cursor (toggle) |
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |

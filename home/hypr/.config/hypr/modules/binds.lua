@@ -9,15 +9,17 @@ local function k(keys) return mod .. " + " .. keys end
 
 local terminal    = "kitty"
 local fileManager = "nautilus --new-window"
+local browser     = "brave-origin"
 
 -- Apps
 hl.bind(k("Return"),  app(terminal))
 hl.bind(k("E"),       app(fileManager))
 hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app launcher
 hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clipboard history
-hl.bind(k("W"),       hl.dsp.exec_cmd("qs ipc call wallpaper pick"))     -- choose wallpaper
+hl.bind(k("W"),       app(browser))                                      -- browser (Brave Origin)
+hl.bind(k("SHIFT + W"), hl.dsp.exec_cmd("qs ipc call wallpaper pick"))   -- choose wallpaper
 hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call panel toggle"))       -- quick settings
-hl.bind(k("SHIFT + A"), hl.dsp.exec_cmd("qs ipc call panel open appearance"))   -- appearance (GTK theme, fonts, cursor)
+hl.bind(k("SHIFT + A"), hl.dsp.exec_cmd("qs ipc call appearance toggle"))   -- appearance settings (GTK theme, fonts, cursor)
 
 -- Shell
 hl.bind(k("B"), hl.dsp.exec_cmd("qs ipc call bar toggle"))   -- hide / show the bar

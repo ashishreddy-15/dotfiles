@@ -38,7 +38,7 @@ quiet tiles, the control center's structure.
 
 ## 4. Beyond the shell
 
-- [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus an appearance page (`Super + Shift + A`)
+- [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus an appearance settings window (`Super + Shift + A`: Style, Icons & cursor, Fonts)
       (colour scheme, GTK / icon / cursor theme, cursor size, font and size; like nwg-look)
 - [ ] Appearance: folder icons stay Adwaita blue (not recoloured by the palette); GTK3 apps stay dark in the light scheme;
       `adw-gtk3-theme` is not installed, so the GTK theme list has only Adwaita; icon / cursor list has one real choice each

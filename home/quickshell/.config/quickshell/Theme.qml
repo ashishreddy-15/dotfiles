@@ -42,6 +42,7 @@ Singleton {
     readonly property int radiusCard:  10    // windows and floating cards
     readonly property int radiusRow:   6     // rows, buttons and inputs inside a card
     readonly property int radiusSmall: 3     // slider tracks, small marks
+    readonly property int segmentInset: 3    // gap between a segmented control's outline and its choices (radiusRow - 3 = radiusSmall)
     readonly property int radiusMark:  1     // 2 px accent marks (selection, timeout, tile)
     readonly property int cardInset:   4     // gap between a card's edge and the rows inside it
 
@@ -68,6 +69,8 @@ Singleton {
     readonly property string glyphBack:    "\uf104"   // chevron left: back
     readonly property string glyphClose:   "\uf00d"   // x
     readonly property string glyphMark:    "\uf111"   // filled dot: the chosen item in a list
+    readonly property string glyphMinus:   "\uf068"
+    readonly property string glyphPlus:    "\uf067"
     readonly property string glyphCheck:   "\uf00c"   // tick: a ticked menu entry
     readonly property string glyphLock:    "\uf023"   // padlock: secured network
     readonly property string glyphPrev:    "\uf048"

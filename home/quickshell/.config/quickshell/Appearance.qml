@@ -6,7 +6,7 @@ import Quickshell.Io
 
 // How GTK apps look: colour scheme, GTK / icon / cursor theme, font and sizes. The work is done by the `appearance`
 // script (home/bin/.local/bin/appearance), which writes gsettings and the settings.ini files in the dotfiles repo.
-// This file only holds the current values and the lists to choose from, for the control center's appearance page.
+// This file only holds the current values and the lists to choose from, for the appearance window (appearance/AppearanceWindow.qml).
 Singleton {
     id: root
 

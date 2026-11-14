@@ -21,8 +21,6 @@ Singleton {
     property string panelScreen: ""
     function togglePanel(screenName) { panelScreen = screenName; panelOpen = !panelOpen }
 
-    // The appearance page asks for the font picker (the page itself opens with Super + Shift + A).
-    signal pickFont()
 
     // Where pop-ups (notifications, volume/brightness) appear: the main monitor,
     // or the first one if the main monitor is unplugged.

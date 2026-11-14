@@ -98,13 +98,13 @@ live() {
     # Start from a quiet desktop: close the panel and wait (up to 3 s) for every pop-up to unmap.
     qs ipc call panel close >/dev/null 2>&1
     local i
-    for i in $(seq 300); do layers | grep -qE 'quickshell-(launcher|clipboard|wallpapers|panel|osd|notifications)$' || break; sleep 0.01; done
+    for i in $(seq 300); do layers | grep -qE 'quickshell-(launcher|clipboard|wallpapers|appearance|panel|osd|notifications|traymenu)$' || break; sleep 0.01; done
     local before; before=$(layers | sort -u | tr '\n' ' ')
     local limit=$(( $(tv durFast) + 400 ))   # exit animation + the window's own linger + a frame or two
 
     # target:function:namespace
     local item target fn ns res
-    for item in launcher:toggle:quickshell-launcher clipboard:toggle:quickshell-clipboard panel:toggle:quickshell-panel; do
+    for item in launcher:toggle:quickshell-launcher clipboard:toggle:quickshell-clipboard panel:toggle:quickshell-panel appearance:toggle:quickshell-appearance; do
         IFS=: read -r target fn ns <<<"$item"
         qs ipc call "$target" "$fn" >/dev/null 2>&1; sleep 0.6
         if layers | grep -qx "$ns"; then

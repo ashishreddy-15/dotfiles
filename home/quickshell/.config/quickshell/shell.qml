@@ -22,5 +22,5 @@ ShellRoot {
     Clipboard {}
     Wallpaper {}
     QuickPanel {}
-    FontPicker {}
+    AppearanceWindow {}
 }
