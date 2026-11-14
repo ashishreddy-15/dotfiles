@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 
 // The notification centre: receives notifications (this is the D-Bus notification server) and keeps two lists.
@@ -9,6 +10,8 @@ import Quickshell.Services.Notifications
 //   popups   the ones currently shown on screen (a few seconds each, or until clicked if critical)
 // A pop-up going away does not remove the notification from the history. Do Not Disturb (Modes.dnd) keeps
 // pop-ups away, except critical ones.
+// Every notification is also written to a log on disk (the archive: Settings > Notifications), kept for
+// `archiveDays` days and readable only by you; `archive` holds it, newest first.
 Singleton {
     id: root
 
@@ -18,6 +21,74 @@ Singleton {
 
     readonly property int maxHistory: 50
     readonly property int maxPopups: 4
+
+    // ---- the archive: a log on disk, one JSON object per line ----
+    readonly property int archiveDays: 7
+    readonly property string logFile: Quickshell.env("HOME") + "/.local/state/dotfiles/notifications.jsonl"
+    property var archive: []                  // [{ time, app, summary, body, urgency }], newest first
+
+    FileView {
+        id: logView
+        path: root.logFile
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: root.readArchive()
+        onLoadFailed: root.archive = []
+    }
+    function readArchive() {
+        const list = []
+        for (const line of logView.text().split("\n")) {
+            if (line.trim() === "") continue
+            try { list.push(JSON.parse(line)) } catch (e) { /* a broken line: skip it */ }
+        }
+        list.sort((a, b) => b.time - a.time)
+        archive = list
+    }
+
+    // Lines are appended one at a time (a queue, so two arriving together cannot interleave).
+    property var pendingLines: []
+    function log(entry) {
+        pendingLines = pendingLines.concat([JSON.stringify(entry)])
+        writeNext()
+    }
+    function writeNext() {
+        if (writer.running || pendingLines.length === 0) return
+        writer.command = ["sh", "-c", 'umask 077; mkdir -p "$(dirname "$1")" && printf "%s\\n" "$2" >> "$1"', "sh", logFile, pendingLines[0]]
+        pendingLines = pendingLines.slice(1)
+        writer.running = true
+    }
+    Process { id: writer; onExited: root.writeNext() }
+
+    function clearArchive() {
+        clearer.running = true
+    }
+    Process {
+        id: clearer
+        command: ["sh", "-c", 'umask 077; : > "$1"', "sh", root.logFile]
+        onExited: { root.archive = []; logView.reload() }
+    }
+
+    // When the shell starts: drop entries older than archiveDays.
+    Process {
+        running: true
+        command: ["python3", "-I", "-c",
+            "import json, os, sys, time\n" +
+            "path, days = sys.argv[1], float(sys.argv[2])\n" +
+            "if not os.path.exists(path): sys.exit()\n" +
+            "cutoff = (time.time() - days * 86400) * 1000\n" +
+            "keep = []\n" +
+            "for line in open(path, encoding='utf-8', errors='replace'):\n" +
+            "    try:\n" +
+            "        if json.loads(line)['time'] >= cutoff: keep.append(line)\n" +
+            "    except Exception: pass\n" +
+            "tmp = path + '.tmp'\n" +
+            "os.umask(0o077)\n" +
+            "open(tmp, 'w', encoding='utf-8').writelines(keep)\n" +
+            "os.replace(tmp, path)\n",
+            root.logFile, String(root.archiveDays)]
+        onExited: logView.reload()
+    }
 
     // id -> the live Notification object (to dismiss it or invoke an action)
     property var live: ({})
@@ -71,7 +142,12 @@ Singleton {
         const rec = record(n)
         const h = indexOfNid(historyModel, n.id)
         if (h >= 0) historyModel.set(h, rec)              // an update of one we already have
-        else historyModel.insert(0, rec)
+        else {
+            historyModel.insert(0, rec)
+            // The archive keeps plain text: no markup, no images.
+            log({ time: rec.time, app: rec.appName, summary: rec.summary.replace(/<[^>]*>/g, ""),
+                  body: rec.body.replace(/<[^>]*>/g, ""), urgency: rec.urgency })
+        }
         while (historyModel.count > maxHistory) dismiss(historyModel.get(historyModel.count - 1).nid)
 
         const p = indexOfNid(popupModel, n.id)
