@@ -35,7 +35,7 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
-    ├── bin/                # ~/.local/bin: appearance (GTK look), bt-agent (Bluetooth pairing), screenshot
+    ├── bin/                # ~/.local/bin: appearance (GTK look), bt-agent (Bluetooth pairing), screenshot, screenrecord
     ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
     ├── kitty/              # terminal: font + colours
@@ -88,6 +88,8 @@ drop dependencies nothing else needs. A package in both lists is an error.
 **Hide an app from the launcher:** add `home/applications/.local/share/applications/<same file name as the system one>.desktop`
 containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
 (Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
+nm-applet no longer starts at login (`home/autostart/`): Wi-Fi is in Settings. It is still installed; run `nm-applet`
+by hand if you ever need it.
 
 **Settings:** press `Super + I` (again, or Esc, to close; `Super + Shift + A` opens it on Appearance). It is a window of its own,
 centred, with a sidebar: Wi-Fi, Bluetooth, Sound, Display (brightness, night light), Wallpaper (thumbnails), Notifications
@@ -118,6 +120,11 @@ apps, login screen).
 **Screenshots:** `Print` freezes every screen first (a still frame from `hyprpicker -r`), so the control center,
 pop-ups and anything else that closes when it loses focus stay in the shot; then drag a region or click a window.
 Every shot goes to `~/Pictures/Screenshots/` and the clipboard, with a notification (`home/bin/.local/bin/screenshot`).
+
+**Screen recording:** `Super + Shift + R` records a region (drag, or click a window), `Super + Ctrl + R` the focused
+monitor. Press the same key again, or click the red "rec 0:12" in the bar, to stop. Videos (MP4, H.264) go to
+`~/Videos/Recordings/`, with a notification. Silent by default; `screenrecord screen --audio` also records what the
+computer plays (`home/bin/.local/bin/screenrecord`).
 
 ## Repos
 
@@ -313,6 +320,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` | screenshot: the screen freezes, then drag a region or click a window (Esc cancels) |
 | `Shift + Print` / `Ctrl + Print` | screenshot of the focused monitor / every monitor |
+| `Super + Shift + R` / `Super + Ctrl + R` | record a region or window / the focused monitor; again to stop |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |
 | `Super + Shift + E` | log out |

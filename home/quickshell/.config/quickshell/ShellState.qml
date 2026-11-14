@@ -37,6 +37,29 @@ Singleton {
     property string wallpaperCurrent: ""
     signal wallpaperChosen(string path)
 
+    // Screen recording (home/bin/.local/bin/screenrecord): whether one is running and since when (seconds since 1970).
+    // The script reports start and stop through IPC; when the shell starts it asks, in case one is already running.
+    property bool recording: false
+    property real recordingSince: 0
+    readonly property string screenrecord: Quickshell.env("HOME") + "/.local/bin/screenrecord"
+    function stopRecording() { Quickshell.execDetached([screenrecord, "stop"]) }
+
+    IpcHandler {
+        target: "recording"
+        function started(since: string): void { recordingSince = Number(since) || Date.now() / 1000; recording = true }
+        function stopped(): void { recording = false }
+    }
+    Process {
+        running: true
+        command: [screenrecord, "status"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = text.match(/^recording (\d+)/)
+                if (m) { recordingSince = Number(m[1]); recording = true }
+            }
+        }
+    }
+
     // Where pop-ups (notifications, volume/brightness) appear: the main monitor,
     // or the first one if the main monitor is unplugged.
     readonly property var mainScreen: Quickshell.screens.find(s => s.name === Theme.mainOutput)

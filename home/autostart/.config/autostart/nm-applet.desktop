@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=nm-applet (disabled by dotfiles: Wi-Fi is in Settings; run nm-applet by hand as a fallback)
+Hidden=true

@@ -75,6 +75,11 @@ hl.bind("Print",         hl.dsp.exec_cmd(screenshot))               -- drag a re
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(screenshot .. " screen"))  -- the focused monitor
 hl.bind("CTRL + Print",  hl.dsp.exec_cmd(screenshot .. " all"))     -- every monitor
 
+-- Screen recording (home/bin/.local/bin/screenrecord): the same key again stops it (or click "rec" in the bar).
+local screenrecord = os.getenv("HOME") .. "/.local/bin/screenrecord"
+hl.bind(k("SHIFT + R"), hl.dsp.exec_cmd(screenrecord))               -- a region or a window
+hl.bind(k("CTRL + R"),  hl.dsp.exec_cmd(screenrecord .. " screen"))  -- the focused monitor
+
 -- Media / brightness keys (work on the lock screen too)
 local hw = { locked = true, repeating = true }
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), hw)

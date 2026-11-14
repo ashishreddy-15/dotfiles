@@ -57,7 +57,8 @@ Variants {
                 spacing: 16
                 anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
 
-                Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
+                Recording { anchors.verticalCenter: parent.verticalCenter }
+            Tray { window: bar; visible: bar.full && hasItems; anchors.verticalCenter: parent.verticalCenter }
 
                 // Status items and the clock: click anywhere here to open the quick-settings panel.
                 Item {
