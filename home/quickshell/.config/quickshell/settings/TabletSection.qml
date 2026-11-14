@@ -81,6 +81,8 @@ Page {
             id: ink
             anchors.fill: parent
             property var segments: []          // [x1, y1, x2, y2, width]
+            property int count: 0              // segments.length, as a property the page notices (push() alone does not)
+            function clear() { segments = []; count = 0; requestPaint() }
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
@@ -102,28 +104,29 @@ Page {
                 const p = point.position
                 // A mouse has no pressure: draw it at half.
                 const pressure = point.pressure > 0 && point.device.type === PointerDevice.Stylus ? point.pressure : 0.5
-                if (pad.last) ink.segments.push([pad.last.x, pad.last.y, p.x, p.y, 1 + pressure * 7])
+                if (pad.last) { ink.segments.push([pad.last.x, pad.last.y, p.x, p.y, 1 + pressure * 7]); ink.count++ }
                 pad.last = { x: p.x, y: p.y }
                 ink.requestPaint()
             }
         }
 
         StyledText {
-            visible: ink.segments.length === 0
+            visible: ink.count === 0
             anchors.centerIn: parent
             text: "Write here"
             color: Theme.dim
         }
         Rectangle {
             id: clearPad
-            visible: ink.segments.length > 0
             anchors { right: parent.right; top: parent.top; margins: 8 }
             width: clearText.implicitWidth + 20
             height: 26
             radius: Theme.radiusRow
             color: clearArea.containsMouse ? Theme.selected : Theme.surface
+            opacity: ink.count > 0 ? 1 : 0.5          // always there; brighter once there is something to clear
+            Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
             StyledText { id: clearText; anchors.centerIn: parent; text: "Clear"; font.pixelSize: Theme.fontSmall }
-            MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { ink.segments = []; ink.requestPaint() } }
+            MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ink.clear() }
         }
     }
 }

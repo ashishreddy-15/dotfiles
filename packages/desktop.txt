@@ -14,6 +14,7 @@ loupe                      # image viewer
 papers                     # PDF and document viewer
 gnome-calculator           # calculator
 baobab                     # disk usage analyzer
+xournalpp                  # handwritten notes and PDF annotation (pen tablet)
 network-manager-applet     # Wi-Fi tray / connection editor
 blueman                    # Bluetooth GUI (blueman-manager), tray stays off
 xdg-desktop-portal-gtk     # file pickers for GTK apps
