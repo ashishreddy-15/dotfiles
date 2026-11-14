@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs
 
-// Quick settings: volume + output, Wi-Fi, Bluetooth, wallpaper and the power actions.
+// Quick settings: volume + output, brightness, Wi-Fi, Bluetooth, wallpaper and the power actions.
 // Opens under the right end of the bar when you click the clock (or press Super+A).
 // Esc, or a click anywhere else, closes it.
 //
@@ -34,7 +34,11 @@ Scope {
 
     Connections {
         target: ShellState
-        function onPanelOpenChanged() { if (ShellState.panelOpen) root.expanded = "" }
+        function onPanelOpenChanged() {
+            if (!ShellState.panelOpen) return
+            root.expanded = ""
+            Brightness.refresh()            // show the real levels, in case something else changed them
+        }
     }
 
     PanelWindow {
@@ -105,6 +109,7 @@ Scope {
                         expanded: root.expanded === "out"
                         onToggleExpanded: root.toggle("out")
                     }
+                    BrightnessSection { width: parent.width }
                     WifiSection {
                         width: parent.width
                         expanded: root.expanded === "wifi"

@@ -64,5 +64,12 @@ for u in "${MASK[@]}"; do
   systemctl mask "$u" >/dev/null 2>&1 && echo "masked:   $u"
 done
 
+# Monitor brightness over DDC/CI (ddcutil) needs access to /dev/i2c-*. The ddcutil package ships a udev rule that
+# grants it to the logged-in user, but only devices created after the package was installed get it: without
+# this, a reboot would be needed. Re-applying the rules fixes that at once (no logout needed); harmless to repeat.
+if command -v ddcutil >/dev/null; then
+  udevadm trigger --subsystem-match=i2c-dev && udevadm settle && echo "i2c:      access rules re-applied (ddcutil)"
+fi
+
 # User-level units are handled by system/user-services.sh (runs without sudo).
 echo "Done."

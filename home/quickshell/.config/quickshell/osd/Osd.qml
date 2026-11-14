@@ -1,14 +1,16 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import Quickshell.Services.Pipewire
 import qs
 
-// Small volume / brightness indicator at the bottom-centre of the main monitor.
+// Small volume / brightness indicator at the bottom-centre of a monitor: the one you are using for
+// volume, the one being adjusted for brightness.
 //   volume:     shown automatically whenever the default output's volume or mute changes
-//   brightness: shown when the brightness keys call `qs ipc call osd brightness`
-//               (hypridle's dimming doesn't call it, so idle dimming stays silent)
+//   brightness: shown when Brightness reports a change (keys, panel slider), on that screen;
+//               "no control" if the focused screen can't be adjusted.
+//               (hypridle's dimming doesn't go through Brightness, so idle dimming stays silent)
 Scope {
     id: root
 
@@ -16,11 +18,15 @@ Scope {
     property real value: 0          // 0..1
     property bool muted: false
     property bool shown: false
+    property string screenName: ""  // which monitor shows it
+    property string note: ""        // text instead of the number, e.g. "no control"
 
-    function show(newLabel, newValue, newMuted) {
+    function show(newLabel, newValue, newMuted, onScreen, newNote) {
         label = newLabel
         value = Math.max(0, Math.min(1, newValue))
         muted = newMuted
+        screenName = onScreen ?? Hyprland.focusedMonitor?.name ?? ""
+        note = newNote ?? ""
         shown = true
         hideTimer.restart()
     }
@@ -43,25 +49,15 @@ Scope {
     }
 
     // ---- brightness ----
-    Process {
-        id: readBrightness
-        command: ["brightnessctl", "-m"]   // e.g. "intel_backlight,backlight,3756,12%,30720"
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const f = text.trim().split(",")
-                if (f.length >= 5) root.show("bri", Number(f[2]) / Number(f[4]), false)
-            }
-        }
-    }
-
-    IpcHandler {
-        target: "osd"
-        function brightness(): void { readBrightness.running = true }
+    Connections {
+        target: Brightness
+        function onChanged(name, level) { root.show("bri", level, false, name) }
+        function onUnavailable(name) { root.show("bri", 0, false, name, "no control") }
     }
 
     // ---- the indicator ----
     PanelWindow {
-        screen: ShellState.mainScreen
+        screen: Quickshell.screens.find(s => s.name === root.screenName) ?? ShellState.mainScreen
         visible: root.shown
 
         anchors.bottom: true                    // bottom only = horizontally centred
@@ -93,6 +89,7 @@ Scope {
                 }
 
                 Rectangle {
+                    visible: root.note === ""
                     width: 150
                     height: 4
                     radius: 2
@@ -100,7 +97,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
 
                     Rectangle {
-                        width: parent.width * root.value
+                        width: parent.width * (root.note === "" ? root.value : 0)
                         height: parent.height
                         radius: parent.radius
                         color: root.muted ? Theme.dim : Theme.accent
@@ -109,6 +106,15 @@ Scope {
                 }
 
                 StyledText {
+                    visible: root.note !== ""
+                    width: 150 + 40 + 12
+                    text: root.note
+                    color: Theme.warn
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                StyledText {
+                    visible: root.note === ""
                     width: 40
                     text: root.muted ? "muted" : Math.round(root.value * 100)
                     horizontalAlignment: Text.AlignRight

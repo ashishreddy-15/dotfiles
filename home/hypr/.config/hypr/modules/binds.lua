@@ -75,8 +75,13 @@ hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT
 hl.bind("XF86AudioLowerVolume",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      hw)
 hl.bind("XF86AudioMute",         hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true })
 hl.bind("XF86AudioMicMute",      hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true })
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call osd brightness"),                  hw)
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call osd brightness"),                  hw)
+-- Brightness: changes the screen that has focus (laptop panel via brightnessctl, external monitor via ddcutil).
+-- XF86 keys work on the lock screen too; Super + [ and ] are the same thing for keyboards without them.
+-- If Quickshell can't be reached, the laptop panel still works through brightnessctl directly.
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("qs ipc call brightness up || brightnessctl -e4 -n2 set 5%+"),   hw)
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("qs ipc call brightness down || brightnessctl -e4 -n2 set 5%-"), hw)
+hl.bind(k("bracketright"),       hl.dsp.exec_cmd("qs ipc call brightness up || brightnessctl -e4 -n2 set 5%+"),   { repeating = true })
+hl.bind(k("bracketleft"),        hl.dsp.exec_cmd("qs ipc call brightness down || brightnessctl -e4 -n2 set 5%-"), { repeating = true })
 hl.bind("XF86AudioPlay",         hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPause",        hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioNext",         hl.dsp.exec_cmd("playerctl next"),       { locked = true })

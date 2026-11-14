@@ -6,7 +6,8 @@ grim                       # screenshot
 slurp                      # region select (for screenshots)
 wl-clipboard               # wl-copy / wl-paste
 cliphist                   # clipboard history
-brightnessctl              # screen brightness keys
+brightnessctl              # laptop screen brightness
+ddcutil                    # external monitor brightness over DDC/CI (needs i2c access: see system/services.sh)
 playerctl                  # media keys
 pavucontrol                # audio mixer
 network-manager-applet     # Wi-Fi tray / connection editor

@@ -168,8 +168,13 @@ journalctl --user -u quickshell -f       # logs / QML errors
   the top edge of a wallpaper is light (measured when you pick it), the bar switches to dark text, and
   to light text on dark wallpapers. The colours fade over 0.4 s with the wallpaper; the warning/error/ok
   colours get darker versions too. `lightWallpaper` (the switch point) and the `bar*` colours are in `Theme.qml`.
+- `Brightness.qml` + `brightness/`: brightness of the screen that has focus. The laptop panel goes through
+  `brightnessctl`; an external monitor through `ddcutil` (DDC/CI). Keys: the brightness keys or
+  `Super + [` / `Super + ]` (5% steps, held keys repeat). A change shows in the on-screen indicator on that
+  screen, or "no control" if the focused screen can't be adjusted. Changes appear instantly and the real
+  command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
 - `panel/`: quick settings. Click the clock area of the bar (or `Super + A`) to open a panel under it:
-  volume slider (click `vol` to mute) and output device, Wi-Fi (on/off, networks, password prompt for new
+  volume slider (click `vol` to mute) and output device, a brightness slider per controllable screen, Wi-Fi (on/off, networks, password prompt for new
   secured ones), Bluetooth (on/off, devices, scan and pair), wallpaper (opens the picker) and the power
   actions `lock logout suspend reboot shutdown`; logout, reboot and shutdown ask for a second click.
   Wi-Fi and Bluetooth scan only while their list is open. Esc or a click outside closes it.
@@ -185,6 +190,17 @@ add them as comments in `wallpapers.txt` if you know them. Add or remove photos 
 
 The picker (and so the launcher and clipboard history) scrolls: arrows, Page Up/Down or the mouse wheel move
 through lists longer than eight rows, and a small `3/12` counter shows where you are.
+
+### External monitor brightness (ddcutil)
+
+Needs two things. (1) Access to `/dev/i2c-*`: the ddcutil package's udev rule grants it, but devices that
+existed before the package was installed need the rules re-applied (a logout does not do it; a reboot does):
+`./install.sh services` (it runs `udevadm trigger --subsystem-match=i2c-dev`) or just
+`sudo udevadm trigger --subsystem-match=i2c-dev && sudo udevadm settle`. (2) DDC/CI switched on in the
+monitor's own on-screen menu (some monitors ship with it off; some ports don't support it).
+Check with `ddcutil detect`: the monitor should appear as "Display 1". The quick-settings panel says
+`no DDC access`, `DDC/CI off or unsupported` or `ddcutil not installed` for a monitor it can't reach, and
+looks again each time it opens.
 
 ## Desktop
 
@@ -219,6 +235,7 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + V` | clipboard history |
 | `Super + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
+| `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |
 | `Super + Escape` | lock |

@@ -28,6 +28,7 @@ Singleton {
     readonly property string fontFamily: "Maple Mono NF"   // the one font used everywhere
     readonly property int fontSize: 12      // notifications, panels, indicators
     readonly property int barFontSize: 12   // the bar (Maple Mono)
+    readonly property real brightnessStep: 0.05   // one press of a brightness key (5%)
 
     // Sizes
     readonly property int barHeight: 28
