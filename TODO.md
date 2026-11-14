@@ -62,7 +62,7 @@ quiet tiles, the control center's structure.
 - [ ] Run `./install.sh` from a clean state (fresh Fedora in a VM) and fix what breaks
 - [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
-- [ ] Idle dimming for the external monitor too (today only the laptop dims)
+- [x] Idle dimming for the external monitor too (`qs ipc call brightness dim / undim`, DDC; laptop verified, monitor path shared with the slider)
 - [ ] Put the repo on a remote (GitHub) so the setup is backed up
 - [ ] Decide what to do with Sway: keep as a fallback session, or remove it and its packages
 

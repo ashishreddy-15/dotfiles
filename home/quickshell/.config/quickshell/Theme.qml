@@ -98,6 +98,7 @@ Singleton {
 
     // ---- behaviour ----
     readonly property real brightnessStep: 0.05   // one press of a brightness key (5%)
+    readonly property real idleDimLevel:   0.10   // every screen dims to this when idle (hypr/hypridle.conf)
 
     // ---- the bar ----
     readonly property int barHeight: 28

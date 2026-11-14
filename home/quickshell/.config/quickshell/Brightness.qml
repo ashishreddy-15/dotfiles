@@ -12,6 +12,7 @@ import "brightness"
 //                      switched on in the monitor.
 //
 //   qs ipc call brightness up | down      change the focused screen (bound to the brightness keys, Super+[ ])
+//   qs ipc call brightness dim | undim    every screen down to the idle level and back (hypridle)
 //
 // Other pieces read `displays` (the screens we can control), call set()/step() on them, and listen to
 // `changed` (a person changed a level) and `unavailable` (the focused screen has no control).
@@ -50,10 +51,29 @@ Singleton {
         if (ddcStatus !== "ok") redetect.restart()
     }
 
+    // Dim every screen we can control when the computer goes idle, and put each back as it was on activity
+    // (hypridle calls these: hypr/hypridle.conf). Screens already darker than the dim level are left alone.
+    property var dimmedFrom: ({})          // screen name -> level before dimming; empty when not dimmed
+    function dim() {
+        if (Object.keys(dimmedFrom).length > 0) return
+        const saved = {}
+        for (const d of displays) {
+            saved[d.name] = d.level
+            if (d.level > Theme.idleDimLevel) d.setQuiet(Theme.idleDimLevel)
+        }
+        dimmedFrom = saved
+    }
+    function undim() {
+        for (const d of displays) if (d.name in dimmedFrom) d.setQuiet(dimmedFrom[d.name])
+        dimmedFrom = ({})
+    }
+
     IpcHandler {
         target: "brightness"
         function up(): void { root.adjust(1) }
         function down(): void { root.adjust(-1) }
+        function dim(): void { root.dim() }
+        function undim(): void { root.undim() }
     }
 
     // ---- which screens can we control? ----

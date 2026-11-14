@@ -303,7 +303,9 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + Escape` | lock |
 | `Super + Shift + E` | log out |
 
-Idle (`hypridle.conf`): dim at 2.5 min, lock at 5, screens off at 5.5, suspend at 30.
+Idle (`hypridle.conf`): dim at 2.5 min, lock at 5, screens off at 5.5, suspend at 30. Dimming covers every screen the
+shell can control (the laptop panel and, over DDC, the external monitor) to 10% (`idleDimLevel` in `Theme.qml`), quietly
+(no indicator), and puts each back as it was; without the shell running, only the laptop dims.
 Apps that are playing media prevent this automatically.
 
 Session environment variables go in `home/uwsm/.config/uwsm/env-hyprland`, not

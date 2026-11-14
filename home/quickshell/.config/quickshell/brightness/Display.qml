@@ -30,10 +30,14 @@ Scope {
     function clamp(v) { return Math.max(0, Math.min(1, v)) }
 
     function set(v) {
+        setQuiet(v)
+        userChanged()
+    }
+    // The same, without telling anyone (no on-screen indicator): used for dimming when idle.
+    function setQuiet(v) {
         level = clamp(v)
         wanted = Math.round(level * maxValue)
         pause.restart()
-        userChanged()
     }
     function step(delta) { set(level + delta) }
 
