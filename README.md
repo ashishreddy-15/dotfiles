@@ -147,6 +147,9 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `launcher/`: Spotlight-style app launcher (`Super + Space`). Opens in the upper third of
   the focused monitor; results appear as you type (name, then description/keywords, then
   letters-in-order). Up/Down or Tab to move, Enter to open, Esc or click outside to close.
+  The window has a fixed size and only the card inside it grows and shrinks; Hyprland's own
+  fade is switched off for it (`rules.lua`). Resizing the window per keystroke made the old
+  version smear. `qs ipc call launcher search <text>` opens it with text prefilled.
 
 ## Desktop
 

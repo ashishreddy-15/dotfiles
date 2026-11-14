@@ -9,6 +9,12 @@ import qs
 // Spotlight-style app launcher (Super+Space -> `qs ipc call launcher toggle`).
 // Type to search installed apps; Up/Down or Tab to move, Enter to open, Esc or click outside to close.
 // Apps start through `uwsm app` so each runs in its own systemd scope.
+//
+// Animation notes (why it is built this way):
+//  - The window is a fixed size and never resized. Only the card inside it grows and shrinks.
+//    Resizing a layer-shell window per keystroke makes the compositor stretch and smear the old frame.
+//  - Hyprland's own fade is switched off for this window (hypr/modules/rules.lua); the open/close
+//    fade and the height change are animated here, inside the window.
 Scope {
     id: root
 
@@ -17,9 +23,15 @@ Scope {
     property int selected: 0
     readonly property int maxResults: 8
 
+    readonly property int searchHeight: 54
+    readonly property int rowHeight: 40
+    readonly property int listPadding: 6
+
     IpcHandler {
         target: "launcher"
         function toggle(): void { root.open = !root.open }
+        // Open with text already typed, e.g. `qs ipc call launcher search fire` (also used for testing).
+        function search(text: string): void { root.open = true; input.text = text }
     }
 
     onOpenChanged: if (open) { query = ""; selected = 0 }
@@ -35,7 +47,7 @@ Scope {
         if (name.includes(q)) return 40
         const extra = (app.genericName + " " + app.keywords + " " + app.comment).toLowerCase()
         if (extra.includes(q)) return 20
-        // letters in order, e.g. "nts" -> "Nautilus"? no; "ntl" -> "NauTiLus" yes
+        // letters in order, e.g. "ntl" -> "NauTiLus"
         let i = 0
         for (const ch of name) if (ch === q[i]) i++
         return i === q.length ? 10 : 0
@@ -66,17 +78,21 @@ Scope {
 
         // Open on the monitor you're working on.
         screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
-        visible: root.open
+
+        // Stay mapped until the close animation has finished.
+        visible: root.open || card.shown > 0
 
         anchors.top: true                            // top only = horizontally centred
         margins.top: Math.round((screen?.height ?? 1080) * 0.22)
         exclusionMode: ExclusionMode.Ignore
         implicitWidth: 600
-        implicitHeight: box.height
+        // Always tall enough for the longest list, so the window itself never changes size.
+        implicitHeight: root.searchHeight + 1 + 2 * root.listPadding + root.maxResults * root.rowHeight
         color: "transparent"
+        mask: Region { item: card }                  // only the card takes clicks; the rest is see-through
         WlrLayershell.namespace: "quickshell-launcher"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+        WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         // Close when clicking anywhere else.
         HyprlandFocusGrab {
@@ -86,9 +102,22 @@ Scope {
         }
 
         Rectangle {
-            id: box
+            id: card
+
+            // 0 = hidden, 1 = fully shown. Drives the fade, the slight zoom and the slide.
+            property real shown: root.open ? 1 : 0
+            Behavior on shown { NumberAnimation { duration: root.open ? 140 : 90; easing.type: Easing.OutCubic } }
+
             width: parent.width
             height: column.implicitHeight
+            Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+
+            opacity: shown
+            scale: 0.97 + 0.03 * shown
+            transformOrigin: Item.Top
+            y: (1 - shown) * -8
+
+            clip: true                               // list rows are revealed as the card grows
             radius: Theme.radius + 4
             color: Theme.surface
             border.width: 1
@@ -101,7 +130,7 @@ Scope {
                 // Search field
                 Item {
                     width: parent.width
-                    height: 54
+                    height: root.searchHeight
 
                     TextInput {
                         id: input
@@ -159,8 +188,8 @@ Scope {
                 Column {
                     visible: root.results.length > 0
                     width: parent.width
-                    topPadding: 6
-                    bottomPadding: 6
+                    topPadding: root.listPadding
+                    bottomPadding: root.listPadding
 
                     Repeater {
                         model: root.results
@@ -171,9 +200,9 @@ Scope {
                             required property int index
                             readonly property bool active: index === root.selected
 
-                            x: 6
-                            width: parent.width - 12
-                            height: 40
+                            x: root.listPadding
+                            width: parent.width - 2 * root.listPadding
+                            height: root.rowHeight
                             radius: Theme.radius
                             color: active ? Theme.raised : "transparent"
 
@@ -202,8 +231,15 @@ Scope {
                                 }
                             }
 
-                            HoverHandler { onHoveredChanged: if (hovered) root.selected = row.index }
-                            TapHandler { onTapped: root.launch(row.modelData) }
+                            // Only a real mouse move changes the highlight. (A list that re-lays out under a
+                            // resting pointer must not steal the keyboard selection.)
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onPositionChanged: root.selected = row.index
+                                onClicked: root.launch(row.modelData)
+                            }
                         }
                     }
                 }

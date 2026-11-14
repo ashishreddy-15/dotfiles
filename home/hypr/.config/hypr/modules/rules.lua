@@ -20,3 +20,11 @@ hl.window_rule({
     match = { class = "^(org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor)$" },
     float = true,
 })
+
+-- The launcher animates itself (fade, zoom, height) inside its window. Hyprland's own layer fade
+-- smears when Quickshell unmaps the window, so switch it off for this one.
+hl.layer_rule({
+    name  = "no-anim-launcher",
+    match = { namespace = "^quickshell-launcher$" },
+    no_anim = true,
+})
