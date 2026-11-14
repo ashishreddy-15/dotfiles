@@ -74,38 +74,17 @@ Page {
             title: modelData.name || modelData.address
             marked: modelData.connected
             detail: modelData.pairing ? "pairing…"
-                  : failed ? "failed, try again"
+                  : Pairing.hasFailed(modelData) ? "failed, try again"
                   : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
                   : modelData.paired ? "paired" : "pair"
-            detailColor: modelData.connected ? Theme.ok : failed ? Theme.warn : Theme.dim
+            detailColor: modelData.connected ? Theme.ok : Pairing.hasFailed(modelData) ? Theme.warn : Theme.dim
 
-            // Pairing is only half the job: once it has worked, trust the device (so it can reconnect by itself later)
-            // and connect. If pairing ends without success, say so instead of quietly going back to "pair".
-            property bool connectAfterPairing: false
-            property bool failed: false
-            Connections {
-                target: item.modelData
-                function onPairedChanged() {
-                    if (item.connectAfterPairing && item.modelData.paired) {
-                        item.connectAfterPairing = false
-                        item.modelData.trusted = true
-                        item.modelData.connect()
-                    }
-                }
-                function onPairingChanged() {
-                    if (!item.modelData.pairing && item.connectAfterPairing && !item.modelData.paired) {
-                        item.connectAfterPairing = false
-                        item.failed = true
-                    }
-                }
-            }
-
+            // Pairing is started through Pairing.qml, which trusts and connects the device once it has worked.
             onClicked: {
-                failed = false
                 if (modelData.pairing) modelData.cancelPair()
                 else if (modelData.connected) modelData.disconnect()
                 else if (modelData.paired) modelData.connect()
-                else { connectAfterPairing = true; modelData.pair() }
+                else Pairing.start(modelData)
             }
         }
     }
