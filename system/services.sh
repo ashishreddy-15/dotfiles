@@ -64,10 +64,5 @@ for u in "${MASK[@]}"; do
   systemctl mask "$u" >/dev/null 2>&1 && echo "masked:   $u"
 done
 
-# User-level: Bluetooth OBEX file transfer (sending files to/from phones; not needed for headsets/mice)
-if [[ -n "${SUDO_USER:-}" ]]; then
-  sudo -u "$SUDO_USER" XDG_RUNTIME_DIR="/run/user/$(id -u "$SUDO_USER")" \
-    systemctl --user disable --now obex.service >/dev/null 2>&1 && echo "disabled (user): obex.service"
-fi
-
+# User-level units are handled by system/user-services.sh (runs without sudo).
 echo "Done."

@@ -26,9 +26,13 @@ dotfiles/
 │   └── remove.txt          #   packages to uninstall (e.g. Thunar)
 ├── system/                 # root-level config (copied, never symlinked)
 │   ├── repos/*.repo        #   -> /etc/yum.repos.d/
-│   └── services.sh         #   enable/disable systemd services
+│   ├── services.sh         #   system services (sudo)
+│   └── user-services.sh    #   systemd --user units (hypridle, polkit agent)
 └── home/                   # stow packages, each mirrors $HOME
-    └── autostart/.config/autostart/   # hides unwanted /etc/xdg/autostart entries
+    ├── autostart/          # hides unwanted /etc/xdg/autostart entries
+    ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
+    ├── systemd/            # drop-ins: run hypr* services only in Hyprland, not Sway
+    └── uwsm/               # ~/.config/uwsm/env-hyprland: session environment
 ```
 
 ## install.sh
@@ -97,9 +101,43 @@ The hypr* tools cover what's safer outside the shell: `hypridle`, `hyprpolkitage
 and `hyprlock` as a fallback lock screen in case the Quickshell lock crashes.
 File manager: Nautilus.
 
+## Hyprland
+
+Log in by picking **Hyprland (uwsm-managed)** in SDDM. The config is Lua
+(Hyprland 0.57+), split by topic in `home/hypr/.config/hypr/modules/`:
+`monitors`, `input`, `look`, `rules`, `binds`, `autostart`. Hyprland reloads
+on save; `./install.sh link` also checks it with `Hyprland --verify-config`.
+
+Monitors: laptop `eDP-1` (1920x1200) on the left, Samsung `HDMI-A-1` (2560x1440)
+in the centre as the main screen. Workspaces 1-9 are on the main screen, 10 on the laptop.
+
+| Keys | Action |
+|---|---|
+| `Super + Return` / `E` / `Space` | terminal (kitty) / files (Nautilus) / launcher |
+| `Super + Q` | close window |
+| `Super + F` / `M` / `V` | fullscreen / maximize / toggle floating |
+| `Super + arrows` or `h j k l` | move focus (crosses to the other monitor at the edge) |
+| `Super + Shift + arrows` or `h j k l` | move window |
+| `Super + ,` / `.` | focus laptop / main monitor (`+ Shift`: send window there) |
+| `Super + 1..0` | workspace 1-10 (`+ Shift`: move window there) |
+| `Super + Tab` | previous workspace |
+| `Super + S` | scratchpad (`+ Shift`: send window there) |
+| `Super + Shift + V` | clipboard history |
+| `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
+| `Super + Escape` | lock |
+| `Super + Shift + E` | log out |
+
+Idle (`hypridle.conf`): dim at 2.5 min, lock at 5, screens off at 5.5, suspend at 30.
+Apps that are playing media prevent this automatically.
+
+Session environment variables go in `home/uwsm/.config/uwsm/env-hyprland`, not
+`hl.env()`, so systemd services and apps get them too. Apps are launched with
+`uwsm app -- <cmd>` so each runs in its own systemd scope.
+
 ## Services
 
 `system/services.sh` turns off what this bare-metal laptop doesn't use: VM guest
 tools, live-ISO units, iSCSI/RAID/LVM/Stratis, ModemManager, sssd, homed, CUPS,
-Avahi, PackageKit (masked). Bluetooth stays on. To undo one:
+Avahi, PackageKit (masked). Bluetooth stays on.
+`system/user-services.sh` enables hypridle and hyprpolkitagent and disables obex. To undo one:
 `sudo systemctl unmask <unit> && sudo systemctl enable --now <unit>`.

@@ -1,0 +1,12 @@
+# Environment for the Hyprland session only (read by uwsm; Sway is unaffected).
+# With uwsm, set variables here rather than with hl.env(), so systemd services
+# (portals, polkit agent, apps started via `uwsm app`) get them too.
+
+export XCURSOR_SIZE=24
+export HYPRCURSOR_SIZE=24
+
+# Native Wayland for toolkits that don't pick it by default
+export QT_QPA_PLATFORM="wayland;xcb"
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+export SDL_VIDEODRIVER="wayland,x11"
+export ELECTRON_OZONE_PLATFORM_HINT=auto

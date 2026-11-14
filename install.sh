@@ -2,7 +2,7 @@
 #
 # Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
 #
-#   ./install.sh                 run every step (repos packages services link defaults)
+#   ./install.sh                 run every step (repos packages link services defaults)
 #   ./install.sh link            run only the given step(s)
 #   ./install.sh -n              dry run: show what would happen, change nothing
 #   ./install.sh -y              don't ask dnf for confirmation
@@ -12,9 +12,10 @@
 #   repos     install repo files from system/repos/ into /etc/yum.repos.d/
 #   packages  dnf install everything in packages/*.txt,
 #             then dnf remove everything in packages/remove.txt
-#   services  run system/services.sh (disable unneeded services)
+#   services  run system/services.sh (root) and system/user-services.sh (user units)
 #   link      symlink home/<pkg>/ into $HOME with GNU stow
-#             (existing real files are moved to ~/.dotfiles-backup/<time>/ first)
+#             (existing real files are moved to ~/.dotfiles-backup/<time>/ first,
+#             then the Hyprland config is checked with --verify-config)
 #   defaults  set default applications (MIME_DEFAULTS below)
 
 set -Eeuo pipefail
@@ -24,7 +25,7 @@ DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 STOW_DIR="$DOTFILES/home"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 REMOVE_LIST="$DOTFILES/packages/remove.txt"
-ALL_STEPS=(repos packages services link defaults)
+ALL_STEPS=(repos packages link services defaults)
 
 # Default applications: "<desktop file> <mime type>..."
 MIME_DEFAULTS=(
@@ -165,8 +166,24 @@ step_services() {
   need_sudo
   if (( DRY_RUN )); then
     info "[dry-run] sudo bash system/services.sh"
+    info "[dry-run] bash system/user-services.sh"
   else
     sudo bash "$DOTFILES/system/services.sh"
+    bash "$DOTFILES/system/user-services.sh"
+  fi
+}
+
+# Catch config mistakes now instead of at the next login.
+verify_configs() {
+  if command -v Hyprland >/dev/null && [[ -f "$HOME/.config/hypr/hyprland.lua" ]]; then
+    local out
+    if out=$(Hyprland --verify-config -c "$HOME/.config/hypr/hyprland.lua" 2>&1); then
+      ok "Hyprland config is valid"
+    else
+      warn "Hyprland config has errors:"
+      sed -n '/Config parsing result/,$p' <<<"$out" | sed 's/^/      /' >&2
+      return 1
+    fi
   fi
 }
 
@@ -211,6 +228,7 @@ step_link() {
     || die "stow simulation failed; nothing was changed:"$'\n'"$out"
   run stow --no-folding -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}"
   ok "linked: ${pkgs[*]}"
+  (( DRY_RUN )) || verify_configs || die "fix the config above, then re-run ./install.sh link"
 }
 
 step_defaults() {
