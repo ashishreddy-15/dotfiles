@@ -22,6 +22,21 @@ Singleton {
     function togglePanel(screenName) { panelScreen = screenName; panelOpen = !panelOpen }
 
 
+    // Settings window (Super + I): open or not, and the section it shows (see settings/SettingsWindow.qml).
+    property bool settingsOpen: false
+    property string settingsSection: "wifi"
+    function openSettings(section) { if (section) settingsSection = section; settingsOpen = true }
+    function toggleSettings(section) {
+        if (settingsOpen && (!section || section === settingsSection)) settingsOpen = false
+        else openSettings(section)
+    }
+
+    // Wallpaper: the images found and the one in use, for Settings; wallpaper/Wallpaper.qml fills these in and
+    // obeys wallpaperChosen.
+    property var wallpaperFiles: []
+    property string wallpaperCurrent: ""
+    signal wallpaperChosen(string path)
+
     // Where pop-ups (notifications, volume/brightness) appear: the main monitor,
     // or the first one if the main monitor is unplugged.
     readonly property var mainScreen: Quickshell.screens.find(s => s.name === Theme.mainOutput)

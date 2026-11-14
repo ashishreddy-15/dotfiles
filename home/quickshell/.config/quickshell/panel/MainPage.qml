@@ -7,16 +7,15 @@ import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import qs
 
-// The first page of the control center. Every control is one of four kinds, always in the same place:
-//   tile    on/off things (Wi-Fi, Bluetooth, Do Not Disturb, night light, keep awake) at the top; the arrow opens details
+// The control center: only the quick things. Everything with a list or options (networks, devices, wallpaper, ...)
+// is in Settings (Super + I; the gear in the header). Every control is one of three kinds, always in the same place:
+//   tile    on/off things (Wi-Fi, Bluetooth, Do Not Disturb, night light, keep awake) at the top
 //   slider  levels (brightness, volume), grouped under "display" and "sound"
-//   row     things that open something (the sound output page)
 //   action  the power buttons in the footer
 // Order, top to bottom: status header, tiles, display, sound, media (only while a player runs), footer.
 Column {
     id: root
 
-    signal open(string page)     // go to a detail page
     signal done()                // close the panel
 
     spacing: 2
@@ -43,6 +42,8 @@ Column {
         const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60)
         return h > 0 ? h + "h " + m + "m" : m + "m"
     }
+    // Close the control center and open Settings (on a section, or on the last one used).
+    function openSettings(section) { root.done(); ShellState.openSettings(section) }
     function batteryText() {
         const d = battery
         const pct = Math.round((d?.percentage ?? 0) * 100)
@@ -59,17 +60,6 @@ Column {
         if (d?.state === UPowerDeviceState.Charging || d?.state === UPowerDeviceState.FullyCharged || d?.state === UPowerDeviceState.PendingCharge) return Theme.ok
         return pct <= 10 ? Theme.err : pct <= 20 ? Theme.warn : Theme.text
     }
-    // "performance" is selected but the system is holding it back (lap detected, high temperature)
-    readonly property bool perfDegraded: PowerProfiles.profile === PowerProfile.Performance
-        && PowerProfiles.degradationReason !== PerformanceDegradationReason.None
-    function profileName() {
-        switch (PowerProfiles.profile) {
-        case PowerProfile.PowerSaver:  return "power saver"
-        case PowerProfile.Performance: return "performance"
-        default:                       return "balanced"
-        }
-    }
-
     // External screens that are connected but have no brightness control, and why.
     readonly property var uncontrollable: Hyprland.monitors.values
         .map(m => m.name)
@@ -89,7 +79,7 @@ Column {
         width: parent.width
         height: 32
 
-        // The battery text opens the battery page.
+        // The battery text opens Settings on Power; the gear opens Settings.
         MouseArea {
             id: batteryArea
             visible: root.hasBattery
@@ -98,12 +88,12 @@ Column {
             height: 28
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.open("battery")
+            onClicked: root.openSettings("power")
 
             // Keyboard: Enter, Space or Right opens it.
             activeFocusOnTab: true
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.open("battery"); event.accepted = true }
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.openSettings("power"); event.accepted = true }
             }
             FocusRing { visible: batteryArea.activeFocus }
 
@@ -123,32 +113,30 @@ Column {
         }
 
         MouseArea {
-            id: profileArea
+            id: gearArea
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-            width: profileText.implicitWidth + 24
+            width: 32
             height: 28
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.open("profile")
+            onClicked: root.openSettings("")
 
-            // Keyboard: Enter, Space or Right opens the power profile page.
             activeFocusOnTab: true
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.open("profile"); event.accepted = true }
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.openSettings(""); event.accepted = true }
             }
-            FocusRing { visible: profileArea.activeFocus }
+            FocusRing { visible: gearArea.activeFocus }
 
             Rectangle {
                 anchors.fill: parent
                 radius: Theme.radiusRow
-                color: profileArea.containsMouse ? Theme.hover : Theme.clear
+                color: gearArea.containsMouse ? Theme.hover : Theme.clear
                 Behavior on color { ColorAnimation { duration: Theme.durFast } }
             }
             StyledText {
-                id: profileText
                 anchors.centerIn: parent
-                text: root.profileName() + "  " + Theme.glyphNext
-                color: root.perfDegraded ? Theme.warn : Theme.dim
+                text: Theme.glyphGear
+                color: Theme.dim
             }
         }
     }
@@ -167,9 +155,7 @@ Column {
                  : root.wifiNetwork ? root.wifiNetwork.name
                  : root.wifi ? "not connected" : "no adapter"
             active: Networking.wifiEnabled
-            hasDetail: Networking.wifiEnabled
             onToggled: Networking.wifiEnabled = !Networking.wifiEnabled
-            onDetail: root.open("wifi")
         }
         Tile {
             width: parent.tileWidth
@@ -180,9 +166,7 @@ Column {
                  : root.btConnected.length === 1 ? root.btConnected[0].name
                  : root.btConnected.length + " devices"
             active: root.btOn
-            hasDetail: root.btOn
             onToggled: if (root.btAdapter) root.btAdapter.enabled = !root.btOn
-            onDetail: root.open("bt")
         }
         Tile {
             width: parent.tileWidth
@@ -190,18 +174,14 @@ Column {
             // the number is how many notifications are waiting in the history
             value: (Modes.dnd ? "on" : "off") + (Notifs.count > 0 ? "  ·  " + Notifs.count : "")
             active: Modes.dnd
-            hasDetail: true
             onToggled: Modes.toggleDnd()
-            onDetail: root.open("notifications")
         }
         Tile {
             width: parent.tileWidth
             label: "Night light"
             value: Modes.nightLight ? Modes.kelvin + " K" : "off"
             active: Modes.nightLight
-            hasDetail: true
             onToggled: Modes.toggleNight()
-            onDetail: root.open("night")
         }
     }
     Tile {
@@ -261,11 +241,6 @@ Column {
         muted: root.micMuted
         onLabelClicked: if (root.mic?.audio) root.mic.audio.muted = !root.mic.audio.muted
         onMoved: v => { if (root.mic?.audio) root.mic.audio.volume = v }
-    }
-    Line {
-        label: "output"
-        value: root.sink ? (root.sink.nickname || root.sink.description || root.sink.name) : "none"
-        onClicked: root.open("output")
     }
 
     // ---- media (only while a player is running) ----

@@ -48,7 +48,13 @@ Scope {
             "print(sum(px) / len(px))", image]
         stdout: StdioCollector { onStreamFinished: ShellState.topLuminance = parseFloat(text) || 0 }
     }
+    onFilesChanged: ShellState.wallpaperFiles = files
+    Connections {
+        target: ShellState
+        function onWallpaperChosen(path) { root.set(path) }
+    }
     onCurrentChanged: {
+        ShellState.wallpaperCurrent = current
         if (current !== "") { measure.image = current; measure.running = true }
     }
 

@@ -3,11 +3,9 @@ import Quickshell
 import Quickshell.Bluetooth
 import qs
 
-// Bluetooth page: your devices and the ones found nearby. Scans only while this page is open.
-Column {
+// Bluetooth: the switch, your devices and the ones found nearby. Scans only while Settings is open on this section.
+Page {
     id: root
-
-    signal back()
 
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property bool on: adapter?.enabled ?? false
@@ -18,44 +16,40 @@ Column {
     readonly property var devices: Bluetooth.devices.values
         .filter(d => d.paired || d.connected || (d.name !== "" && !addressLike.test(d.name)))
         .sort((a, b) => (b.connected - a.connected) || ((b.paired ? 1 : 0) - (a.paired ? 1 : 0)) || a.name.localeCompare(b.name))
+    readonly property var connectedDevices: Bluetooth.devices.values.filter(d => d.connected)
 
     Binding {
         target: root.adapter
         property: "discovering"
-        value: root.on && ShellState.panelOpen
+        value: root.on && ShellState.settingsOpen && root.visible
         when: root.adapter !== null
     }
 
-    PageHeader {
+    SettingRow {
         title: "Bluetooth"
-        switchText: root.adapter ? (root.on ? "on" : "off") : ""
-        switchColor: root.on ? Theme.ok : Theme.dim
-        onBack: root.back()
-        onSwitched: if (root.adapter) root.adapter.enabled = !root.on
+        description: !root.adapter ? "No Bluetooth adapter"
+                   : !root.on ? "Off"
+                   : root.connectedDevices.length === 0 ? "On"
+                   : root.connectedDevices.length === 1 ? "Connected to " + root.connectedDevices[0].name
+                   : "Connected to " + root.connectedDevices.length + " devices"
+        Switch { visible: root.adapter !== null; checked: root.on; onToggled: root.adapter.enabled = !root.on }
     }
 
-    StyledText {
-        visible: !root.on
-        leftPadding: 10
-        topPadding: 8
-        bottomPadding: 8
-        text: root.adapter ? "Bluetooth is off" : "no adapter"
-        color: Theme.dim
-    }
+    GroupLabel { visible: root.on; text: "Devices" }
 
     Repeater {
         model: root.on ? root.devices : []
 
-        ListItem {
+        ListRow {
             id: item
             required property var modelData
 
-            text: modelData.name || modelData.address
+            title: modelData.name || modelData.address
             marked: modelData.connected
             detail: modelData.pairing ? "pairing…"
                   : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
                   : modelData.paired ? "paired" : "pair"
-            rightColor: modelData.connected ? Theme.ok : Theme.dim
+            detailColor: modelData.connected ? Theme.ok : Theme.dim
 
             // Pairing is only half the job: connect as soon as it has worked.
             property bool connectAfterPairing: false
@@ -76,10 +70,9 @@ Column {
 
     StyledText {
         visible: root.on && root.devices.length === 0
-        leftPadding: 10
-        topPadding: 8
-        bottomPadding: 8
-        text: "searching…"
+        topPadding: 12
+        leftPadding: 12
+        text: "Searching…"
         color: Theme.dim
     }
 }

@@ -1,28 +1,22 @@
 import QtQuick
 import qs
 
-// A toggle tile (Wi-Fi, Bluetooth, ...): a label, a line of state, and a fill when it is on.
-//   click the tile      toggles it                (or opens its page, if `toggle` is false)
-//   click the arrow     opens its detail page     (only when `hasDetail`)
+// A toggle tile (Wi-Fi, Bluetooth, ...): a label, a line of state, and a fill when it is on. Click it to toggle.
 Item {
     id: root
 
     property string label
     property string value
     property bool active: false          // on: the tile is filled with the accent
-    property bool toggle: true           // false: the whole tile opens the detail page instead
-    property bool hasDetail: false
 
     signal toggled()
-    signal detail()
 
     height: 52
 
-    // Keyboard: Enter or Space toggles (or opens the page, for tiles that only open one); Right opens the details.
+    // Keyboard: Enter or Space toggles.
     activeFocusOnTab: true
     Keys.onPressed: event => {
-        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.toggle ? root.toggled() : root.detail(); event.accepted = true }
-        else if (event.key === Qt.Key_Right && root.hasDetail) { root.detail(); event.accepted = true }
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.toggled(); event.accepted = true }
     }
 
     // Quiet by design: "on" is a light wash with the accent mark (the same sign a selected row has in a
@@ -54,11 +48,11 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.toggle ? root.toggled() : root.detail()
+        onClicked: root.toggled()
     }
 
     Column {
-        anchors { left: parent.left; right: arrow.left; verticalCenter: parent.verticalCenter; leftMargin: 12; rightMargin: 4 }
+        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 12; rightMargin: 12 }
         spacing: 2
 
         StyledText {
@@ -73,25 +67,6 @@ Item {
             color: Theme.dim
             font.pixelSize: Theme.fontSmall
             elide: Text.ElideRight
-        }
-    }
-
-    // The arrow has its own click, so it can sit on top of the tile's.
-    Item {
-        id: arrow
-        visible: root.hasDetail
-        anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
-        width: root.hasDetail ? 30 : 0
-
-        StyledText {
-            anchors.centerIn: parent
-            text: Theme.glyphNext
-            color: root.active ? Theme.text : Theme.dim
-        }
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.detail()
         }
     }
 

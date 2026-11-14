@@ -36,9 +36,17 @@ quiet tiles, the control center's structure.
 - [x] Type scale: shell stays at 12 px base; kitty set to 10.5 pt by choice (15 px shell and 11.5 pt kitty were tried and looked too big)
 - [x] Guard rail: `scripts/ui-check` (static: magic values + Theme vs Hyprland/hyprlock/kitty font; live: open/close timing + leftover layers + log). Screen recording not included
 
+## 3b. Settings window (`Super + I`)
+
+- [x] Settings window with a sidebar: Wi-Fi, Bluetooth, Sound, Display, Wallpaper, Notifications, Power, Appearance
+- [x] Control center slimmed to tiles (plain toggles), sliders, media and the power buttons; a gear opens Settings
+- [ ] Try by hand: connect to a saved Wi-Fi network and a new one with a password; pair a Bluetooth device; pick the sound
+      output / input device; the brightness and warmth sliders; clear the notification history; switch the power profile
+- [ ] Settings: keyboard navigation inside a section (only Up / Down between sections and Esc work), a "forget network" action
+
 ## 4. Beyond the shell
 
-- [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus an appearance settings window (`Super + Shift + A`: Style, Icons & cursor, Fonts)
+- [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus appearance settings (now a section of Settings)
       (colour scheme, GTK / icon / cursor theme, cursor size, font and size; like nwg-look)
 - [ ] Appearance: folder icons stay Adwaita blue (not recoloured by the palette); GTK3 apps stay dark in the light scheme;
       `adw-gtk3-theme` is not installed, so the GTK theme list has only Adwaita; icon / cursor list has one real choice each

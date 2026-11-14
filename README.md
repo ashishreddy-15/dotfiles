@@ -88,8 +88,10 @@ drop dependencies nothing else needs. A package in both lists is an error.
 containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
 (Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
 
-**Change how GTK apps look:** press `Super + Shift + A` (again, or Esc, to close). It is a settings window of its own with a sidebar:
-Style (colour scheme, GTK theme), Icons & cursor (icon and cursor theme, cursor size) and Fonts (size, and a searchable family list). It runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
+**Settings:** press `Super + I` (again, or Esc, to close; `Super + Shift + A` opens it on Appearance). It is a window of its own,
+centred, with a sidebar: Wi-Fi, Bluetooth, Sound, Display (brightness, night light), Wallpaper (thumbnails), Notifications
+(Do Not Disturb, history), Power (profile, battery) and Appearance (colour scheme, GTK / icon / cursor theme, cursor size, fonts).
+Appearance runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
 GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita
@@ -160,7 +162,7 @@ journalctl --user -u quickshell -f       # logs / QML errors
   **pop-ups** on screen. Pop-ups are frosted cards under the bar, top-centre of the main monitor, newest on top,
   up to 4 at once; each runs a thin timeout bar (5 s, paused while hovered; critical ones stay). Click a card or its `×`
   to hide the pop-up (it stays in the history); an action link runs the action. Do Not Disturb hides pop-ups, except
-  critical ones, and everything still lands in the history (control center: tile arrow, or the Notifications page).
+  critical ones, and everything still lands in the history (Settings, Notifications).
 - `osd/`: small volume / brightness indicator at the bottom-centre of the main monitor.
   Volume shows on any change; brightness shows when the brightness keys are used
   (they call `qs ipc call osd brightness`), so idle dimming stays silent.
@@ -190,16 +192,16 @@ journalctl --user -u quickshell -f       # logs / QML errors
   `Super + [` / `Super + ]` (5% steps, held keys repeat). A change shows in the on-screen indicator on that
   screen, or "no control" if the focused screen can't be adjusted. Changes appear instantly and the real
   command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
-- `panel/`: the control center. Click the clock area of the bar (or `Super + A`) to open it; Esc or a click
-  outside closes it. It is built from four kinds of control, each with one look and one behaviour:
-  **tiles** (on/off: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake; click toggles, the arrow opens
-  details), **sliders** (levels: a brightness slider per screen, volume, mic; click `volume` or `mic` to mute),
-  **rows** (open something: the sound output page) and **actions** (lock, logout, suspend, reboot,
-  shutdown; the last three ask for a second click). Details open as a separate **page** with a `‹ Title` header
-  (Wi-Fi, Bluetooth, sound output, power profile, night light, notifications), never inline, so the panel doesn't
-  jump. Order on the first page: status header (battery, power profile), tiles, `display`, `sound`, `media` (only while
-  a player runs: title, artist, previous / play-pause / next), power actions. Rows share one grid (`labelWidth`,
-  `valueX` in `Theme.qml`). Wi-Fi and Bluetooth scan only while their page is open.
+- `panel/`: the control center, for the quick things only. Click the clock area of the bar (or `Super + A`) to open it; Esc
+  or a click outside closes it; the gear in its header opens Settings. Three kinds of control, each with one look and
+  one behaviour: **tiles** (on/off: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake; click toggles),
+  **sliders** (levels: a brightness slider per screen, volume, mic; click `volume` or `mic` to mute) and **actions**
+  (lock, logout, suspend, reboot, shutdown; the last three ask for a second click). Order: status header (battery,
+  gear), tiles, `display`, `sound`, `media` (only while a player runs: title, artist, previous / play-pause / next),
+  power actions. Rows share one grid (`labelWidth`, `valueX` in `Theme.qml`).
+- `settings/`: the Settings window (`Super + I`). `SettingsWindow.qml` is the window and sidebar; every section is a file
+  (`WifiSection.qml`, `BluetoothSection.qml`, ...) built from the same rows (`SettingRow`, `ListRow`, `Segmented`,
+  `Switch`, `Stepper`) and loaded only while it shows, so Wi-Fi and Bluetooth scan only while their section is open.
   **Keyboard:** Up / Down (or Tab) move between controls, Enter / Space activates, Left / Right adjust a slider (Right on
   a tile opens its details), Esc or Backspace goes back a page (Esc closes on the first page); the focused control gets
   an accent outline. `qs ipc call panel open <wifi|bt|output|profile|night|notifications|none>` opens it on a page.
@@ -285,7 +287,8 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + W` | browser (Brave Origin) |
 | `Super + Shift + W` | choose wallpaper |
 | `Super + A` | quick settings (also: click the clock) |
-| `Super + Shift + A` | appearance settings: GTK theme, colour scheme, fonts, icons, cursor (toggle) |
+| `Super + I` | settings (toggle) |
+| `Super + Shift + A` | settings, on Appearance (GTK theme, colour scheme, fonts, icons, cursor) |
 | `Super + [` / `Super + ]` | brightness down / up on the focused screen |
 | `Print` / `Shift + Print` | screenshot region / whole monitor, to clipboard |
 | `Super + B` | hide / show the bar |

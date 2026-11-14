@@ -2,12 +2,10 @@ import QtQuick
 import Quickshell
 import qs
 
-// Notification history: everything that came in and has not been dismissed, newest first.
-// Click an entry to dismiss it. "clear all" dismisses everything.
-Column {
+// Notifications: Do Not Disturb, and the history (everything that came in and has not been dismissed, newest first).
+// Click an entry to dismiss it.
+Page {
     id: root
-
-    signal back()
 
     function ago(ms) {
         const m = Math.floor((Date.now() - ms) / 60000)
@@ -17,19 +15,41 @@ Column {
         return h < 24 ? h + "h" : Math.floor(h / 24) + "d"
     }
 
-    PageHeader {
-        title: "Notifications"
-        switchText: Notifs.count > 0 ? "clear all" : ""
-        onBack: root.back()
-        onSwitched: Notifs.clearAll()
+    SettingRow {
+        title: "Do Not Disturb"
+        description: "Hides pop-ups. Urgent ones still show, and everything still goes to the history."
+        Switch { checked: Modes.dnd; onToggled: Modes.toggleDnd() }
+    }
+
+    Item {
+        width: parent.width
+        height: 46
+        StyledText {
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            text: "History"
+            color: Theme.dim
+            font.pixelSize: Theme.fontSmall
+        }
+        Rectangle {
+            visible: Notifs.count > 0
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            width: clearText.implicitWidth + 24
+            height: 28
+            radius: Theme.radiusRow
+            color: clearArea.containsMouse ? Theme.hover : Theme.clear
+            border.width: 1
+            border.color: Theme.border
+            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+            StyledText { id: clearText; anchors.centerIn: parent; text: "Clear all"; color: Theme.text }
+            MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
+        }
     }
 
     StyledText {
         visible: Notifs.count === 0
-        leftPadding: 10
-        topPadding: 8
-        bottomPadding: 8
-        text: "nothing here"
+        leftPadding: 12
+        topPadding: 4
+        text: "Nothing here"
         color: Theme.dim
     }
 
@@ -46,7 +66,7 @@ Column {
             required property int urgency
 
             width: root.width
-            height: col.implicitHeight + 14
+            height: col.implicitHeight + 16
 
             Rectangle {
                 anchors.fill: parent
@@ -64,9 +84,9 @@ Column {
 
             Column {
                 id: col
-                x: 10
-                y: 7
-                width: parent.width - 20
+                x: 12
+                y: 8
+                width: parent.width - 24
                 spacing: 2
 
                 Row {

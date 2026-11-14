@@ -69,6 +69,7 @@ Singleton {
     readonly property string glyphBack:    "\uf104"   // chevron left: back
     readonly property string glyphClose:   "\uf00d"   // x
     readonly property string glyphMark:    "\uf111"   // filled dot: the chosen item in a list
+    readonly property string glyphGear:    "\uf013"   // the settings button
     readonly property string glyphMinus:   "\uf068"
     readonly property string glyphPlus:    "\uf067"
     readonly property string glyphCheck:   "\uf00c"   // tick: a ticked menu entry
