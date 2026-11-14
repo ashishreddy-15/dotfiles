@@ -105,6 +105,7 @@ Singleton {
     readonly property string glyphPlay:    "\uf04b"
     readonly property string glyphPause:   "\uf04c"
     readonly property string glyphForward: "\uf051"
+    readonly property string glyphTimes:   "\u00d7"   // ×: a multiplier, e.g. scroll speed 1.5×
 
     // ---- space ----
     readonly property int pad:        10    // bar edge padding

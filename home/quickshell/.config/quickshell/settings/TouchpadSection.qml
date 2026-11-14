@@ -43,7 +43,7 @@ Page {
         description: "How far two-finger scrolling moves the page."
         LevelSlider {
             value: (Touchpad.scroll - 0.25) / 1.75
-            valueText: Touchpad.scroll.toFixed(2).replace(/0$/, "") + "×"
+            valueText: Touchpad.scroll.toFixed(2).replace(/0$/, "") + Theme.glyphTimes
             textWidth: 64
             onMoved: v => Touchpad.set("scroll", Math.round((0.25 + v * 1.75) * 20) / 20)
         }
