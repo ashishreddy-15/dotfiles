@@ -137,8 +137,10 @@ live() {
 
     echo "live: quickshell log"
     local errs
-    errs=$(journalctl --user -u quickshell --since "-10 min" --no-pager 2>/dev/null | grep -E "ERROR|WARN" | grep -v "Reloading" | tail -5)
-    [ -z "$errs" ] && ok "no errors or warnings in the last 10 minutes" || { fail "quickshell logged problems:"; printf '%s\n' "$errs" | cut -c1-200 | sed 's/^/          /'; }
+    # Only the shell that is running now: earlier ones (before a restart) may have logged errors that are already fixed.
+    local pid; pid=$(systemctl --user show -p MainPID --value quickshell 2>/dev/null)
+    errs=$(journalctl --user -u quickshell --since "-10 min" --no-pager 2>/dev/null | grep -F "quickshell[$pid]" | grep -E "ERROR|WARN" | grep -v "Reloading" | tail -5)
+    [ -z "$errs" ] && ok "no errors or warnings from the running shell (pid $pid) in the last 10 minutes" || { fail "quickshell logged problems:"; printf '%s\n' "$errs" | cut -c1-200 | sed 's/^/          /'; }
 }
 
 case "${1:-all}" in
