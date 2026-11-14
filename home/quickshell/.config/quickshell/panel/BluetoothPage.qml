@@ -3,16 +3,14 @@ import Quickshell
 import Quickshell.Bluetooth
 import qs
 
-// Bluetooth: on/off switch, your devices, and a scan for new ones.
+// Bluetooth page: your devices and the ones found nearby. Scans only while this page is open.
 Column {
     id: root
 
-    property bool expanded: false
-    signal toggleExpanded()
+    signal back()
 
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property bool on: adapter?.enabled ?? false
-    readonly property var connected: Bluetooth.devices.values.filter(d => d.connected)
 
     // Connected first, then saved (paired) ones, then newly found ones. Nearby gadgets that don't announce
     // a name (they show up as a bare address) are left out unless you have paired them.
@@ -21,35 +19,32 @@ Column {
         .filter(d => d.paired || d.connected || (d.name !== "" && !addressLike.test(d.name)))
         .sort((a, b) => (b.connected - a.connected) || ((b.paired ? 1 : 0) - (a.paired ? 1 : 0)) || a.name.localeCompare(b.name))
 
-    // Look for devices only while the list is open.
     Binding {
         target: root.adapter
         property: "discovering"
-        value: root.expanded && root.on && ShellState.panelOpen
+        value: root.on && ShellState.panelOpen
         when: root.adapter !== null
     }
 
-    function summary() {
-        if (!adapter) return "no adapter"
-        if (!on) return "off"
-        if (connected.length === 0) return "not connected"
-        return connected.length === 1 ? connected[0].name : connected.length + " devices"
+    PageHeader {
+        title: "Bluetooth"
+        switchText: root.adapter ? (root.on ? "on" : "off") : ""
+        switchColor: root.on ? Theme.ok : Theme.dim
+        onBack: root.back()
+        onSwitched: if (root.adapter) root.adapter.enabled = !root.on
     }
 
-    Line {
-        label: "bt"
-        value: root.summary()
-        valueColor: root.connected.length > 0 ? Theme.text : Theme.dim
-        toggleText: root.adapter ? (root.on ? "on" : "off") : ""
-        toggleColor: root.on ? Theme.ok : Theme.dim
-        expandable: root.on
-        expanded: root.expanded
-        onClicked: if (root.on) root.toggleExpanded()
-        onToggled: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
+    StyledText {
+        visible: !root.on
+        leftPadding: 10
+        topPadding: 8
+        bottomPadding: 8
+        text: root.adapter ? "Bluetooth is off" : "no adapter"
+        color: Theme.dim
     }
 
     Repeater {
-        model: root.expanded && root.on ? root.devices : []
+        model: root.on ? root.devices : []
 
         ListItem {
             id: item
@@ -58,8 +53,8 @@ Column {
             text: modelData.name || modelData.address
             marked: modelData.connected
             detail: modelData.pairing ? "pairing…"
-                 : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
-                 : modelData.paired ? "paired" : "pair"
+                  : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
+                  : modelData.paired ? "paired" : "pair"
             rightColor: modelData.connected ? Theme.ok : Theme.dim
 
             // Pairing is only half the job: connect as soon as it has worked.
@@ -79,11 +74,11 @@ Column {
         }
     }
 
-    // Shown while the list is open and nothing has been found yet
     StyledText {
-        visible: root.expanded && root.on && root.devices.length === 0
-        leftPadding: 78
-        height: 28
+        visible: root.on && root.devices.length === 0
+        leftPadding: 10
+        topPadding: 8
+        bottomPadding: 8
         text: "searching…"
         color: Theme.dim
     }

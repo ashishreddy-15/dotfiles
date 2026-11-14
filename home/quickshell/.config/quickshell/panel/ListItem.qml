@@ -31,15 +31,15 @@ Item {
     }
 
     StyledText {
-        x: 62
+        x: 10
         width: 14
         anchors.verticalCenter: parent.verticalCenter
         text: root.marked ? "●" : ""
         color: Theme.accent
     }
     StyledText {
-        x: 78
-        width: parent.width - 78 - rightText.implicitWidth - 20
+        x: 28
+        width: parent.width - 28 - rightText.implicitWidth - 20
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
         color: root.marked ? Theme.bright : root.color

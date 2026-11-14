@@ -61,6 +61,9 @@ Singleton {
     // ---- space ----
     readonly property int pad:        10    // bar edge padding
     readonly property int padContent: 14    // inside a card that holds free-form content (notifications)
+    // The control center lines every row up on one grid: a label column, then the value or slider.
+    readonly property int labelWidth: 76    // room for "wallpaper" (the longest label)
+    readonly property int valueX:     90    // where values and sliders start (10 inset + label column + gap)
 
     // ---- motion ----
     // Enter: durBase, ease out. Exit: durFast, ease out. Resizing a card: durBase. Hover and selection: durFast.

@@ -6,7 +6,8 @@ import Quickshell.Hyprland
 import qs
 import "../ui"
 
-// Quick settings: volume + output, brightness, Wi-Fi, Bluetooth, wallpaper and the power actions.
+// Control center: a first page (status, tiles, display, sound, power) and detail pages (Wi-Fi, Bluetooth,
+// sound output, power profile). See MainPage.qml for how controls are arranged.
 // Opens under the right end of the bar when you click the clock (or press Super+A).
 // Esc, or a click anywhere else, closes it.
 //
@@ -15,31 +16,24 @@ import "../ui"
 Scope {
     id: root
 
-    property string expanded: ""        // which list is open: "out", "wifi" or "bt"
     readonly property int panelWidth: 340
     readonly property int maxHeight: 560
-
-    function toggle(name) { expanded = expanded === name ? "" : name }
 
     IpcHandler {
         target: "panel"
         function toggle(): void { ShellState.togglePanel(Hyprland.focusedMonitor?.name ?? "") }
         function close(): void { ShellState.panelOpen = false }
-        // Open with a list already expanded: out, wifi or bt (used for testing).
-        function open(section: string): void {
+        // Open on a page: wifi, bt, output, profile, or none for the first page (used for testing).
+        function open(page: string): void {
             ShellState.panelScreen = Hyprland.focusedMonitor?.name ?? ""
             ShellState.panelOpen = true
-            root.expanded = section          // after opening: opening resets the lists
+            stage.go(["wifi", "bt", "output", "profile"].includes(page) ? page : "main")
         }
     }
 
     Connections {
         target: ShellState
-        function onPanelOpenChanged() {
-            if (!ShellState.panelOpen) return
-            root.expanded = ""
-            Brightness.refresh()            // show the real levels, in case something else changed them
-        }
+        function onPanelOpenChanged() { if (ShellState.panelOpen) Brightness.refresh() }    // show the real levels
     }
 
     PanelWindow {
@@ -79,57 +73,70 @@ Scope {
             width: root.panelWidth
             open: ShellState.panelOpen
             origin: Item.TopRight
-            contentHeight: content.implicitHeight + 2 * Theme.cardInset
+            contentHeight: stage.implicitHeight + 2 * Theme.cardInset
             maxHeight: root.maxHeight
 
             focus: true
-            Keys.onEscapePressed: ShellState.panelOpen = false
+            // Esc goes back one page; on the first page it closes the panel.
+            Keys.onEscapePressed: stage.detail ? stage.go("main") : ShellState.panelOpen = false
+
+            // Start from the first page again once the panel is out of sight.
+            onShownChanged: if (shown === 0) stage.go("main")
 
             Flickable {
                 anchors { fill: parent; margins: Theme.cardInset }
                 contentWidth: width
-                contentHeight: content.implicitHeight
+                contentHeight: stage.implicitHeight
                 interactive: contentHeight > height
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
 
-                Column {
-                    id: content
+                // Two layers: the first page and the detail page. Switching slides them a short way and
+                // cross-fades; the card animates to the new page's height.
+                Item {
+                    id: stage
                     width: parent.width
-                    spacing: 2
+                    implicitHeight: detail ? detailLoader.implicitHeight : mainPage.implicitHeight
+                    clip: true
 
-                    AudioSection {
-                        width: parent.width
-                        expanded: root.expanded === "out"
-                        onToggleExpanded: root.toggle("out")
-                    }
-                    BrightnessSection { width: parent.width }
-                    WifiSection {
-                        width: parent.width
-                        expanded: root.expanded === "wifi"
-                        onToggleExpanded: root.toggle("wifi")
-                    }
-                    BluetoothSection {
-                        width: parent.width
-                        expanded: root.expanded === "bt"
-                        onToggleExpanded: root.toggle("bt")
-                    }
-                    Line {
-                        label: "wall"
-                        value: ShellState.wallpaperName
-                        toggleText: "change"
-                        onClicked: { ShellState.panelOpen = false; ShellState.pickWallpaper() }
-                        onToggled: { ShellState.panelOpen = false; ShellState.pickWallpaper() }
+                    property string page: "main"
+                    property string detailPage: ""             // kept while the page slides out
+                    readonly property bool detail: page !== "main"
+                    property real t: detail ? 1 : 0            // 0 = first page, 1 = detail page
+                    Behavior on t { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
+                    onTChanged: if (t === 0) detailPage = ""
+
+                    function go(name) {
+                        if (name !== "main") detailPage = name
+                        page = name
                     }
 
-                    Item { width: parent.width; height: 9
-                        Rectangle { anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 10; rightMargin: 10 } height: 1; color: Theme.border }
-                    }
-
-                    PowerSection {
+                    MainPage {
+                        id: mainPage
                         width: parent.width
+                        x: -stage.t * 24
+                        opacity: 1 - stage.t
+                        visible: stage.t < 1
+                        onOpen: page => stage.go(page)
                         onDone: ShellState.panelOpen = false
                     }
+
+                    Loader {
+                        id: detailLoader
+                        width: parent.width
+                        x: (1 - stage.t) * 24
+                        opacity: stage.t
+                        visible: stage.t > 0
+                        sourceComponent: stage.detailPage === "wifi" ? wifiPage
+                                       : stage.detailPage === "bt" ? btPage
+                                       : stage.detailPage === "output" ? outputPage
+                                       : stage.detailPage === "profile" ? profilePage : null
+                    }
+
+                    Component { id: wifiPage;    WifiPage      { onBack: stage.go("main") } }
+                    Component { id: btPage;      BluetoothPage { onBack: stage.go("main") } }
+                    Component { id: outputPage;  OutputPage    { onBack: stage.go("main") } }
+                    Component { id: profilePage; ProfilePage   { onBack: stage.go("main") } }
                 }
             }
         }

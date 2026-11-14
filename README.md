@@ -173,12 +173,16 @@ journalctl --user -u quickshell -f       # logs / QML errors
   `Super + [` / `Super + ]` (5% steps, held keys repeat). A change shows in the on-screen indicator on that
   screen, or "no control" if the focused screen can't be adjusted. Changes appear instantly and the real
   command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
-- `panel/`: quick settings. Click the clock area of the bar (or `Super + A`) to open a panel under it:
-  volume slider (click `vol` to mute) and output device, a brightness slider per controllable screen, Wi-Fi (on/off, networks, password prompt for new
-  secured ones), Bluetooth (on/off, devices, scan and pair), wallpaper (opens the picker) and the power
-  actions `lock logout suspend reboot shutdown`; logout, reboot and shutdown ask for a second click.
-  Wi-Fi and Bluetooth scan only while their list is open. Esc or a click outside closes it.
-  `qs ipc call panel open <out|wifi|bt>` opens it with a list expanded.
+- `panel/`: the control center. Click the clock area of the bar (or `Super + A`) to open it; Esc or a click
+  outside closes it. It is built from four kinds of control, each with one look and one behaviour:
+  **tiles** (on/off: Wi-Fi, Bluetooth; click toggles, the arrow opens details), **sliders** (levels: a
+  brightness slider per screen, volume; click `volume` to mute), **rows** (open something: wallpaper picker,
+  sound output) and **actions** (lock, logout, suspend, reboot, shutdown; the last three ask for a second click).
+  Details open as a separate **page** with a `‹ Title` header (Wi-Fi, Bluetooth, sound output, power profile),
+  never inline, so the panel doesn't jump; Esc or `‹` goes back. Order on the first page: status header
+  (battery, power profile), tiles, `display`, `sound`, power actions. Rows share one grid (`labelWidth`,
+  `valueX` in `Theme.qml`). Wi-Fi and Bluetooth scan only while their page is open.
+  `qs ipc call panel open <wifi|bt|output|profile|none>` opens it on a page.
 
 ### Wallpaper photos
 
