@@ -20,7 +20,7 @@ Re-running `./install.sh` is always safe: each step checks what's already done.
 dotfiles/
 ├── install.sh              # bootstrap script (see below)
 ├── scripts/                # helpers: ui-check (guard rails for the look)
-├── packages/               # what to dnf install, one package per line
+├── packages/               # what to dnf install, one package per line (flatpak.txt: apps from Flathub)
 │   ├── hyprland.txt        #   compositor + hypr* tools (Hyprland COPR)
 │   ├── quickshell.txt      #   desktop shell (Quickshell COPR)
 │   ├── desktop.txt         #   apps and tools (official Fedora)
@@ -48,7 +48,7 @@ dotfiles/
 
 | Command                     | What it does                                              |
 |-----------------------------|-----------------------------------------------------------|
-| `./install.sh`              | all steps: `repos packages fonts wallpapers link services sddm defaults` |
+| `./install.sh`              | all steps: `repos packages flatpaks fonts wallpapers link services sddm defaults` |
 | `./install.sh <step>...`    | only those steps, e.g. `./install.sh link`                |
 | `./install.sh -n`           | dry run                                                   |
 | `./install.sh -y`           | don't ask dnf for confirmation                            |
@@ -73,6 +73,8 @@ mv ~/.config/<app>/<file> home/<app>/.config/<app>/   # or write a new one
 ```
 Stow links individual files (`--no-folding`), so apps that write caches or state
 into `~/.config/<app>` don't end up writing into this repo.
+
+**Add a Flathub app:** add its app id to `packages/flatpak.txt`, then `./install.sh flatpaks` (for your user, no sudo).
 
 **Add / remove a package:** add a line to the right `packages/*.txt` (or to
 `packages/remove.txt` to uninstall it), then `./install.sh packages`. Removals also

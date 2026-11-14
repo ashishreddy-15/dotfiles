@@ -1,0 +1,4 @@
+# Apps from Flathub, installed for your user only (no sudo) by `./install.sh flatpaks`.
+# This file is not a list of Fedora packages: the packages step skips it.
+# One app id per line; '#' starts a comment. Already-installed ones are skipped.
+net.nokyan.Resources       # system monitor: CPU, memory, GPU, disks, network, apps and processes

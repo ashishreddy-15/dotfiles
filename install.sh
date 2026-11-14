@@ -2,7 +2,7 @@
 #
 # Bootstrap this machine from the dotfiles repo. Safe to re-run at any time.
 #
-#   ./install.sh                 run every step (repos packages fonts wallpapers link services sddm defaults)
+#   ./install.sh                 run every step (repos packages flatpaks fonts wallpapers link services sddm defaults)
 #   ./install.sh link            run only the given step(s)
 #   ./install.sh -n              dry run: show what would happen, change nothing
 #   ./install.sh -y              don't ask dnf for confirmation
@@ -12,6 +12,7 @@
 #   repos     install repo files from system/repos/ into /etc/yum.repos.d/
 #   packages  dnf install everything in packages/*.txt,
 #             then dnf remove everything in packages/remove.txt
+#   flatpaks  install the apps in packages/flatpak.txt from Flathub, for your user (no sudo)
 #   fonts     download fonts in system/fonts.txt (pinned + checksummed) to ~/.local/share/fonts
 #   wallpapers download the photos in system/wallpapers.txt (pinned + checksummed) to ~/.local/share/wallpapers
 #   services  run system/services.sh (root) and system/user-services.sh (user units)
@@ -29,7 +30,7 @@ DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 STOW_DIR="$DOTFILES/home"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 REMOVE_LIST="$DOTFILES/packages/remove.txt"
-ALL_STEPS=(repos packages fonts wallpapers link services sddm defaults)
+ALL_STEPS=(repos packages flatpaks fonts wallpapers link services sddm defaults)
 
 # Default applications: "<desktop file> <mime type>..."
 MIME_DEFAULTS=(
@@ -126,6 +127,7 @@ step_packages() {
   local list p pkgs=() unwanted=()
   for list in "$DOTFILES"/packages/*.txt; do
     [[ "$list" == "$REMOVE_LIST" ]] && continue
+    [[ "$(basename "$list")" == flatpak.txt ]] && continue      # Flathub apps: step_flatpaks
     mapfile -t -O "${#pkgs[@]}" pkgs < <(read_list "$list")
     info "$(basename "$list"): $(read_list "$list" | wc -l) packages"
   done
@@ -239,6 +241,36 @@ step_sddm() {
   else warn "no wallpaper found (run ./install.sh wallpapers): the login screen has a plain background"; fi
   run sudo install -m 644 "$src/10-dotfiles.conf" /etc/sddm.conf.d/10-dotfiles.conf
   ok "login screen: carbon (preview without logging out: sddm-greeter-qt6 --test-mode --theme $dest)"
+}
+
+# Apps from Flathub (packages/flatpak.txt), for your user only: no sudo, nothing system-wide.
+step_flatpaks() {
+  step "Flatpaks"
+  local list="$DOTFILES/packages/flatpak.txt"
+  [[ -f "$list" ]] || { ok "no packages/flatpak.txt"; return 0; }
+  command -v flatpak >/dev/null 2>&1 || { warn "flatpak is not installed: skipped"; return 0; }
+  run flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  # Let Flatpak apps read (only read) the GTK settings in this repo, so they get the same palette, corners and font.
+  run flatpak override --user --filesystem="$STOW_DIR/gtk:ro"
+  local app missing=()
+  while read -r app; do
+    flatpak info --user "$app" >/dev/null 2>&1 || missing+=("$app")
+  done < <(read_list "$list")
+  if (( ${#missing[@]} )); then
+    info "to install: ${missing[*]}"
+    run flatpak install --user --noninteractive flathub "${missing[@]}"
+  else
+    ok "all Flathub apps already installed"
+  fi
+  # Inside the sandbox GTK reads its config from the app's own folder (~/.var/app/<id>/config), not ~/.config:
+  # link the repo's gtk.css and settings.ini into it (absolute paths: stow's relative links would not resolve there).
+  local f
+  while read -r app; do
+    run mkdir -p "$HOME/.var/app/$app/config/gtk-4.0"
+    for f in gtk.css settings.ini; do
+      run ln -sfn "$STOW_DIR/gtk/.config/gtk-4.0/$f" "$HOME/.var/app/$app/config/gtk-4.0/$f"
+    done
+  done < <(read_list "$list")
 }
 
 step_link() {
@@ -409,7 +441,7 @@ main() {
       -n|--dry-run) DRY_RUN=1 ;;
       -y|--yes)     ASSUME_YES=1 ;;
       -h|--help)    usage 0 ;;
-      repos|packages|fonts|wallpapers|services|link|sddm|defaults|unlink) steps+=("$1") ;;
+      repos|packages|flatpaks|fonts|wallpapers|services|link|sddm|defaults|unlink) steps+=("$1") ;;
       *) warn "unknown argument: $1"; usage 1 ;;
     esac
     shift

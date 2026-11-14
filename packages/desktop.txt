@@ -10,6 +10,10 @@ brightnessctl              # laptop screen brightness
 ddcutil                    # external monitor brightness over DDC/CI (needs i2c access: see system/services.sh)
 playerctl                  # media keys
 pavucontrol                # audio mixer
+loupe                      # image viewer
+papers                     # PDF and document viewer
+gnome-calculator           # calculator
+baobab                     # disk usage analyzer
 network-manager-applet     # Wi-Fi tray / connection editor
 blueman                    # Bluetooth GUI (blueman-manager), tray stays off
 xdg-desktop-portal-gtk     # file pickers for GTK apps
