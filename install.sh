@@ -293,6 +293,8 @@ step_sdkman() {
     ok "SDKMAN already installed"
   fi
   (( DRY_RUN )) && { read_list "$list" | while read -r c v; do info "[dry-run] sdk install $c $v; sdk default $c $v"; done; return 0; }
+  # SDKMAN's scripts use unset variables, which this script treats as errors (set -u): allow them around its calls.
+  set +u
   # shellcheck disable=SC1091
   source "$dir/bin/sdkman-init.sh"
   local cand ver
@@ -302,6 +304,7 @@ step_sdkman() {
     fi
     sdk default "$cand" "$ver" >/dev/null 2>&1
   done < <(read_list "$list")
+  set -u
 }
 
 step_link() {
