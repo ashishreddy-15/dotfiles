@@ -60,7 +60,6 @@ static() {
         hex=$(tv "$name" | tr -d '"#')
         grep -qi "$hex" "$lock" && ok "$name #$hex in hyprlock" || fail "$name #$hex missing from hyprlock.conf"
     done
-    [ "$(sed -nE 's/^ *rounding *= *([0-9]+).*# Theme.radiusCard/\1/p' "$lock")" = "$radius" ] && ok "hyprlock card corners $radius" || fail "hyprlock card rounding is not radiusCard ($radius)"
 
     # GTK apps: the stylesheets use the same palette as Theme.qml.
     local name hex
@@ -76,7 +75,6 @@ static() {
             hex=$(tv "$name" | tr -d '"#')
             grep -qi "\"#$hex\"" "$sddm" && ok "$name #$hex in the login screen" || fail "$name #$hex missing from system/sddm/carbon/Main.qml"
         done
-        grep -qE "radiusCard: *$radius\b" "$sddm" && ok "login screen card corners $radius" || fail "login screen radiusCard is not $radius"
     fi
     # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")

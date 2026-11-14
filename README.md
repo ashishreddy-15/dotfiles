@@ -107,8 +107,9 @@ accepted until you click Pair or Allow (Esc declines). The agent behind this is 
 `bt-agent.service`; logs: `journalctl --user -u bt-agent -f`). Only `bluetoothd` can call it (system bus policy), and
 the computer is pairable only while Settings > Bluetooth is open.
 
-**Login screen (SDDM):** the "carbon" theme in `system/sddm/carbon/` has the same look as the lock screen (blurred
-wallpaper, one card with the time, date, user and password; session and power buttons under it). Install or update it
+**Login screen (SDDM):** the "carbon" theme in `system/sddm/carbon/` has the same look as the lock screen (no card:
+the wallpaper lightly blurred, the date and a large light clock near the top, your name and a frosted password pill
+near the bottom; session and power buttons small along the bottom edge). Install or update it
 with `./install.sh sddm` (sudo). It copies Maple Mono and your current wallpaper into the theme, because the login
 screen cannot read your home folder, so run it again after changing the wallpaper. Preview without logging out:
 `sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/carbon`. The cursor is Adwaita everywhere (shell, GTK

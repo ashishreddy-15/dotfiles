@@ -231,7 +231,9 @@ step_sddm() {
 
   run sudo install -d -m 755 "$dest" /etc/sddm.conf.d
   run sudo install -m 644 "$src"/carbon/* "$dest"/
-  if [[ -f "$font" ]]; then run sudo install -m 644 "$font" "$dest/MapleMono-NF-Regular.ttf"
+  if [[ -f "$font" ]]; then
+    run sudo install -m 644 "$font" "$dest/MapleMono-NF-Regular.ttf"
+    run sudo install -m 644 "${font%Regular.ttf}Light.ttf" "$dest/MapleMono-NF-Light.ttf"
   else warn "Maple Mono not found (run ./install.sh fonts first): the login screen uses a plain monospace font"; fi
   if [[ -f "$wall" ]]; then run sudo install -m 644 "$wall" "$dest/background.jpg"
   else warn "no wallpaper found (run ./install.sh wallpapers): the login screen has a plain background"; fi
