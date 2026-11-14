@@ -1,0 +1,15 @@
+# Bluetooth pairing agent: puts BlueZ's pairing questions to you in the shell (see home/bin/.local/bin/bt-agent).
+#   journalctl --user -u bt-agent -f
+[Unit]
+Description=Bluetooth pairing agent (asks through the shell)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/bt-agent
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

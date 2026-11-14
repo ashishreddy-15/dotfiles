@@ -15,6 +15,7 @@ ENABLE=(
   hypridle.service          # idle -> lock / screens off / suspend
   hyprpolkitagent.service   # password prompts for GUI apps
   quickshell.service        # desktop shell: bar, notifications, launcher
+  bt-agent.service          # Bluetooth pairing agent (asks you in the shell; without one, pairing hangs)
 )
 
 DISABLE=(

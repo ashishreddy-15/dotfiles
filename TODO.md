@@ -43,6 +43,8 @@ quiet tiles, the control center's structure.
 - [ ] Try by hand: connect to a saved Wi-Fi network and a new one with a password; pair a Bluetooth device; pick the sound
       output / input device; the brightness and warmth sliders; clear the notification history; switch the power profile
 - [x] Settings: keyboard navigation (sidebar, Tab / arrows between controls, Enter / Space, Left / Right, scrolling to the focused row)
+- [x] Bluetooth pairing: agent (`bt-agent`) that asks in the shell; pairable only while Settings > Bluetooth is open; trusted after pairing
+- [ ] Pair the Rockerz 650 Pro for real (needs the headset in pairing mode)
 - [ ] Settings: a "forget network" action; Bluetooth: forget / remove a device
 
 ## 4. Beyond the shell

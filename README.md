@@ -34,7 +34,7 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
-    ├── bin/                # ~/.local/bin/appearance: reads and sets GTK theme, colour scheme, fonts, icons, cursor
+    ├── bin/                # ~/.local/bin: appearance (GTK theme, fonts, cursor...), bt-agent (Bluetooth pairing agent)
     ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
     ├── kitty/              # terminal: font + colours
@@ -99,6 +99,12 @@ Left on a plain row or Shift+Tab from the first control goes back to the sidebar
 GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita
 light in the light scheme. GTK3 apps (blueman, file dialogs) always use the dark palette. More GTK themes appear in the
 list when installed (for example `sudo dnf install adw-gtk3-theme`).
+
+**Pair a Bluetooth device:** put it in pairing mode, open Settings > Bluetooth and click it. BlueZ's questions (a PIN,
+"does this code match?", "may this device connect?") come up as a prompt in the middle of the screen; nothing is
+accepted until you click Pair or Allow (Esc declines). The agent behind this is `bt-agent` (user service
+`bt-agent.service`; logs: `journalctl --user -u bt-agent -f`). Only `bluetoothd` can call it (system bus policy), and
+the computer is pairable only while Settings > Bluetooth is open.
 
 ## Repos
 

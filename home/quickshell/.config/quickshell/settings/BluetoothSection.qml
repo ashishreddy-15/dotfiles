@@ -27,6 +27,14 @@ Page {
         value: root.on && ShellState.settingsOpen && root.visible
         when: root.adapter !== null
     }
+    // Pairable (devices may pair with this computer) only while this page is open; it goes back to what it was after.
+    // Every pairing question is still put to you by the pairing prompt (bt-agent + bluetooth/PairingPrompt.qml).
+    Binding {
+        target: root.adapter
+        property: "pairable"
+        value: true
+        when: root.adapter !== null && root.on && ShellState.settingsOpen && root.visible
+    }
 
     SettingRow {
         title: "Bluetooth"
@@ -46,6 +54,15 @@ Page {
     }
 
     GroupLabel { visible: root.on; text: "Devices" }
+    StyledText {
+        visible: root.on
+        width: parent.width
+        bottomPadding: 6
+        text: "To add a device, put it in pairing mode (usually: hold its power button until the light flashes), then click it."
+        color: Theme.dim
+        font.pixelSize: Theme.fontSmall
+        wrapMode: Text.Wrap
+    }
 
     Repeater {
         model: root.on ? root.devices : []
@@ -57,21 +74,36 @@ Page {
             title: modelData.name || modelData.address
             marked: modelData.connected
             detail: modelData.pairing ? "pairing…"
+                  : failed ? "failed, try again"
                   : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
                   : modelData.paired ? "paired" : "pair"
-            detailColor: modelData.connected ? Theme.ok : Theme.dim
+            detailColor: modelData.connected ? Theme.ok : failed ? Theme.warn : Theme.dim
 
-            // Pairing is only half the job: connect as soon as it has worked.
+            // Pairing is only half the job: once it has worked, trust the device (so it can reconnect by itself later)
+            // and connect. If pairing ends without success, say so instead of quietly going back to "pair".
             property bool connectAfterPairing: false
+            property bool failed: false
             Connections {
                 target: item.modelData
                 function onPairedChanged() {
-                    if (item.connectAfterPairing && item.modelData.paired) { item.connectAfterPairing = false; item.modelData.connect() }
+                    if (item.connectAfterPairing && item.modelData.paired) {
+                        item.connectAfterPairing = false
+                        item.modelData.trusted = true
+                        item.modelData.connect()
+                    }
+                }
+                function onPairingChanged() {
+                    if (!item.modelData.pairing && item.connectAfterPairing && !item.modelData.paired) {
+                        item.connectAfterPairing = false
+                        item.failed = true
+                    }
                 }
             }
 
             onClicked: {
-                if (modelData.connected) modelData.disconnect()
+                failed = false
+                if (modelData.pairing) modelData.cancelPair()
+                else if (modelData.connected) modelData.disconnect()
                 else if (modelData.paired) modelData.connect()
                 else { connectAfterPairing = true; modelData.pair() }
             }
