@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 
 // The one place for colours, fonts and sizes. Every other file reads from here.
-// Palette: "Carbon & Ice". The same colours are used in:
+// Palette: "Carbon & Pewter". The same colours are used in:
 //   hypr/modules/look.lua (borders), hypr/hyprlock.conf, kitty/kitty.conf
 Singleton {
     // Surfaces, darkest to lightest
@@ -18,7 +18,7 @@ Singleton {
     readonly property color dim:     "#666a6e"
 
     // Accent and status (kept muted on purpose)
-    readonly property color accent:  "#8a9fab"
+    readonly property color accent:  "#6c7f91"
     readonly property color ok:      "#7d9889"
     readonly property color warn:    "#a8976f"
     readonly property color err:     "#a67a7e"

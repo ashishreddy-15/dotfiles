@@ -99,7 +99,7 @@ update back for a few days until the COPR rebuilds Quickshell. That's expected.
 
 ## Look
 
-Palette "Carbon & Ice": neutral near-black base (#111111), dim grey text, one muted icy accent, muted
+Palette "Carbon & Pewter": neutral near-black base (#111111), dim grey text, one pewter (grey-blue) accent, muted
 status colours. Fonts: **Maple Mono NF** (bar, terminal, icons) and **Asap** (interface,
 slightly condensed). Neither is in Fedora, so `./install.sh fonts` downloads the
 exact versions listed in `system/fonts.txt` and verifies their checksums.
@@ -110,7 +110,8 @@ four to re-theme.
 
 ## Quickshell
 
-Runs as `quickshell.service` (Hyprland sessions only) and reloads when a file is saved.
+Runs as `quickshell.service` (Hyprland sessions only). It reloads when a file is saved in
+place; if a change does not show up (some tools replace the file instead), restart it.
 
 ```sh
 systemctl --user restart quickshell      # restart

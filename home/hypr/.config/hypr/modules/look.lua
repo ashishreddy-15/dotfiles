@@ -1,11 +1,11 @@
--- Colours: "Carbon & Ice" (same palette as quickshell/Theme.qml).
+-- Colours: "Carbon & Pewter" (same palette as quickshell/Theme.qml).
 hl.config({
     general = {
         gaps_in     = 4,
         gaps_out    = 8,
         border_size = 2,
         col = {
-            active_border   = "rgba(8a9fabee)",
+            active_border   = "rgba(6c7f91ee)",
             inactive_border = "rgba(262626ee)",
         },
         resize_on_border = true,   -- drag window edges to resize
