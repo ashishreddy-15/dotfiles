@@ -7,7 +7,7 @@ import qs
 // so the text looks like part of the wallpaper (Theme.barOpacity). The text colours follow the wallpaper:
 // light text on dark ones, dark text on light ones (Theme.barText and friends).
 //
-//   [1] 2  3   App name                              (status when it matters)   Sat 14 Nov  12:40
+//   [1] 2  3   App name                              (status when it matters)   Sat 14  12:40   bell
 //
 // "Quiet" rule: the right side only shows things that need attention.
 // Super+B hides/shows the bar.
