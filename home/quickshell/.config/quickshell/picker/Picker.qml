@@ -187,8 +187,35 @@ Scope {
                     color: Theme.border
                 }
 
-                Column {
+                Item {
                     visible: root.items.length > 0
+                    width: parent.width
+                    height: list.implicitHeight
+
+                    // One highlight for the whole list: it slides to the selected row instead of each row
+                    // lighting up on its own. (Scrolling moves `offset`, and the highlight follows.)
+                    Rectangle {
+                        x: root.listPadding
+                        y: root.listPadding + (root.selected - root.offset) * root.rowHeight
+                        width: parent.width - 2 * root.listPadding
+                        height: root.rowHeight
+                        radius: Theme.radiusRow
+                        color: Theme.selected
+                        Behavior on y { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
+
+                        // The accent mark makes the selected row obvious on any wallpaper.
+                        Rectangle {
+                            x: 4
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 2
+                            height: 16
+                            radius: 1
+                            color: Theme.accent
+                        }
+                    }
+
+                Column {
+                    id: list
                     width: parent.width
                     topPadding: root.listPadding
                     bottomPadding: root.listPadding
@@ -206,19 +233,7 @@ Scope {
                             width: parent.width - 2 * root.listPadding
                             height: root.rowHeight
                             radius: Theme.radiusRow
-                            color: active ? Theme.selected : Theme.clear
-                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
-
-                            // The accent mark makes the selected row obvious on any wallpaper.
-                            Rectangle {
-                                visible: row.active
-                                x: 4
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 2
-                                height: 16
-                                radius: 1
-                                color: Theme.accent
-                            }
+                            color: Theme.clear   // the highlight is drawn behind the list
 
                             RowLayout {
                                 anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
@@ -265,6 +280,7 @@ Scope {
                             }
                         }
                     }
+                }
                 }
             }
         }

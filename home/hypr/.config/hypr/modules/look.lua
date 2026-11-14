@@ -18,7 +18,7 @@ hl.config({
         blur     = { enabled = true, size = 4, passes = 2 },
     },
 
-    animations = { enabled = true },  -- Hyprland's built-in default animations
+    animations = { enabled = true },
 
     dwindle = { preserve_split = true },
 
@@ -29,3 +29,23 @@ hl.config({
         focus_on_activate       = true,   -- apps asking for focus (e.g. a link opening Brave) get it
     },
 })
+
+-- Motion: the same numbers as quickshell/Theme.qml. Hyprland speeds are in units of 100 ms, so
+-- durBase 140 ms = 1.4, durFast 90 ms = 0.9, durSlow 240 ms = 2.4. Enter slower than exit, ease out, no springs.
+hl.curve("easeOut", { type = "bezier", points = { {0.215, 0.61}, {0.355, 1} } })   -- = Easing.OutCubic
+
+hl.animation({ leaf = "global",        enabled = true, speed = 1.4, bezier = "easeOut" })
+hl.animation({ leaf = "windowsIn",     enabled = true, speed = 1.4, bezier = "easeOut", style = "popin 94%" })
+hl.animation({ leaf = "windowsOut",    enabled = true, speed = 0.9, bezier = "easeOut", style = "popin 94%" })
+hl.animation({ leaf = "windowsMove",   enabled = true, speed = 1.4, bezier = "easeOut" })
+hl.animation({ leaf = "fadeIn",        enabled = true, speed = 1.4, bezier = "easeOut" })
+hl.animation({ leaf = "fadeOut",       enabled = true, speed = 0.9, bezier = "easeOut" })
+hl.animation({ leaf = "fadeSwitch",    enabled = true, speed = 0.9, bezier = "easeOut" })
+hl.animation({ leaf = "fadeShadow",    enabled = true, speed = 1.4, bezier = "easeOut" })
+hl.animation({ leaf = "border",        enabled = true, speed = 0.9, bezier = "easeOut" })
+hl.animation({ leaf = "borderangle",   enabled = false })
+hl.animation({ leaf = "layersIn",      enabled = true, speed = 1.4, bezier = "easeOut", style = "fade" })
+hl.animation({ leaf = "layersOut",     enabled = true, speed = 0.9, bezier = "easeOut", style = "fade" })
+hl.animation({ leaf = "workspaces",    enabled = true, speed = 2.4, bezier = "easeOut", style = "slide" })
+hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 2.4, bezier = "easeOut", style = "slide" })
+hl.animation({ leaf = "workspacesOut", enabled = true, speed = 2.4, bezier = "easeOut", style = "slide" })

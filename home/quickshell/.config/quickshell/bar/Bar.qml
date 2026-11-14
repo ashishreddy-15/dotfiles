@@ -67,7 +67,18 @@ Variants {
                     Clock {}
                 }
 
+                // Hover / pressed wash behind the status items and clock, in the bar's own text colour so it
+                // reads on both dark and light wallpapers.
+                Rectangle {
+                    anchors { fill: parent; leftMargin: -8; rightMargin: -8; topMargin: -4; bottomMargin: -4 }
+                    radius: Theme.radiusRow
+                    color: Qt.alpha(Theme.barText, area.pressed ? 0.22 : area.containsMouse ? 0.12 : 0)
+                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                }
+
                 MouseArea {
+                    id: area
+                    hoverEnabled: true
                     anchors { fill: parent; margins: -6 }
                     cursorShape: Qt.PointingHandCursor
                     onClicked: ShellState.togglePanel(bar.modelData.name)

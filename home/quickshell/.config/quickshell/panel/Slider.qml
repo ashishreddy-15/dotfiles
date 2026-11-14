@@ -18,7 +18,8 @@ Item {
     Rectangle {
         id: track
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
-        height: 4
+        height: mouse.pressed ? 6 : 4       // a little thicker under the pointer, thicker still while dragging
+        Behavior on height { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
         radius: Theme.radiusSmall
         color: Theme.border
 
@@ -28,9 +29,24 @@ Item {
             radius: parent.radius
             color: root.muted ? Theme.dim : Theme.accent
         }
+
+        // Knob: appears when the pointer is over the slider.
+        Rectangle {
+            x: parent.width * root.clamp(root.value) - width / 2
+            anchors.verticalCenter: parent.verticalCenter
+            width: mouse.pressed ? 14 : 12
+            height: width
+            radius: width / 2
+            color: Theme.bright
+            opacity: mouse.containsMouse || mouse.pressed ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
+            Behavior on width { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+        }
     }
 
     MouseArea {
+        id: mouse
+        hoverEnabled: true
         anchors { fill: parent; topMargin: -4; bottomMargin: -4 }
         cursorShape: Qt.PointingHandCursor
         onPressed: m => root.moved(root.clamp(m.x / width))

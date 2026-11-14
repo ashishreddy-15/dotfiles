@@ -25,6 +25,7 @@ Row {
             height: 16
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
 
             onClicked: event => {
                 if (event.button === Qt.RightButton || modelData.onlyMenu) {
@@ -42,7 +43,10 @@ Row {
             IconImage {
                 anchors.fill: parent
                 source: entry.modelData.icon
-                opacity: 0.8   // keep colourful app icons from shouting
+                opacity: entry.pressed ? 0.6 : entry.containsMouse ? 1 : 0.8   // quiet at rest, full under the pointer
+                scale: entry.pressed ? 0.9 : 1
+                Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
+                Behavior on scale { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
             }
         }
     }

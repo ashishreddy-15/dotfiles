@@ -27,9 +27,9 @@ GTK apps dark + Carbon & Pewter + Maple Mono, control center as tiles + sliders 
 Done: design tokens, shared `Card`, one radius system, frosted cards + shadows, visible selection and hover,
 quiet tiles, the control center's structure.
 
-- [ ] Hyprland animations: windows, workspaces and layers on the same speed as the shell (snappy)
-- [ ] Picker: the selection highlight slides between rows instead of jumping
-- [ ] Hover / pressed feedback for: sliders, tray icons, the bar's clock area
+- [x] Hyprland animations: windows, workspaces and layers on the same speed as the shell (snappy)
+- [x] Picker: the selection highlight slides between rows instead of jumping
+- [x] Hover / pressed feedback for: sliders, tray icons, the bar's clock area
 - [ ] One consistent glyph set (selection dot, padlock, arrows)
 - [ ] Tray right-click menus: check how they look and theme them
 - [ ] `Super + B` (hide bar) animated inside the shell instead of a compositor fade
