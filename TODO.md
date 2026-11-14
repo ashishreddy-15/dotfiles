@@ -62,6 +62,7 @@ quiet tiles, the control center's structure.
 
 ## 5. System
 
+- [x] install.sh output: numbered steps, colour-coded status, services grouped with their real on / off state, summary
 - [ ] Run `./install.sh` from a clean state (fresh Fedora in a VM) and fix what breaks
 - [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
@@ -112,7 +113,7 @@ quiet tiles, the control center's structure.
       file aliases, history and completion settings (home/bash)
 - [x] Apps: Resources from Flathub (installed; Flatpak apps get the palette); Loupe, Papers, Calculator, Disk Usage
       Analyzer added to packages/desktop.txt
-- [ ] Run `./install.sh packages` (needs sudo) to install Loupe, Papers, Calculator and Disk Usage Analyzer
+- [x] Loupe, Papers, Calculator and Disk Usage Analyzer installed
 - [x] App menu on Super + A (icon grid + search); control center moved to Super + D; wallpaper picker removed
       (Settings > Wallpaper)
 - [x] Notification bell always at the right end of the bar
