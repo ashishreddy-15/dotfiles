@@ -63,7 +63,7 @@ quiet tiles, the control center's structure.
 - [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
 - [x] Idle dimming for the external monitor too (`qs ipc call brightness dim / undim`, DDC; laptop verified, monitor path shared with the slider)
-- [ ] Put the repo on a remote (GitHub) so the setup is backed up
+- [x] Repo on GitHub (public): https://github.com/ashishreddy-15/dotfiles
 - [ ] Decide what to do with Sway: keep as a fallback session, or remove it and its packages
 
 ## 6. Things I could not test (no way to press keys or click from here) - please try
