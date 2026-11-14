@@ -1,0 +1,54 @@
+/* GTK4 / libadwaita apps (Nautilus, pavucontrol...): the "Carbon & Pewter" palette and the shell's shape.
+   Same colours as quickshell/Theme.qml (checked by scripts/ui-check). libadwaita names its colours, so recolouring
+   is a matter of redefining them. */
+@define-color window_bg_color      #111111;
+@define-color window_fg_color      #adb0b3;
+@define-color view_bg_color        #141414;
+@define-color view_fg_color        #adb0b3;
+@define-color headerbar_bg_color   #141414;
+@define-color headerbar_fg_color   #d0d3d6;
+@define-color headerbar_border_color #262626;
+@define-color headerbar_backdrop_color #111111;
+@define-color headerbar_shade_color rgba(0, 0, 0, 0.45);
+@define-color card_bg_color        #1b1b1b;
+@define-color card_fg_color        #adb0b3;
+@define-color card_shade_color     rgba(0, 0, 0, 0.45);
+@define-color dialog_bg_color      #141414;
+@define-color dialog_fg_color      #adb0b3;
+@define-color popover_bg_color     #1b1b1b;
+@define-color popover_fg_color     #adb0b3;
+@define-color sidebar_bg_color     #141414;
+@define-color sidebar_fg_color     #adb0b3;
+@define-color sidebar_backdrop_color #111111;
+@define-color sidebar_shade_color  rgba(0, 0, 0, 0.45);
+@define-color secondary_sidebar_bg_color #111111;
+@define-color secondary_sidebar_fg_color #adb0b3;
+@define-color thumbnail_bg_color   #1b1b1b;
+@define-color thumbnail_fg_color   #adb0b3;
+@define-color shade_color          rgba(0, 0, 0, 0.45);
+@define-color scrollbar_outline_color #111111;
+@define-color borders              #262626;
+
+@define-color accent_bg_color      #6c7f91;
+@define-color accent_fg_color      #0e1114;
+@define-color accent_color         #8fa3b5;
+@define-color success_bg_color     #7d9889;
+@define-color success_fg_color     #0e1114;
+@define-color success_color        #7d9889;
+@define-color warning_bg_color     #a8976f;
+@define-color warning_fg_color     #0e1114;
+@define-color warning_color        #a8976f;
+@define-color error_bg_color       #a67a7e;
+@define-color error_fg_color       #0e1114;
+@define-color error_color          #a67a7e;
+@define-color destructive_bg_color #a67a7e;
+@define-color destructive_fg_color #0e1114;
+@define-color destructive_color    #a67a7e;
+
+/* Shape: windows and cards 10 px, rows, buttons and inputs 6 px (see Theme.radiusCard / radiusRow). */
+window.csd, window.csd decoration, popover > contents, .card, .boxed-list, dialog.message {
+    border-radius: 10px;
+}
+button, entry, spinbutton, .linked > button, row, menuitem, modelbutton, tab, .navigation-sidebar > row {
+    border-radius: 6px;
+}
