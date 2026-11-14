@@ -6,7 +6,11 @@
 
 import Quickshell
 import "bar"
+import "notifications"
+import "osd"
 
 ShellRoot {
     Bar {}
+    Notifications {}
+    Osd {}
 }

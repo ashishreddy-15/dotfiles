@@ -9,6 +9,11 @@ import Quickshell.Io
 Singleton {
     property bool barVisible: true
 
+    // Where pop-ups (notifications, volume/brightness) appear: the main monitor,
+    // or the first one if the main monitor is unplugged.
+    readonly property var mainScreen: Quickshell.screens.find(s => s.name === Theme.mainOutput)
+                                      ?? Quickshell.screens[0]
+
     IpcHandler {
         target: "bar"
         function toggle(): void { barVisible = !barVisible }

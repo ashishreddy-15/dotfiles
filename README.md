@@ -131,12 +131,19 @@ journalctl --user -u quickshell -f       # logs / QML errors
   | Item | Shown when |
   |---|---|
   | `bat` | 30% or less, or charging |
-  | `vol` | muted, or for 1.5 s after the volume changes |
+  | `vol` | muted |
   | `wifi` / `net` | there is no connection |
   | `bt` | a device is connected |
 
   `Super + B` hides or shows the bar. If the main monitor is unplugged, the laptop's
   bar takes over the status area.
+- `notifications/`: Quickshell is the notification daemon. Pop-ups drop down from the
+  top-centre of the main monitor, newest on top, up to 4 at once. Normal ones close
+  after 5 s (paused while hovered); critical ones stay. Click to dismiss.
+  dunst (from the Sway spin) is kept out of Hyprland by a systemd drop-in.
+- `osd/`: small volume / brightness indicator at the bottom-centre of the main monitor.
+  Volume shows on any change; brightness shows when the brightness keys are used
+  (they call `qs ipc call osd brightness`), so idle dimming stays silent.
 
 ## Desktop
 
