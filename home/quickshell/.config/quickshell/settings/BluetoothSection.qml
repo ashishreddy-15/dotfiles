@@ -8,7 +8,8 @@ Page {
     id: root
 
     readonly property var adapter: Bluetooth.defaultAdapter
-    readonly property bool on: adapter?.enabled ?? false
+    // A blocked radio counts as off even when BlueZ still lists a powered adapter.
+    readonly property bool on: (adapter?.enabled ?? false) && !Rfkill.bluetoothBlocked
 
     // Connected first, then saved (paired) ones, then newly found ones. Nearby gadgets that don't announce
     // a name (they show up as a bare address) are left out unless you have paired them.
@@ -17,6 +18,8 @@ Page {
         .filter(d => d.paired || d.connected || (d.name !== "" && !addressLike.test(d.name)))
         .sort((a, b) => (b.connected - a.connected) || ((b.paired ? 1 : 0) - (a.paired ? 1 : 0)) || a.name.localeCompare(b.name))
     readonly property var connectedDevices: Bluetooth.devices.values.filter(d => d.connected)
+
+    Component.onCompleted: Rfkill.refresh()
 
     Binding {
         target: root.adapter
@@ -27,12 +30,19 @@ Page {
 
     SettingRow {
         title: "Bluetooth"
-        description: !root.adapter ? "No Bluetooth adapter"
+        description: Rfkill.bluetoothHardBlocked ? "Blocked by a hardware switch"
+                   : Rfkill.bluetoothBlocked ? "Off: the radio is blocked"
+                   : !root.adapter ? "No Bluetooth adapter"
                    : !root.on ? "Off"
                    : root.connectedDevices.length === 0 ? "On"
                    : root.connectedDevices.length === 1 ? "Connected to " + root.connectedDevices[0].name
                    : "Connected to " + root.connectedDevices.length + " devices"
-        Switch { visible: root.adapter !== null; checked: root.on; onToggled: root.adapter.enabled = !root.on }
+        Switch {
+            visible: !Rfkill.bluetoothHardBlocked && (root.adapter !== null || Rfkill.bluetoothBlocked)
+            checked: root.on
+            // A blocked radio has to be unblocked first; after that the adapter can be switched as usual.
+            onToggled: Rfkill.bluetoothBlocked ? Rfkill.unblockBluetooth() : root.adapter.enabled = !root.on
+        }
     }
 
     GroupLabel { visible: root.on; text: "Devices" }

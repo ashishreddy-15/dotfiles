@@ -24,7 +24,7 @@ Column {
     readonly property var wifi: Networking.devices.values.find(d => d.type === DeviceType.Wifi) ?? null
     readonly property var wifiNetwork: wifi?.networks.values.find(n => n.connected) ?? null
     readonly property var btAdapter: Bluetooth.defaultAdapter
-    readonly property bool btOn: btAdapter?.enabled ?? false
+    readonly property bool btOn: (btAdapter?.enabled ?? false) && !Rfkill.bluetoothBlocked   // a blocked radio counts as off
     readonly property var btConnected: Bluetooth.devices.values.filter(d => d.connected)
 
     readonly property var sink: Pipewire.defaultAudioSink
@@ -160,13 +160,15 @@ Column {
         Tile {
             width: parent.tileWidth
             label: "Bluetooth"
-            value: !root.btAdapter ? "no adapter"
+            value: Rfkill.bluetoothHardBlocked ? "hardware switch"
+                 : Rfkill.bluetoothBlocked ? "blocked"
+                 : !root.btAdapter ? "no adapter"
                  : !root.btOn ? "off"
                  : root.btConnected.length === 0 ? "on"
                  : root.btConnected.length === 1 ? root.btConnected[0].name
                  : root.btConnected.length + " devices"
             active: root.btOn
-            onToggled: if (root.btAdapter) root.btAdapter.enabled = !root.btOn
+            onToggled: Rfkill.bluetoothBlocked ? Rfkill.unblockBluetooth() : (root.btAdapter ? root.btAdapter.enabled = !root.btOn : undefined)
         }
         Tile {
             width: parent.tileWidth
