@@ -1,0 +1,5 @@
+# Installed with SDKMAN (into ~/.sdkman, for your user, no sudo) by `./install.sh sdkman`.
+# This file is not a list of Fedora packages: the packages step skips it.
+# One "<candidate> <version>" per line; that version is installed and made the default. '#' starts a comment.
+java    25.0.5.0+8-tem             # Eclipse Temurin 25 (LTS); Neovim's intellij-lsp uses it
+maven   3.10.0

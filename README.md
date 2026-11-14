@@ -149,8 +149,14 @@ you have typed; `cp` and `mv` ask before overwriting, `rm` asks once before dele
 **Neovim:** `home/nvim/.config/nvim` (its own README lists the plugins and keys). Plugin versions are pinned in
 `lazy-lock.json`; the first start installs them (or `nvim --headless "+Lazy! restore" +qa`). What it needs from the
 system (Neovim, gcc, make, tree-sitter-cli, npm, fd) is in `packages/editor.txt`. Its colour scheme
-(`colors/mono.lua`) uses the desktop's palette, checked by `scripts/ui-check`. Java support (intellij-lsp.nvim)
-expects a JDK from SDKMAN in `~/.sdkman/candidates/java/current`.
+(`colors/mono.lua`) uses the desktop's palette, checked by `scripts/ui-check`. Java support (intellij-lsp.nvim) uses
+the JDK from SDKMAN (below).
+
+**Java and Maven (SDKMAN):** `./install.sh sdkman` installs SDKMAN into `~/.sdkman` (for your user; it is told not to
+edit `~/.bashrc`) and the versions in `packages/sdkman.txt` (Temurin 25 LTS, Maven 3.10.0), made the defaults.
+`~/.bashrc.d/40-sdkman.sh` puts the current versions on PATH and sets `JAVA_HOME` / `MAVEN_HOME` without loading
+SDKMAN, so new shells stay fast; `sdk` loads it the first time you type it. To change a version: `sdk install java
+<version>`, `sdk default java <version>`, and update `packages/sdkman.txt`.
 
 ## Repos
 

@@ -94,7 +94,8 @@ quiet tiles, the control center's structure.
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
 - [x] Neovim config moved in from the swaywm repo (home/nvim), recoloured to Carbon & Pewter; packages/editor.txt
 - [ ] Run `./install.sh packages` (sudo) for Neovim and its build tools, then first start (plugins install)
-- [ ] Optional: remove nvim/ from the swaywm repo with a pointer here; install a JDK (SDKMAN) for Java
+- [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
+- [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
       file aliases, history and completion settings (home/bash)
 - [x] Apps: Resources from Flathub (installed; Flatpak apps get the palette); Loupe, Papers, Calculator, Disk Usage
