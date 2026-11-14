@@ -84,7 +84,7 @@ quiet tiles, the control center's structure.
 - [ ] Notification actions and click-to-dismiss
 - [x] hyprlock: how it looks, unlocking (no fingerprint reader on this laptop)
 - [ ] Launching an app from the launcher with Enter (tray: empty now that nm-applet no longer starts)
-- [ ] Frosted cards on a light wallpaper (e.g. `cloud-peak`)
+- [ ] Frosted cards on a light wallpaper (e.g. `cloud-sea`)
 
 ## 7. Ideas (not committed to)
 
