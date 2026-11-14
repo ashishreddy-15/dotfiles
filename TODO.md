@@ -64,6 +64,8 @@ quiet tiles, the control center's structure.
 - [x] install.sh output: numbered steps, colour-coded status, services grouped with their real on / off state, summary
 - [ ] Run `./install.sh` from a clean state (fresh Fedora in a VM) and fix what breaks
 - [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
+- [x] Lid closed with the monitor plugged in: laptop screen off, workspace 10 moves to the monitor; back on opening (modules/monitors.lua)
+- [ ] Try with the real lid: close and open it docked; boot docked with the lid shut; unplug the monitor with the lid shut
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
 - [x] Idle dimming for the external monitor too (`qs ipc call brightness dim / undim`, DDC; laptop verified, monitor path shared with the slider)
 - [x] Repo on GitHub (public): https://github.com/ashishreddy-15/dotfiles
