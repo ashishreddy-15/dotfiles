@@ -11,6 +11,10 @@ Page {
 
     Component.onCompleted: Tablet.refresh()
 
+    // The page scrolls by dragging, which would take the pen's strokes away from the test pad (writing would scroll
+    // the page instead). Over the pad, or while drawing on it, the page does not scroll.
+    interactive: contentHeight > height && !padHover.hovered && !pen.active
+
     readonly property var screens: [{ label: "Working screen", value: "current" }]
         .concat(Hyprland.monitors.values.map(m => ({ label: Brightness.isInternal(m.name) ? "Laptop" : "Monitor", value: m.name })))
         .concat([{ label: "All", value: "all" }])
@@ -104,6 +108,7 @@ Page {
 
         property var last: null
 
+        HoverHandler { id: padHover }           // a pen hovering above the tablet counts too
         Canvas {
             id: ink
             anchors.fill: parent
