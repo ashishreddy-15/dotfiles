@@ -1,0 +1,7 @@
+# Neovim and what its plugins need (home/nvim/.config/nvim).
+neovim                     # the editor (the config needs 0.11 or newer)
+gcc                        # builds Treesitter parsers and telescope-fzf-native
+make                       # builds telescope-fzf-native
+tree-sitter-cli            # nvim-treesitter (main branch) needs it to install parsers
+nodejs-npm                 # Mason installs the TypeScript and Python language servers with npm
+fd-find                    # Telescope's file finder (ripgrep is already there for live grep)

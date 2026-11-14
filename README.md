@@ -35,6 +35,7 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
+    ├── nvim/               # ~/.config/nvim: Neovim (lazy.nvim, LSP, Treesitter, Telescope...), colours = the palette
     ├── bash/               # ~/.bashrc.d: options, aliases, the prompt (Fedora's ~/.bashrc loads them)
     ├── bin/                # ~/.local/bin: appearance (GTK look), bt-agent (Bluetooth pairing), screenshot, screenrecord
     ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
@@ -144,6 +145,12 @@ Aliases: `din` / `dup` / `drm` / `dse` = dnf install / upgrade / remove / search
 `dhist`); `ll`, `la`, `lt`; `..`, `...`, `dots`, `mkcd`; git `gs`, `gd`, `gds`, `ga`, `gc`, `gca`, `gp`, `gl`,
 `gsw`, `glog`; `sc` / `scu` (systemctl), `jf` / `jfu` (follow logs); `reload`. Up / Down search the history for what
 you have typed; `cp` and `mv` ask before overwriting, `rm` asks once before deleting many files or a folder.
+
+**Neovim:** `home/nvim/.config/nvim` (its own README lists the plugins and keys). Plugin versions are pinned in
+`lazy-lock.json`; the first start installs them (or `nvim --headless "+Lazy! restore" +qa`). What it needs from the
+system (Neovim, gcc, make, tree-sitter-cli, npm, fd) is in `packages/editor.txt`. Its colour scheme
+(`colors/mono.lua`) uses the desktop's palette, checked by `scripts/ui-check`. Java support (intellij-lsp.nvim)
+expects a JDK from SDKMAN in `~/.sdkman/candidates/java/current`.
 
 ## Repos
 

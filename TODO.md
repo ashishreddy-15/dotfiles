@@ -92,6 +92,9 @@ quiet tiles, the control center's structure.
 - [x] Notification centre (Super + N, bell in the bar with a count; crossed bell while Silence is on), grouped by app
 - [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
+- [x] Neovim config moved in from the swaywm repo (home/nvim), recoloured to Carbon & Pewter; packages/editor.txt
+- [ ] Run `./install.sh packages` (sudo) for Neovim and its build tools, then first start (plugins install)
+- [ ] Optional: remove nvim/ from the swaywm repo with a pointer here; install a JDK (SDKMAN) for Java
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
       file aliases, history and completion settings (home/bash)
 - [x] Apps: Resources from Flathub (installed; Flatpak apps get the palette); Loupe, Papers, Calculator, Disk Usage
