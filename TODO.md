@@ -100,9 +100,10 @@ quiet tiles, the control center's structure.
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
 - [x] Pen tablet: Settings > Tablet (screen, proportions, orientation, mode, battery, test pad), applied live
-- [ ] Tablet: try the test pad with the pen (pressure); later maybe ExpressKeys / pen buttons
+- [x] Tablet: pen and pressure confirmed
+- [ ] Later, if wanted: ExpressKeys / pen buttons
 - [x] Handwriting app: Xournal++ (packages/desktop.txt)
-- [ ] Install it: `din xournalpp`; check the pen and pressure in it
+- [x] Xournal++ installed; pen and pressure work
 - [x] fzf (Ctrl+R / Ctrl+T / Alt+C / **), zoxide (z, zi), bat previews; prompt still ~0.05 ms (zoxide without its
       per-prompt hook)
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
