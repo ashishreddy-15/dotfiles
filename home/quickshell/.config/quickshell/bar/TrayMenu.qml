@@ -22,8 +22,9 @@ Scope {
     property bool open: false
     property var trayItem: null
     property real anchorX: 0
-    property var path: []                   // submenus we have stepped into (entries), outermost first
-    readonly property var current: path.length > 0 ? path[path.length - 1] : (trayItem ? trayItem.menu : null)
+    // The submenus we have stepped into, as positions in each parent's list (outermost first). Positions, not the
+    // entry objects: the app rebuilds its menu entries whenever it refreshes them, which would leave stale objects.
+    property var path: []
 
     readonly property int cardWidth: 300
     readonly property int maxHeight: 460
@@ -35,11 +36,33 @@ Scope {
         path = []
         open = true
     }
-    function close() { open = false }
+    function close() { leave(path.length); open = false }
+
+    // Apps such as nm-applet fill a submenu only when told it is being shown (D-Bus "AboutToShow"),
+    // so tell them when we step into one and when we leave it.
+    function entryAt(op, i) { return op && op.children && i >= 0 && i < op.children.values.length ? op.children.values[i] : null }
+    function enter(i) {
+        const e = entryAt(opener, i)
+        if (!e) return
+        e.opened()
+        path = path.concat([i])
+    }
+    function leave(count) {
+        for (let n = 0; n < count && path.length > 0; n++) {
+            entryAt(openers[path.length - 1], path[path.length - 1])?.closed()
+            path = path.slice(0, -1)
+        }
+    }
 
     onOpenChanged: if (open) keys.forceActiveFocus()
 
-    QsMenuOpener { id: opener; menu: root.current }
+    // One opener per level (a menu three submenus deep is the most we support): each one opens the entry chosen in the previous.
+    QsMenuOpener { id: o0; menu: root.trayItem ? root.trayItem.menu : null }
+    QsMenuOpener { id: o1; menu: root.path.length > 0 ? root.entryAt(o0, root.path[0]) : null }
+    QsMenuOpener { id: o2; menu: root.path.length > 1 ? root.entryAt(o1, root.path[1]) : null }
+    QsMenuOpener { id: o3; menu: root.path.length > 2 ? root.entryAt(o2, root.path[2]) : null }
+    readonly property var openers: [o0, o1, o2, o3]
+    readonly property var opener: openers[Math.min(path.length, 3)]
 
     PanelWindow {
         id: win
@@ -67,7 +90,7 @@ Scope {
         Item {
             id: keys
             focus: true
-            Keys.onEscapePressed: root.path.length > 0 ? root.path = root.path.slice(0, -1) : root.close()
+            Keys.onEscapePressed: root.path.length > 0 ? root.leave(1) : root.close()
         }
 
         Card {
@@ -102,7 +125,7 @@ Scope {
                             height: root.rowHeight
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: root.path = root.path.slice(0, -1)
+                            onClicked: root.leave(1)
                             Rectangle {
                                 anchors.fill: parent
                                 radius: Theme.radiusRow
@@ -112,18 +135,19 @@ Scope {
                             StyledText {
                                 x: 10
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: Theme.glyphBack + "  " + (root.path.length > 0 ? root.path[root.path.length - 1].text : "")
+                                text: Theme.glyphBack + "  " + (root.entryAt(root.openers[root.path.length - 1], root.path[root.path.length - 1])?.text ?? "")
                                 color: Theme.bright
                             }
                         }
                     }
 
                     Repeater {
-                        model: opener.children
+                        model: root.opener.children
 
                         Item {
                             id: entry
                             required property var modelData
+                            required property int index
                             readonly property bool separator: modelData.isSeparator
 
                             width: column.width
@@ -186,7 +210,7 @@ Scope {
                                 enabled: entry.modelData.enabled
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (entry.modelData.hasChildren) root.path = root.path.concat([entry.modelData])
+                                    if (entry.modelData.hasChildren && root.path.length < 3) root.enter(entry.index)
                                     else { entry.modelData.triggered(); root.close() }
                                 }
                             }
