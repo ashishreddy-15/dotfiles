@@ -7,7 +7,7 @@ import qs
 import "../ui"
 
 // Control center: a first page (status, tiles, display, sound, power) and detail pages (Wi-Fi, Bluetooth,
-// sound output, power profile, battery). See MainPage.qml for how controls are arranged.
+// sound output, power profile, battery, appearance). See MainPage.qml for how controls are arranged.
 // Opens under the right end of the bar when you click the clock (or press Super+A).
 // Esc, or a click anywhere else, closes it.
 //
@@ -27,7 +27,7 @@ Scope {
         function open(page: string): void {
             ShellState.panelScreen = Hyprland.focusedMonitor?.name ?? ""
             ShellState.panelOpen = true
-            stage.go(["wifi", "bt", "output", "profile", "night", "notifications", "battery"].includes(page) ? page : "main")
+            stage.go(["wifi", "bt", "output", "profile", "night", "notifications", "battery", "appearance"].includes(page) ? page : "main")
         }
     }
 
@@ -155,6 +155,7 @@ Scope {
                                        : stage.detailPage === "output" ? outputPage
                                        : stage.detailPage === "profile" ? profilePage
                                        : stage.detailPage === "battery" ? batteryPage
+                                       : stage.detailPage === "appearance" ? appearancePage
                                        : stage.detailPage === "night" ? nightPage
                                        : stage.detailPage === "notifications" ? notificationsPage : null
                     }
@@ -163,6 +164,7 @@ Scope {
                     Component { id: btPage;      BluetoothPage { onBack: stage.go("main") } }
                     Component { id: outputPage;  OutputPage    { onBack: stage.go("main") } }
                     Component { id: batteryPage; BatteryPage   { onBack: stage.go("main"); onOpen: page => stage.go(page) } }
+                    Component { id: appearancePage; AppearancePage { onBack: stage.go("main"); onDone: ShellState.panelOpen = false } }
                     Component { id: profilePage; ProfilePage   { onBack: stage.go("main") } }
                     Component { id: nightPage;   NightPage     { onBack: stage.go("main") } }
                     Component { id: notificationsPage; NotificationsPage { onBack: stage.go("main") } }

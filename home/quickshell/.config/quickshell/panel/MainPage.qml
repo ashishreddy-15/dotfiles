@@ -241,6 +241,12 @@ Column {
         }
     }
     Line {
+        label: "appearance"
+        value: "gtk apps"
+        onClicked: root.open("appearance")
+    }
+
+    Line {
         label: "wallpaper"
         value: ShellState.wallpaperName
         onClicked: { root.done(); ShellState.pickWallpaper() }

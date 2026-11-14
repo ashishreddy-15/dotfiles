@@ -38,8 +38,10 @@ quiet tiles, the control center's structure.
 
 ## 4. Beyond the shell
 
-- [ ] GTK apps (Nautilus, pavucontrol, blueman, file dialogs): force dark, recolour libadwaita to the palette,
-      10 px corners, Maple Mono
+- [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus an `appearance` page in the control center
+      (colour scheme, GTK / icon / cursor theme, cursor size, font and size; like nwg-look)
+- [ ] Appearance: folder icons stay Adwaita blue (not recoloured by the palette); GTK3 apps stay dark in the light scheme;
+      `adw-gtk3-theme` is not installed, so the GTK theme list has only Adwaita; icon / cursor list has one real choice each
 - [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
 - [ ] hyprlock: same tokens, frosted input card, your wallpaper instead of a blurred screenshot; fingerprint
 - [ ] Login screen (SDDM) theme and a matching cursor theme (optional)

@@ -12,6 +12,7 @@ import "launcher"
 import "clipboard"
 import "wallpaper"
 import "panel"
+import "appearance"
 
 ShellRoot {
     Bar {}
@@ -21,4 +22,5 @@ ShellRoot {
     Clipboard {}
     Wallpaper {}
     QuickPanel {}
+    FontPicker {}
 }

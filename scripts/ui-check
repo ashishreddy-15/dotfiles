@@ -58,6 +58,13 @@ static() {
     grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
     grep -qi "$text"   "$lock" && ok "text #$text in hyprlock" || fail "text #$text missing from hyprlock.conf"
 
+    # GTK apps: the stylesheets use the same palette as Theme.qml.
+    local name hex
+    for name in bg surface border text dim bright accent; do
+        hex=$(tv "$name" | tr -d '"#')
+        if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/gtk.css; then ok "$name #$hex in the GTK stylesheets"
+        else fail "$name #$hex missing from the GTK stylesheets (home/gtk)"; fi
+    done
     # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")
     grep -q "$fam" "$kitty" && ok "font \"$fam\" in kitty" || fail "kitty does not use \"$fam\""

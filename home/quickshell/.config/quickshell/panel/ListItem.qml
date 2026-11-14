@@ -42,6 +42,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.marked ? Theme.glyphMark : ""
         color: Theme.accent
+        font.pixelSize: Theme.fontMark
     }
     StyledText {
         x: 28

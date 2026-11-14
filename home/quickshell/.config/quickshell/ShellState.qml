@@ -24,6 +24,8 @@ Singleton {
     // Wallpaper: its name for the panel, and a request from the panel to open the picker.
     property string wallpaperName: ""
     signal pickWallpaper()
+    // The appearance page asks for the font picker.
+    signal pickFont()
 
     // Where pop-ups (notifications, volume/brightness) appear: the main monitor,
     // or the first one if the main monitor is unplugged.

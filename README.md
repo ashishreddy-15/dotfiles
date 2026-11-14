@@ -34,6 +34,8 @@ dotfiles/
 └── home/                   # stow packages, each mirrors $HOME
     ├── applications/       # hides leftover launcher entries (~/.local/share/applications, NoDisplay)
     ├── autostart/          # hides unwanted /etc/xdg/autostart entries
+    ├── bin/                # ~/.local/bin/appearance: reads and sets GTK theme, colour scheme, fonts, icons, cursor
+    ├── gtk/                # ~/.config/gtk-3.0 and gtk-4.0: settings.ini (the defaults) and gtk.css (palette + shape)
     ├── hypr/               # ~/.config/hypr: hyprland.lua + modules/, hypridle, hyprlock
     ├── kitty/              # terminal: font + colours
     ├── quickshell/         # the desktop shell (QML): Theme.qml, shell.qml, bar/
@@ -85,6 +87,14 @@ drop dependencies nothing else needs. A package in both lists is an error.
 **Hide an app from the launcher:** add `home/applications/.local/share/applications/<same file name as the system one>.desktop`
 containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true`, then run `./install.sh link`.
 (Currently hidden: Foot x3, Rofi and its theme selector, Tuned Switcher, Xarchiver: Sway-era leftovers.)
+
+**Change how GTK apps look:** open the control center, then `appearance` (colour scheme, GTK / icon / cursor theme, cursor
+size, font and size). It runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
+`home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
+`appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
+GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita
+light in the light scheme. GTK3 apps (blueman, file dialogs) always use the dark palette. More GTK themes appear in the
+list when installed (for example `sudo dnf install adw-gtk3-theme`).
 
 ## Repos
 

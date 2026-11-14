@@ -56,6 +56,7 @@ Singleton {
     readonly property int fontSmall: 11     // secondary text: app names, hints
     readonly property int fontBase:  12     // normal text everywhere, the bar included
     readonly property int fontLarge: 14     // list entries in pickers
+    readonly property int fontMark:  8      // the selection dot (a filled circle is heavy at text size)
     readonly property int fontXL:    16     // the search field of pickers
     readonly property int fontSize:    fontBase   // (older names, same values)
     readonly property int barFontSize: fontBase

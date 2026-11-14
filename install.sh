@@ -230,6 +230,10 @@ step_link() {
     || die "stow simulation failed; nothing was changed:"$'\n'"$out"
   run stow --no-folding -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}"
   ok "linked: ${pkgs[*]}"
+  # GTK4 / libadwaita apps read gsettings, not settings.ini: copy the linked defaults (dark, fonts, themes) there.
+  if command -v gsettings >/dev/null 2>&1 && [[ -x "$HOME/.local/bin/appearance" || $DRY_RUN == 1 ]]; then
+    run "$HOME/.local/bin/appearance" sync
+  fi
   (( DRY_RUN )) || verify_configs || die "fix the config above, then re-run ./install.sh link"
 }
 
