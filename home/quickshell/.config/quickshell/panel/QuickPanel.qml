@@ -16,7 +16,7 @@ import "../ui"
 Scope {
     id: root
 
-    readonly property int panelWidth: 340
+    readonly property int panelWidth: 450
     readonly property int maxHeight: 780        // the first page is about 650 px; longer pages scroll
 
     IpcHandler {

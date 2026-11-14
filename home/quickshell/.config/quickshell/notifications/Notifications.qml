@@ -11,7 +11,7 @@ import qs
 Scope {
     id: root
 
-    readonly property int cardWidth: 400
+    readonly property int cardWidth: 460
     readonly property int gap: 8
     readonly property int cardMaxHeight: 150
     // Room for the most cards we ever show, each as tall as allowed.

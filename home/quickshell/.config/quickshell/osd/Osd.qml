@@ -64,8 +64,8 @@ Scope {
         anchors.bottom: true                    // bottom only = horizontally centred
         margins.bottom: 80 - Theme.shadowMargin
         exclusionMode: ExclusionMode.Ignore
-        implicitWidth: 260 + 2 * Theme.shadowMargin
-        implicitHeight: 38 + 2 * Theme.shadowMargin
+        implicitWidth: 310 + 2 * Theme.shadowMargin
+        implicitHeight: 44 + 2 * Theme.shadowMargin
         color: "transparent"
         mask: Region {}                         // clicks pass straight through
         WlrLayershell.namespace: "quickshell-osd"
@@ -75,17 +75,17 @@ Scope {
             id: card
             x: Theme.shadowMargin
             y: Theme.shadowMargin
-            width: 260
+            width: 310
             open: root.shown
             origin: Item.Bottom
-            contentHeight: 38
+            contentHeight: 44
 
             Row {
                 anchors.centerIn: parent
                 spacing: 12
 
                 StyledText {
-                    width: 24
+                    width: 32
                     text: root.label
                     color: Theme.dim
                     anchors.verticalCenter: parent.verticalCenter
@@ -93,7 +93,7 @@ Scope {
 
                 Rectangle {
                     visible: root.note === ""
-                    width: 150
+                    width: 170
                     height: 4
                     radius: Theme.radiusSmall
                     color: Theme.border
@@ -110,7 +110,7 @@ Scope {
 
                 StyledText {
                     visible: root.note !== ""
-                    width: 150 + 40 + 12
+                    width: 170 + 52 + 12
                     text: root.note
                     color: Theme.warn
                     anchors.verticalCenter: parent.verticalCenter
@@ -118,7 +118,7 @@ Scope {
 
                 StyledText {
                     visible: root.note === ""
-                    width: 40
+                    width: 52
                     text: root.muted ? "muted" : Math.round(root.value * 100)
                     horizontalAlignment: Text.AlignRight
                     color: root.muted ? Theme.dim : Theme.text
