@@ -55,12 +55,15 @@ quiet tiles, the control center's structure.
 
 ## 6. Things I could not test (no way to press keys or click from here) - please try
 
-- [ ] Install the test tools so I can test keys and clicks myself: `./install.sh packages` (adds `wtype`, `wlrctl`; asks for sudo)
+- [x] Install the test tools (`wtype`, `wlrctl`) - done; I can now type keys and click from here
 - [ ] Keep awake: verify with nothing playing (a playing video holds its own idle inhibitor and hides the effect)
 - [ ] Night light: look at the screen when it is on (screenshots can't show the colour filter; hyprsunset reports it applies)
-- [ ] Media buttons (previous / play-pause / next) and the keyboard navigation of the control center
-- [ ] Keys: `Super + A / V / W / Space / B`, `Super + [` and `]`, the XF86 brightness keys, Enter / Esc in the pickers
-- [ ] Control center clicks: tiles, the `›` arrows, the `‹` back button, sliders, power confirmation
+- [x] Keyboard navigation of the control center (tested: arrows, Enter/Space, Right/Left, Backspace, Esc, focus return)
+- [ ] Media buttons: play-pause was hit by accident and works; previous / next not tried
+- [x] Enter / Esc / arrows in the launcher, clipboard and wallpaper pickers (tested)
+- [ ] Keys: `Super + A / V / W / Space / B`, `Super + [` and `]`, the XF86 brightness keys (Hyprland ignores binds from virtual keyboards, so only a physical keypress can test these)
+- [x] Control center clicks: clock opens it, tiles, `›` arrow, `‹` back, sliders, mic mute (tested)
+- [ ] Power confirmation (lock / logout / suspend / reboot / shutdown): not pressed on purpose
 - [ ] Wi-Fi: connect to a saved network, enter a password for a new one; Bluetooth: pair and connect a device
 - [ ] Notification actions and click-to-dismiss
 - [ ] hyprlock: how it looks, unlocking, fingerprint

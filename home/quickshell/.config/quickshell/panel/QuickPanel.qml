@@ -93,7 +93,7 @@ Scope {
             Keys.onPressed: event => { if (event.key === Qt.Key_Backspace && stage.detail) { stage.go("main"); event.accepted = true } }
 
             // Start from the first page again once the panel is out of sight.
-            onShownChanged: if (shown === 0) stage.go("main")
+            onShownChanged: if (shown === 0) stage.reset()
 
             Flickable {
                 anchors { fill: parent; margins: Theme.cardInset }
@@ -118,11 +118,21 @@ Scope {
                     Behavior on t { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
                     onTChanged: if (t === 0) detailPage = ""
 
+                    property var returnItem: null          // the control that had focus before a page opened
+
                     function go(name) {
-                        if (name !== "main") detailPage = name
+                        if (name !== "main") {
+                            if (page === "main") returnItem = card.Window.activeFocusItem
+                            detailPage = name
+                        }
                         page = name
-                        card.forceActiveFocus()        // start from the top of the new page: the next Down picks its first control
+                        // Going back gives the focus to the control you came from; opening a page starts at its top
+                        // (the next Down picks its first control).
+                        const back = name === "main" ? returnItem : null
+                        if (back) Qt.callLater(() => back.forceActiveFocus())
+                        else card.forceActiveFocus()
                     }
+                    function reset() { returnItem = null; go("main") }
 
                     MainPage {
                         id: mainPage
