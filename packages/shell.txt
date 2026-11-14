@@ -1,0 +1,4 @@
+# Terminal tools (home/bash/.bashrc.d/50-fzf.sh sets them up).
+fzf                        # fuzzy finder: Ctrl+R history, Ctrl+T files, Alt+C folders, ** + Tab
+zoxide                     # z <part of a folder name> jumps to it; zi picks with fzf
+bat                        # file previews with syntax colours (for Ctrl+T)

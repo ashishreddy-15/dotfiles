@@ -99,6 +99,8 @@ quiet tiles, the control center's structure.
 - [ ] Later, when learning Go: `din golang`; gopls then installs by itself on the next Neovim start
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
+- [x] fzf (Ctrl+R / Ctrl+T / Alt+C / **), zoxide (z, zi), bat previews; prompt still ~0.05 ms (zoxide without its
+      per-prompt hook)
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
       file aliases, history and completion settings (home/bash)
 - [x] Apps: Resources from Flathub (installed; Flatpak apps get the palette); Loupe, Papers, Calculator, Disk Usage

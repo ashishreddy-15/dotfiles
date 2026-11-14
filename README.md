@@ -140,11 +140,14 @@ Notifications shows it by day (Today, Yesterday, This week, All) with search and
 **Shell (bash):** `home/bash/.bashrc.d/` (Fedora's own `~/.bashrc` loads every file there, so it is left alone).
 The prompt `~/dotfiles  main  3.2s ✗1 ❯` shows the folder, the git branch, how long the last command took (from 2 s),
 and its exit code when it failed; `user@host` over SSH and `(venv)` when one is active. It starts no programs when it
-is drawn (the branch is read from `.git/HEAD`, the time from `$EPOCHREALTIME`): about 0.07 ms per prompt.
+is drawn (the branch is read from `.git/HEAD`, the time from `$EPOCHREALTIME`): about 0.05 ms per prompt (0.7 ms after changing folder, when zoxide records it in the background).
+fzf and zoxide are loaded from files, never with `eval "$(...)"`, so they start no programs either.
 Aliases: `din` / `dup` / `drm` / `dse` = dnf install / upgrade / remove / search (also `dinfo`, `dprov`, `dls`,
 `dhist`); `ll`, `la`, `lt`; `..`, `...`, `dots`, `mkcd`; git `gs`, `gd`, `gds`, `ga`, `gc`, `gca`, `gp`, `gl`,
-`gsw`, `glog`; `sc` / `scu` (systemctl), `jf` / `jfu` (follow logs); `reload`. Up / Down search the history for what
-you have typed; `cp` and `mv` ask before overwriting, `rm` asks once before deleting many files or a folder.
+`gsw`, `glog`; `sc` / `scu` (systemctl), `jf` / `jfu` (follow logs); `reload`. `Ctrl + R` searches the whole history with fzf,
+`Ctrl + T` picks files (with a bat preview), `Alt + C` goes into a folder, `**` + Tab completes anything fuzzily;
+`z <part of a name>` jumps to a folder you use often (zoxide), `zi` picks one with fzf. Up / Down search the history
+for what you have typed; `cp` and `mv` ask before overwriting, `rm` asks once before deleting many files or a folder.
 
 **Neovim:** `home/nvim/.config/nvim` (its own README lists the plugins and keys). Plugin versions are pinned in
 `lazy-lock.json`; the first start installs them (or `nvim --headless "+Lazy! restore" +qa`). What it needs from the

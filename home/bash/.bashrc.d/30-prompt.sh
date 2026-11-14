@@ -58,6 +58,12 @@ __p_prompt() {
         status=0                                             # nothing ran: do not repeat an old failure
     fi
 
+    # Changed folder? Then tell whoever wants to know (zoxide, in 50-fzf.sh). Nothing runs while you stay put.
+    if [[ $PWD != "$__p_lastdir" ]]; then
+        __p_lastdir=$PWD
+        declare -F __p_on_cd >/dev/null && __p_on_cd
+    fi
+
     __p_find_branch
     ps=''
     [[ -n $SSH_CONNECTION ]] && ps+="${__p_dim}\u@\h "
