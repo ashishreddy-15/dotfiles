@@ -71,6 +71,7 @@ for g, o in pairs(groups) do hl(g, o) end
 local ts = {
   ["@variable"] = { fg = c.fg }, ["@variable.builtin"] = { fg = syn.keyword },          -- this, super
   ["@variable.parameter"] = { fg = c.fg, italic = true },
+  ["@variable.parameter.bash"] = { fg = c.fg },        -- bash calls a command's arguments "parameters": not italic
   ["@variable.member"] = { fg = syn.field }, ["@property"] = { fg = syn.field }, ["@field"] = { fg = syn.field },
   ["@function"] = { fg = syn.fn, bold = true }, ["@function.method"] = { fg = syn.fn, bold = true },
   ["@function.call"] = { fg = syn.fn }, ["@function.method.call"] = { fg = syn.fn },
