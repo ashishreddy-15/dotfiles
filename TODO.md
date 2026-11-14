@@ -51,8 +51,7 @@ quiet tiles, the control center's structure.
 
 - [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus appearance settings (now a section of Settings)
       (colour scheme, GTK / icon / cursor theme, cursor size, font and size; like nwg-look)
-- [ ] Appearance: folder icons stay Adwaita blue (not recoloured by the palette); GTK3 apps stay dark in the light scheme;
-      `adw-gtk3-theme` is not installed, so the GTK theme list has only Adwaita; icon / cursor list has one real choice each
+- [x] Appearance: GTK3 apps follow the light / dark scheme (adw-gtk3 twins + scheme.css); folders in pewter (Carbon icon theme)
 - [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
 - [x] hyprlock: same tokens, no card: date and a large light clock at the top, name and a frosted password pill at the
       bottom, over your wallpaper (lightly blurred) instead of a screenshot.

@@ -2,6 +2,7 @@
 # One package per line; '#' starts a comment. Already-installed ones are skipped.
 kitty                      # terminal
 nautilus                   # file manager
+adw-gtk3-theme             # GTK3 apps in the libadwaita look (light and dark)
 grim                       # screenshot
 slurp                      # region select (for screenshots)
 wl-clipboard               # wl-copy / wl-paste

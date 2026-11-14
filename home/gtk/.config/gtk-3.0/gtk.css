@@ -1,53 +1,7 @@
-/* GTK3 apps (blueman, nm-connection-editor, the file chooser dialogs): the "Carbon & Pewter" palette and the shell's shape.
-   Same colours as quickshell/Theme.qml (checked by scripts/ui-check). The GTK3 Adwaita theme has its colours compiled in,
-   so they are set with plain rules here. GTK3 cannot switch by colour scheme, so these apps keep the dark palette in the
-   light scheme too (GTK4 apps do follow it). */
-@define-color theme_bg_color #111111;
-@define-color theme_fg_color #adb0b3;
-@define-color theme_base_color #141414;
-@define-color theme_text_color #adb0b3;
-@define-color theme_selected_bg_color #6c7f91;
-@define-color theme_selected_fg_color #0e1114;
-
-* { color: #adb0b3; }
-*:disabled, label:disabled { color: #666a6e; }
-
-window, .background, dialog, messagedialog { background-color: #111111; }
-headerbar, .titlebar, toolbar, .toolbar, .primary-toolbar, menubar, actionbar, statusbar, .inline-toolbar, notebook > header {
-    background-color: #141414; background-image: none; color: #d0d3d6; border-color: #262626; box-shadow: none;
-}
-.view, treeview.view, iconview, textview text, list, row, stack, frame > border, scrolledwindow viewport {
-    background-color: #141414; color: #adb0b3;
-}
-treeview.view header button { background-color: #141414; color: #666a6e; border-color: #262626; }
-
-entry, spinbutton, combobox button, button {
-    background-image: none; background-color: #1b1b1b; color: #adb0b3; border: 1px solid #262626; box-shadow: none;
-}
-button:hover, combobox button:hover { background-color: #262626; }
-button:active, button:checked, button.suggested-action { background-color: #6c7f91; color: #0e1114; }
-button.destructive-action { background-color: #a67a7e; color: #0e1114; }
-button:disabled, entry:disabled { color: #666a6e; background-color: #141414; }
-entry:focus, spinbutton:focus { border-color: #6c7f91; }
-headerbar button, toolbar button, .toolbar button { background-color: transparent; border-color: transparent; }
-headerbar button:hover, toolbar button:hover, .toolbar button:hover { background-color: #262626; }
-
-menu, .menu, popover, popover.background, .popup, tooltip, tooltip.background {
-    background-color: #1b1b1b; color: #adb0b3; border: 1px solid #262626; box-shadow: none;
-}
-menuitem:hover, modelbutton:hover, row:hover { background-color: #262626; }
-
-*:selected, row:selected, .view:selected, treeview.view:selected, iconview:selected, menuitem:active {
-    background-color: #6c7f91; color: #0e1114;
-}
-switch { background-color: #262626; border: 1px solid #262626; }
-switch:checked { background-color: #6c7f91; }
-switch slider { background-color: #d0d3d6; border-color: #d0d3d6; }
-scale trough, progressbar trough { background-color: #262626; }
-scale highlight, progressbar progress { background-color: #6c7f91; }
-scrollbar slider { background-color: #262626; }
-scrollbar slider:hover { background-color: #3a3f44; }
-separator { background-color: #262626; }
+/* GTK3 apps (blueman, nm-connection-editor, the file chooser dialogs): the shell's shape, and its palette in the dark
+   scheme. GTK3 cannot ask for the colour scheme in css, so `appearance` points scheme.css (made by it, not in the repo)
+   at dark.css or light.css whenever the scheme changes, and switches the theme between adw-gtk3-dark and adw-gtk3. */
+@import url("scheme.css");
 
 /* Shape: windows and cards 10 px, rows, buttons and inputs 6 px (Theme.radiusCard / radiusRow). */
 window.csd, window.csd decoration, popover.background, .card { border-radius: 10px; }

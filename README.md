@@ -104,8 +104,11 @@ Left on a plain row or Shift+Tab from the first control goes back to the sidebar
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
 GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita
-light in the light scheme. GTK3 apps (blueman, file dialogs) always use the dark palette. More GTK themes appear in the
-list when installed (for example `sudo dnf install adw-gtk3-theme`).
+light in the light scheme. GTK3 apps (blueman, file dialogs) follow the scheme too: `adw-gtk3` is listed once and the
+scheme picks `adw-gtk3` or `adw-gtk3-dark`, and `~/.config/gtk-3.0/scheme.css` points at `dark.css` (the palette) or
+`light.css` (stock colours). The icon theme is **Carbon**: Adwaita with its folders recoloured from blue to the
+palette's pewter, built into `~/.local/share/icons/Carbon` by `appearance icons` (and by `appearance sync`, which
+`./install.sh link` runs), so nothing is copied into the repo.
 
 **Pair a Bluetooth device:** put it in pairing mode, open Settings > Bluetooth and click it. BlueZ's questions (a PIN,
 "does this code match?", "may this device connect?") come up as a prompt in the middle of the screen; nothing is

@@ -65,7 +65,7 @@ static() {
     local name hex
     for name in bg surface border text dim bright accent; do
         hex=$(tv "$name" | tr -d '"#')
-        if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/gtk.css; then ok "$name #$hex in the GTK stylesheets"
+        if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/dark.css; then ok "$name #$hex in the GTK stylesheets"
         else fail "$name #$hex missing from the GTK stylesheets (home/gtk)"; fi
     done
     # Neovim's colour scheme keeps a copy of the palette.
