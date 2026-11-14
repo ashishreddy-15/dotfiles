@@ -161,6 +161,10 @@ edit `~/.bashrc`) and the versions in `packages/sdkman.txt` (Temurin 25 LTS, Mav
 SDKMAN, so new shells stay fast; `sdk` loads it the first time you type it. To change a version: `sdk install java
 <version>`, `sdk default java <version>`, and update `packages/sdkman.txt`.
 
+**Touchpad:** Settings > Touchpad: tap to click, natural scrolling, speed (the touchpad's own; the mouse is not
+affected), scroll speed, right click (two fingers or the corner), tap and drag, off while typing. Applied live by
+`quickshell/Touchpad.qml` (`qs ipc call touchpad status`); `hypr/modules/input.lua` is the baseline.
+
 **Pen tablet:** Settings > Tablet (shown when one is connected; written for the Wacom Intuos BT S): which screen it
 covers (default: the one you are working on), keep proportions (trims the active area to that screen's shape; it
 follows you between the 16:10 laptop and the 16:9 monitor), orientation (180° for left-handed), pen or mouse mode,

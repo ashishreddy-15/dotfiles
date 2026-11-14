@@ -21,6 +21,7 @@ ShellRoot {
     // Singletons start the first time something uses them. These have work to do from the start (applying the tablet
     // settings), so touch them here.
     readonly property bool tabletReady: Tablet.present
+    readonly property bool touchpadReady: Touchpad.present
 
     Bar {}
     Notifications {}

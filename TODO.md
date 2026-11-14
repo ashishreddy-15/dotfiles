@@ -99,6 +99,7 @@ quiet tiles, the control center's structure.
 - [ ] Later, when learning Go: `din golang`; gopls then installs by itself on the next Neovim start
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
+- [x] Touchpad: Settings > Touchpad (tap, natural scroll, speed, scroll speed, right click, tap and drag, typing)
 - [x] Pen tablet: Settings > Tablet (screen, proportions, orientation, mode, battery, test pad), applied live
 - [x] Tablet: pen and pressure confirmed
 - [x] ExpressKeys: Settings > Tablet, tablet-keys helper (runs only while the tablet is plugged in)

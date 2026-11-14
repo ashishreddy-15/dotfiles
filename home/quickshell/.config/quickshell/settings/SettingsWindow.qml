@@ -16,7 +16,7 @@ import "../ui"
 // Keyboard: it opens with the focus on the sidebar: Up / Down change section, Right / Enter / Tab go into the section.
 // Inside a section Tab (or Up / Down) moves between the controls, Enter and Space press, Left / Right adjust (
 // choices, steppers, sliders). Left on a plain row, or Shift+Tab / Up from the first control, goes back to the sidebar.
-// Sections: wifi, bluetooth, display, sound, power, tablet, appearance, wallpaper, notifications. Each one is a file in this folder;
+// Sections: wifi, bluetooth, display, sound, power, touchpad, tablet, appearance, wallpaper, notifications. Each one is a file in this folder;
 // it is loaded only while it is showing (so scanning for networks and devices stops when Settings is closed).
 //
 // Same build as the pickers: a fixed-size layer window with the Card inside it (see ui/Card.qml and picker/Picker.qml).
@@ -30,6 +30,7 @@ Scope {
         { id: "display",       group: "Device",      label: "Display",       glyph: Theme.glyphBright,    file: "DisplaySection.qml" },
         { id: "sound",         group: "Device",      label: "Sound",         glyph: Theme.glyphVolume,    file: "SoundSection.qml" },
         { id: "power",         group: "Device",      label: "Power",         glyph: Theme.glyphBattery,   file: "BatterySection.qml" },
+        { id: "touchpad",      group: "Device",      label: "Touchpad",      glyph: Theme.glyphTouchpad,  file: "TouchpadSection.qml" },
         { id: "tablet",        group: "Device",      label: "Tablet",        glyph: Theme.glyphPen,       file: "TabletSection.qml" },
         { id: "appearance",    group: "Personal",    label: "Appearance",    glyph: Theme.glyphBrush,     file: "AppearanceSection.qml" },
         { id: "wallpaper",     group: "Personal",    label: "Wallpaper",     glyph: Theme.glyphImage,     file: "WallpaperSection.qml" },
