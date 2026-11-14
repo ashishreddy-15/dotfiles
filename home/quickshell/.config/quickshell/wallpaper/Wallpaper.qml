@@ -3,10 +3,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs
-import "../picker"
 
 // Wallpaper: one background-layer window per monitor, cross-fading when the image changes.
-//   Super + W                        pick a wallpaper (Picker)
+//   Settings > Wallpaper             pick one (a grid of thumbnails)
 //   qs ipc call wallpaper next       cycle
 //   qs ipc call wallpaper set <path> use any image file
 //
@@ -104,33 +103,12 @@ Scope {
         target: "wallpaper"
         function next(): void { root.next() }
         function set(path: string): void { root.set(path) }
-        function pick(): void { scan.running = true; picker.open = !picker.open }
-        // Open the picker with text typed, and choose the highlighted entry (same as pressing Enter).
-        function search(text: string): void { scan.running = true; picker.setQuery(text) }
-        function choose(): void { picker.chooseSelected() }
     }
 
-    // ---- picker ----
-    function baseName(path) { return path.split("/").pop().replace(/\.[^.]+$/, "") }
-    // What to show next to a name: yours (from ~/Pictures) or one of the photos that come with the dotfiles.
-    function kind(path) {
-        if (path.startsWith(home + "/Pictures")) return "yours"
-        return "photo"
-    }
-
-    readonly property var listed: {
-        const q = picker.query.trim().toLowerCase()
-        return files
-            .filter(f => q === "" || baseName(f).toLowerCase().includes(q))
-            .map(f => ({ title: baseName(f), subtitle: f === current ? "current" : kind(f), path: f }))
-    }
-
-    Picker {
-        id: picker
-        namespace: "quickshell-wallpapers"
-        placeholder: "Choose wallpaper"
-        items: root.listed
-        onActivated: item => root.set(item.path)
+    // Look for new images whenever Settings opens (it shows them in Settings > Wallpaper).
+    Connections {
+        target: ShellState
+        function onSettingsOpenChanged() { if (ShellState.settingsOpen) scan.running = true }
     }
 
     // ---- the wallpaper itself ----

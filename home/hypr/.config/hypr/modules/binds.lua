@@ -17,8 +17,8 @@ hl.bind(k("E"),       app(fileManager))
 hl.bind(k("Space"),   hl.dsp.exec_cmd("qs ipc call launcher toggle"))   -- app launcher
 hl.bind(k("V"),       hl.dsp.exec_cmd("qs ipc call clipboard toggle"))   -- clipboard history
 hl.bind(k("W"),       app(browser))                                      -- browser (Brave Origin)
-hl.bind(k("SHIFT + W"), hl.dsp.exec_cmd("qs ipc call wallpaper pick"))   -- choose wallpaper
-hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call panel toggle"))       -- quick settings
+hl.bind(k("D"),       hl.dsp.exec_cmd("qs ipc call panel toggle"))       -- control center (dashboard)
+hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call apps toggle"))        -- app menu: every app as an icon, with a search
 hl.bind(k("N"),       hl.dsp.exec_cmd("qs ipc call notifications toggle"))  -- notification centre
 hl.bind(k("I"),       hl.dsp.exec_cmd("qs ipc call settings toggle"))     -- settings (Wi-Fi, Bluetooth, sound, wallpaper...)
 hl.bind(k("SHIFT + A"), hl.dsp.exec_cmd("qs ipc call settings toggleSection appearance"))   -- settings, on Appearance

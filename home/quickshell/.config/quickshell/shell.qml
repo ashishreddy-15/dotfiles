@@ -15,6 +15,7 @@ import "panel"
 import "settings"
 import "bluetooth"
 import "power"
+import "apps"
 
 ShellRoot {
     Bar {}
@@ -28,4 +29,5 @@ ShellRoot {
     SettingsWindow {}
     PairingPrompt {}
     PowerMenu {}
+    AppMenu {}
 }

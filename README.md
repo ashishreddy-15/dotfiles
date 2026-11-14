@@ -211,8 +211,8 @@ journalctl --user -u quickshell -f       # logs / QML errors
 - `clipboard/`: clipboard history (`Super + V`) from `cliphist` (fed by `wl-paste --watch` in
   `autostart.lua`). Shows the latest entries; typing filters the whole history. Enter copies the entry
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
-- `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + Shift + W`
-  picks one; `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
+- `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. Settings > Wallpaper
+  picks one (thumbnails); `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
   It lists `~/.local/share/wallpapers` (eight Unsplash photos in one mood, atmospheric and muted: fog-forest,
   fog-valley, forest-light, forest-path, moss-valley, canyon, cloud-peak, cloud-sea; fetched by
   `./install.sh wallpapers` from `system/wallpapers.txt`) and `~/Pictures/Wallpapers` (**put your own images there**;
@@ -227,7 +227,7 @@ journalctl --user -u quickshell -f       # logs / QML errors
   `Super + [` / `Super + ]` (5% steps, held keys repeat). A change shows in the on-screen indicator on that
   screen, or "no control" if the focused screen can't be adjusted. Changes appear instantly and the real
   command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
-- `panel/`: the control center, for the quick things only. Click the clock area of the bar (or `Super + A`) to open it; Esc
+- `panel/`: the control center, for the quick things only. Click the clock area of the bar (or `Super + D`) to open it; Esc
   or a click outside closes it. Three bands: a row of round **toggles** (Wi-Fi, Bluetooth, Silence = Do Not Disturb,
   Night light, Keep awake; filled when on), thick **pill sliders** with the icon inside (a brightness per screen, volume,
   mic; click the icon to mute; the name turns into the value while you hover, drag or focus it), and the **media** card
@@ -319,8 +319,8 @@ Change the laptop scale with `laptopScale` in `modules/monitors.lua`; positions 
 | `Super + S` | scratchpad (`+ Shift`: send window there) |
 | `Super + V` | clipboard history |
 | `Super + W` | browser (Brave Origin) |
-| `Super + Shift + W` | choose wallpaper |
-| `Super + A` | quick settings (also: click the clock) |
+| `Super + A` | app menu: every app as an icon, with a search (Enter or click starts it) |
+| `Super + D` | control center, the dashboard (also: click the clock) |
 | `Super + N` | notification centre (also: the bell in the bar) |
 | `Super + I` | settings (toggle) |
 | `Super + X` | power menu: lock, log out, suspend, reboot, shut down (letters L O S R P; log out / reboot / shut down ask twice) |

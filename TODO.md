@@ -77,7 +77,7 @@ quiet tiles, the control center's structure.
 - [x] Keyboard navigation of the control center (tested: arrows, Enter/Space, Right/Left, Backspace, Esc, focus return)
 - [ ] Media buttons: play-pause was hit by accident and works; previous / next not tried
 - [x] Enter / Esc / arrows in the launcher, clipboard and wallpaper pickers (tested)
-- [ ] Keys: `Super + A / V / W / I / X / Space / B`, `Super + Shift + A / W / R`, `Super + Ctrl + R`, `Print` (+ Shift / Ctrl), `Super + [` and `]`, the XF86 brightness keys (Hyprland ignores binds from virtual keyboards, so only a physical keypress can test these)
+- [ ] Keys: `Super + A / D / V / W / I / X / N / Space / B`, `Super + Shift + A / R`, `Super + Ctrl + R`, `Print` (+ Shift / Ctrl), `Super + [` and `]`, the XF86 brightness keys (Hyprland ignores binds from virtual keyboards, so only a physical keypress can test these)
 - [x] Control center clicks: clock opens it, tiles, `›` arrow, `‹` back, sliders, mic mute (tested)
 - [ ] Power confirmation (lock / logout / suspend / reboot / shutdown): not pressed on purpose
 - [ ] Wi-Fi: connect to a saved network, enter a password for a new one (Bluetooth pairing: done, the Rockerz works)
@@ -92,6 +92,8 @@ quiet tiles, the control center's structure.
 - [x] Notification centre (Super + N, bell in the bar with a count; crossed bell while Silence is on), grouped by app
 - [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
+- [x] App menu on Super + A (icon grid + search); control center moved to Super + D; wallpaper picker removed
+      (Settings > Wallpaper)
 - [x] Notification bell always at the right end of the bar
 - [x] Settings sidebar grouped: Connections (Wi-Fi, Bluetooth), Device (Display, Sound, Power), Personal (Appearance,
       Wallpaper, Notifications), with icons
