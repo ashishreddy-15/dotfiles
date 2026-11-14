@@ -1,5 +1,6 @@
 # Photos from Unsplash (https://unsplash.com/license: free to use). Downloaded by `./install.sh wallpapers`
-# into ~/.local/share/wallpapers/<name>.jpg, next to the generated wallpapers. They are not stored in this repo.
+# into ~/.local/share/wallpapers/<name>.jpg. They are not stored in this repo. Files there that are not
+# listed here are removed by the same step (your own images go in ~/Pictures/Wallpapers and are never touched).
 #
 # Format:  <name>  <sha256>  <url>
 # Each URL asks Unsplash's image CDN for a 2560x1600 smart crop (so portrait photos fit a landscape screen).
@@ -11,23 +12,29 @@
 # To add a photo: take the long id from its image URL (photo-<id>), build the URL below, download it once,
 # run `sha256sum` on it, and add a line. To remove one, delete its line (and the file).
 
-# black-sand: dark sand ripples, near-monochrome
-black-sand      2f9f3f1d22f20f648d17a0ab62e5374131487c132d7e17512913e54e4b272b73  https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
-
-# night-ridge: stars over a dark ridge
-night-ridge     0a956a4e1e11a2a6afd54ca527dcb3779eaed17e44b5f9f1f025afd9859b3445  https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
-
-# mountain-stars: rocky peak under a starry sky
-mountain-stars  650d34aefb95f76ab179a1c79a8bee9ab4be97d26e57c608b702ede89ce291ba  https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
-
-# sailboat-night: a small boat on mirror-still water at night
-sailboat-night  301c63c3724f06722faaf6a0c0dcb70d6cd68f860fb4ba928c62a6aa07d9af51  https://images.unsplash.com/photo-1534447677768-be436bb09401?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
-
-# earth-night: Earth's city lights from orbit
-earth-night     9b2bc269215f87abb3390f64e863e668b1d8409814f2e5ad270be993bc795fac  https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# The set: atmospheric, muted, natural (chosen to match fog-forest), dark enough for the bar's text or light enough
+# for its dark text.
 
 # fog-forest: aerial fog over pine forest
 fog-forest      aa871527c1942498f33a4cfb4f92d2fa271fd83006b8d09b3aa76bb25e9e5b16  https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
 
-# misty-ridges: layered soft ridges (the one light photo)
-misty-ridges    7b35ce29d76b418fb4a98bcc9daf7f0b5fbc5c18fcc1584aed46555602325263  https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+# fog-valley: fog filling a forested valley
+fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# forest-light: dark misty forest, soft light through the trees
+forest-light    edc65922cd566ddfc1cbd5fe8618de0c07c94f2d8a546280fe9f96bd8825f809  https://images.unsplash.com/photo-1448375240586-882707db888b?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# forest-path: deep forest, a path through it
+forest-path     a612bb6dbb66d6fa64bb3fac1d06bd2f82bdecbb3855e2ce7234412830b56122  https://images.unsplash.com/photo-1516214104703-d870798883c5?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# moss-valley: green valley with rock spires, hazy light
+moss-valley     6046324a97ba27cc7548f47af4f99be2c217c85a2cf99062601ae0645bf0f963  https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# canyon: mossy canyon with a river (Iceland)
+canyon          9ae082321600f490356255cb0b231aba3206bcd05047aa14f7c924e3f3f8cda0  https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# cloud-peak: snowy peak rising out of cloud, nearly black and white
+cloud-peak      e03c86a54e4d2c25fb6e9fd06d996fda1de9fc7879730f070e9e4577b110252e  https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy
+
+# cloud-sea: a sea of clouds below mountains at dusk
+cloud-sea       9d8f272b1bb77e13f41552a11d42f670ae543ac69e3185bc459891f88cc345e5  https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2560&h=1600&q=85&fm=jpg&fit=crop&crop=entropy

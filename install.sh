@@ -13,7 +13,7 @@
 #   packages  dnf install everything in packages/*.txt,
 #             then dnf remove everything in packages/remove.txt
 #   fonts     download fonts in system/fonts.txt (pinned + checksummed) to ~/.local/share/fonts
-#   wallpapers generate the Carbon & Pewter wallpapers into ~/.local/share/wallpapers (scripts/gen-wallpapers.py)
+#   wallpapers download the photos in system/wallpapers.txt (pinned + checksummed) to ~/.local/share/wallpapers
 #   services  run system/services.sh (root) and system/user-services.sh (user units)
 #   link      symlink home/<pkg>/ into $HOME with GNU stow
 #             (existing real files are moved to ~/.dotfiles-backup/<time>/ first,
@@ -322,14 +322,6 @@ step_fonts() {
 # Generate the wallpapers (kept out of git: they are a few MB each and fully reproducible).
 step_wallpapers() {
   step "Wallpapers"
-  local gen="$DOTFILES/scripts/gen-wallpapers.py"
-  [[ -f "$gen" ]] || { ok "no generator found"; return 0; }
-  python3 -c 'import PIL' 2>/dev/null || { warn "Pillow missing (sudo dnf install python3-pillow); skipping"; return 0; }
-  if (( DRY_RUN )); then
-    info "[dry-run] python3 scripts/gen-wallpapers.py"
-  else
-    python3 "$gen"
-  fi
   download_photos
 }
 
@@ -367,6 +359,16 @@ download_photos() {
     mv "$tmp" "$file"
     ok "$name.jpg downloaded"
   done < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest")
+
+  # Remove what is no longer in the list (this folder holds only the listed photos; your own are in ~/Pictures/Wallpapers).
+  local listed f
+  listed=$(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest" | awk '{print $1 ".jpg"}')
+  for f in "$dest"/*; do
+    [[ -f "$f" ]] || continue
+    grep -qxF "$(basename "$f")" <<<"$listed" && continue
+    run rm -f "$f"
+    ok "removed $(basename "$f") (no longer listed)"
+  done
 }
 
 step_defaults() {

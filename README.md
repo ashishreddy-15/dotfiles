@@ -19,7 +19,7 @@ Re-running `./install.sh` is always safe: each step checks what's already done.
 ```
 dotfiles/
 ├── install.sh              # bootstrap script (see below)
-├── scripts/                # helpers: gen-wallpapers.py (makes the wallpapers; needs Pillow)
+├── scripts/                # helpers: ui-check (guard rails for the look)
 ├── packages/               # what to dnf install, one package per line
 │   ├── hyprland.txt        #   compositor + hypr* tools (Hyprland COPR)
 │   ├── quickshell.txt      #   desktop shell (Quickshell COPR)
@@ -213,11 +213,11 @@ journalctl --user -u quickshell -f       # logs / QML errors
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
 - `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. `Super + Shift + W`
   picks one; `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
-  It lists `~/.local/share/wallpapers` (five generated ones that look clearly different: carbon, contours,
-  dusk, pewter-glow, slate, plus seven photos from Unsplash: black-sand, night-ridge, mountain-stars,
-  sailboat-night, earth-night, fog-forest, misty-ridges; all made or fetched by `./install.sh wallpapers`)
-  and `~/Pictures/Wallpapers` (**put your own images there**; png, jpg, webp). The picker labels each as
-  generated, photo or yours. The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
+  It lists `~/.local/share/wallpapers` (eight Unsplash photos in one mood, atmospheric and muted: fog-forest,
+  fog-valley, forest-light, forest-path, moss-valley, canyon, cloud-peak, cloud-sea; fetched by
+  `./install.sh wallpapers` from `system/wallpapers.txt`) and `~/Pictures/Wallpapers` (**put your own images there**;
+  png, jpg, webp). The picker labels each as
+  photo or yours. The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
   The bar has no background of its own, so its text follows the wallpaper, like the macOS menu bar: when
   the top edge of a wallpaper is light (measured when you pick it), the bar switches to dark text, and
   to light text on dark wallpapers. The colours fade over 0.4 s with the wallpaper; the warning/error/ok

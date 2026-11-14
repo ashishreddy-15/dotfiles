@@ -84,7 +84,7 @@ quiet tiles, the control center's structure.
 - [ ] Notification actions and click-to-dismiss
 - [x] hyprlock: how it looks, unlocking (no fingerprint reader on this laptop)
 - [ ] Launching an app from the launcher with Enter (tray: empty now that nm-applet no longer starts)
-- [ ] Frosted cards on a light wallpaper (e.g. `misty-ridges`)
+- [ ] Frosted cards on a light wallpaper (e.g. `cloud-peak`)
 
 ## 7. Ideas (not committed to)
 
@@ -92,6 +92,10 @@ quiet tiles, the control center's structure.
 - [x] Notification centre (Super + N, bell in the bar with a count; crossed bell while Silence is on), grouped by app
 - [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
+- [x] Notification bell always at the right end of the bar
+- [x] Settings sidebar grouped: Connections (Wi-Fi, Bluetooth), Device (Display, Sound, Power), Personal (Appearance,
+      Wallpaper, Notifications), with icons
+- [x] Wallpapers: eight Unsplash photos in fog-forest's mood; the generated ones and the other photos are gone
 - [x] Control center redesign: a row of round toggles, pill sliders with icons, media card, footer (battery, settings, power)
 - [x] Power menu on Super + X (actions shared with the control center: Power.qml)
 
