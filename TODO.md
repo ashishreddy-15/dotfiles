@@ -95,7 +95,8 @@ quiet tiles, the control center's structure.
 - [x] Neovim config moved in from the swaywm repo (home/nvim), recoloured to Carbon & Pewter; packages/editor.txt
 - [x] Neovim first start: 33 plugins, 16 Treesitter parsers, 8 Mason tools, IntelliJ server; checkhealth 0 errors;
       starts in ~40 ms
-- [ ] Neovim: accept the IntelliJ server EULA (open a .java file once); Go toolchain for gopls, or drop gopls
+- [ ] Neovim: accept the IntelliJ server EULA (open a .java file once)
+- [ ] Later, when learning Go: `din golang`; gopls then installs by itself on the next Neovim start
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
