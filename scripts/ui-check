@@ -56,7 +56,11 @@ static() {
     accent=$(tv accent | tr -d '"#'); border=$(tv border | tr -d '"#'); text=$(tv text | tr -d '"#')
     grep -qi "$accent" "$look" && ok "accent #$accent in Hyprland active border" || fail "accent #$accent missing from look.lua"
     grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
-    grep -qi "$text"   "$lock" && ok "text #$text in hyprlock" || fail "text #$text missing from hyprlock.conf"
+    for name in text dim bright border accent warn err; do
+        hex=$(tv "$name" | tr -d '"#')
+        grep -qi "$hex" "$lock" && ok "$name #$hex in hyprlock" || fail "$name #$hex missing from hyprlock.conf"
+    done
+    [ "$(sed -nE 's/^ *rounding *= *([0-9]+).*# Theme.radiusCard/\1/p' "$lock")" = "$radius" ] && ok "hyprlock card corners $radius" || fail "hyprlock card rounding is not radiusCard ($radius)"
 
     # GTK apps: the stylesheets use the same palette as Theme.qml.
     local name hex

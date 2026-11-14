@@ -53,8 +53,17 @@ Scope {
         target: ShellState
         function onWallpaperChosen(path) { root.set(path) }
     }
+    // The lock screen shows the same wallpaper: hyprlock.conf includes this one-line file (`source = ...`).
+    readonly property string lockFile: home + "/.local/state/dotfiles/hyprlock-wallpaper.conf"
+    Process {
+        id: lockWriter
+        property string value
+        command: ["sh", "-c", 'mkdir -p "$(dirname "$1")" && printf \'$wallpaper = %s\\n\' "$2" > "$1"', "sh", root.lockFile, value]
+    }
+
     onCurrentChanged: {
         ShellState.wallpaperCurrent = current
+        if (current !== "") { lockWriter.value = current; lockWriter.running = true }
         if (current !== "") { measure.image = current; measure.running = true }
     }
 

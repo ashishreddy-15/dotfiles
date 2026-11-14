@@ -54,7 +54,8 @@ quiet tiles, the control center's structure.
 - [ ] Appearance: folder icons stay Adwaita blue (not recoloured by the palette); GTK3 apps stay dark in the light scheme;
       `adw-gtk3-theme` is not installed, so the GTK theme list has only Adwaita; icon / cursor list has one real choice each
 - [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
-- [ ] hyprlock: same tokens, frosted input card, your wallpaper instead of a blurred screenshot; fingerprint
+- [x] hyprlock: same tokens, a card with the time, date and password, your wallpaper (blurred) instead of a screenshot.
+      Fingerprint: not possible, this laptop has no reader
 - [ ] Login screen (SDDM) theme and a matching cursor theme (optional)
 
 ## 5. System
