@@ -24,6 +24,11 @@ Scope {
         function close(): void { root.open = false }
     }
 
+    Connections {
+        target: ShellState
+        function onOpenPowerMenu() { root.open = true }
+    }
+
     onOpenChanged: {
         confirming = ""
         if (open) { current = 0; Qt.callLater(() => card.forceActiveFocus()) }

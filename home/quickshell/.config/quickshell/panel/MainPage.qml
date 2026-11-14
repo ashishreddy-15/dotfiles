@@ -8,18 +8,24 @@ import Quickshell.Services.UPower
 import qs
 import "../ui"
 
-// The control center: only the quick things. Everything with a list or options (networks, devices, wallpaper, ...)
-// is in Settings (Super + I; the gear in the header). Every control is one of three kinds, always in the same place:
-//   tile    on/off things (Wi-Fi, Bluetooth, Do Not Disturb, night light, keep awake) at the top
-//   slider  levels (brightness, volume), grouped under "display" and "sound"
-//   action  the power buttons in the footer
-// Order, top to bottom: status header, tiles, display, sound, media (only while a player runs), footer.
+// The control center: only the quick things, in three bands, top to bottom:
+//   toggles  one row of round buttons: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake
+//   levels   thick pill sliders with their icon inside: a brightness per screen, volume, mic (click the icon to mute)
+//   media    what is playing (only while a player runs)
+// and a footer: the battery (opens Settings > Power), Settings, and the power menu (Super + X).
+// Everything with a list or options (networks, devices, wallpaper, ...) is in Settings (Super + I).
 Column {
     id: root
 
     signal done()                // close the panel
 
-    spacing: 2
+    readonly property int pad: 8
+    readonly property real inner: width - 2 * pad
+    topPadding: 12
+    bottomPadding: 2
+    leftPadding: pad
+    rightPadding: pad
+    spacing: 14
 
     // ---- state shown on this page ----
     readonly property var wifi: Networking.devices.values.find(d => d.type === DeviceType.Wifi) ?? null
@@ -75,26 +81,149 @@ Column {
         }
     }
 
-    // ---- header: battery on the left, power profile on the right ----
-    Item {
-        width: parent.width
-        height: 32
 
-        // The battery text opens Settings on Power; the gear opens Settings.
+    // ---- toggles ----
+    Row {
+        width: root.inner
+        readonly property real cell: width / 5
+
+        RoundToggle {
+            width: parent.cell
+            glyph: Theme.glyphWifi
+            label: "Wi-Fi"
+            status: !root.wifi ? "no adapter" : !Networking.wifiEnabled ? "off"
+                  : root.wifiNetwork ? root.wifiNetwork.name : "on"
+            on: Networking.wifiEnabled
+            onToggled: Networking.wifiEnabled = !Networking.wifiEnabled
+        }
+        RoundToggle {
+            width: parent.cell
+            glyph: Theme.glyphBluetooth
+            label: "Bluetooth"
+            status: Rfkill.bluetoothHardBlocked ? "switch" : Rfkill.bluetoothBlocked ? "blocked"
+                  : !root.btAdapter ? "none" : !root.btOn ? "off"
+                  : root.btConnected.length === 0 ? "on"
+                  : root.btConnected.length === 1 ? root.btConnected[0].name
+                  : root.btConnected.length + " devices"
+            on: root.btOn
+            onToggled: Rfkill.bluetoothBlocked ? Rfkill.unblockBluetooth() : (root.btAdapter ? root.btAdapter.enabled = !root.btOn : undefined)
+        }
+        RoundToggle {
+            width: parent.cell
+            glyph: Theme.glyphSilent
+            label: "Silence"
+            // the number is how many notifications are waiting in the history
+            status: (Modes.dnd ? "on" : "off") + (Notifs.count > 0 ? " · " + Notifs.count : "")
+            on: Modes.dnd
+            onToggled: Modes.toggleDnd()
+        }
+        RoundToggle {
+            width: parent.cell
+            glyph: Theme.glyphNight
+            label: "Night"
+            status: Modes.nightLight ? Modes.kelvin + " K" : "off"
+            on: Modes.nightLight
+            onToggled: Modes.toggleNight()
+        }
+        RoundToggle {
+            width: parent.cell
+            glyph: Theme.glyphAwake
+            label: "Awake"
+            status: Modes.keepAwake ? "on" : "off"
+            on: Modes.keepAwake
+            onToggled: Modes.toggleAwake()
+        }
+    }
+
+    // ---- levels ----
+    Column {
+        width: root.inner
+        spacing: 8
+
+        Repeater {
+            model: Brightness.displays
+            PillSlider {
+                required property var modelData
+                glyph: Theme.glyphBright
+                label: modelData.label
+                value: modelData.level
+                onMoved: v => modelData.set(v)
+            }
+        }
+        Repeater {
+            model: root.uncontrollable
+            PillSlider {
+                active: false
+                glyph: Theme.glyphBright
+                label: "monitor: " + root.brightnessReason()
+            }
+        }
+        PillSlider {
+            glyph: Theme.glyphVolume
+            mutedGlyph: Theme.glyphMuted
+            label: root.sink ? (root.sink.nickname || root.sink.description || root.sink.name) : "no output"
+            value: root.volume
+            muted: root.muted
+            iconClickable: true
+            onIconClicked: if (root.sink?.audio) root.sink.audio.muted = !root.sink.audio.muted
+            onMoved: v => { if (root.sink?.audio) { root.sink.audio.volume = v; if (root.muted && v > 0) root.sink.audio.muted = false } }
+        }
+        PillSlider {
+            glyph: Theme.glyphMic
+            mutedGlyph: Theme.glyphMicOff
+            label: "mic"
+            value: root.micVolume
+            muted: root.micMuted
+            iconClickable: true
+            onIconClicked: if (root.mic?.audio) root.mic.audio.muted = !root.mic.audio.muted
+            onMoved: v => { if (root.mic?.audio) root.mic.audio.volume = v }
+        }
+    }
+
+    // ---- media (only while a player is running) ----
+    MediaBlock { width: root.inner }
+
+    // ---- footer: battery, Settings, power ----
+    component IconButton: Item {
+        id: btn
+        property string glyph
+        signal clicked()
+        width: 34
+        height: 34
+
+        activeFocusOnTab: true
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { btn.clicked(); event.accepted = true }
+        }
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            color: btnArea.containsMouse ? Theme.hover : Theme.clear
+            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+        }
+        StyledText { anchors.centerIn: parent; text: btn.glyph; color: Theme.text }
+        MouseArea { id: btnArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: btn.clicked() }
+        FocusRing { visible: btn.activeFocus; radius: height / 2 }
+    }
+
+    Item {
+        width: root.inner
+        height: 36
+
+        // The battery opens Settings on Power.
         MouseArea {
             id: batteryArea
             visible: root.hasBattery
             anchors { left: parent.left; verticalCenter: parent.verticalCenter }
             width: batteryText.implicitWidth + 20
-            height: 28
+            height: 30
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: root.openSettings("power")
 
-            // Keyboard: Enter, Space or Right opens it.
             activeFocusOnTab: true
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Right) { root.openSettings("power"); event.accepted = true }
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.openSettings("power"); event.accepted = true }
             }
             FocusRing { visible: batteryArea.activeFocus }
 
@@ -110,158 +239,15 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.batteryText()
                 color: root.batteryColor()
+                font.pixelSize: Theme.fontSmall
             }
         }
 
-        MouseArea {
-            id: gearArea
+        Row {
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-            width: 32
-            height: 28
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.openSettings("")
-
-            activeFocusOnTab: true
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.openSettings(""); event.accepted = true }
-            }
-            FocusRing { visible: gearArea.activeFocus }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: Theme.radiusRow
-                color: gearArea.containsMouse ? Theme.hover : Theme.clear
-                Behavior on color { ColorAnimation { duration: Theme.durFast } }
-            }
-            StyledText {
-                anchors.centerIn: parent
-                text: Theme.glyphGear
-                color: Theme.dim
-            }
+            spacing: 4
+            IconButton { glyph: Theme.glyphGear; onClicked: root.openSettings("") }
+            IconButton { glyph: Theme.glyphPower; onClicked: { root.done(); ShellState.openPowerMenu() } }
         }
-    }
-
-    // ---- tiles ----
-    Grid {
-        width: parent.width
-        columns: 2
-        spacing: 6
-        readonly property real tileWidth: (width - spacing) / 2
-
-        Tile {
-            width: parent.tileWidth
-            label: "Wi-Fi"
-            value: !Networking.wifiEnabled ? "off"
-                 : root.wifiNetwork ? root.wifiNetwork.name
-                 : root.wifi ? "not connected" : "no adapter"
-            active: Networking.wifiEnabled
-            onToggled: Networking.wifiEnabled = !Networking.wifiEnabled
-        }
-        Tile {
-            width: parent.tileWidth
-            label: "Bluetooth"
-            value: Rfkill.bluetoothHardBlocked ? "hardware switch"
-                 : Rfkill.bluetoothBlocked ? "blocked"
-                 : !root.btAdapter ? "no adapter"
-                 : !root.btOn ? "off"
-                 : root.btConnected.length === 0 ? "on"
-                 : root.btConnected.length === 1 ? root.btConnected[0].name
-                 : root.btConnected.length + " devices"
-            active: root.btOn
-            onToggled: Rfkill.bluetoothBlocked ? Rfkill.unblockBluetooth() : (root.btAdapter ? root.btAdapter.enabled = !root.btOn : undefined)
-        }
-        Tile {
-            width: parent.tileWidth
-            label: "Do not disturb"
-            // the number is how many notifications are waiting in the history
-            value: (Modes.dnd ? "on" : "off") + (Notifs.count > 0 ? "  ·  " + Notifs.count : "")
-            active: Modes.dnd
-            onToggled: Modes.toggleDnd()
-        }
-        Tile {
-            width: parent.tileWidth
-            label: "Night light"
-            value: Modes.nightLight ? Modes.kelvin + " K" : "off"
-            active: Modes.nightLight
-            onToggled: Modes.toggleNight()
-        }
-    }
-    Tile {
-        width: parent.width
-        label: "Keep awake"
-        value: Modes.keepAwake ? "the screen will not lock or sleep" : "off"
-        active: Modes.keepAwake
-        onToggled: Modes.toggleAwake()
-    }
-
-    // ---- display ----
-    Heading { text: "display" }
-
-    Repeater {
-        model: Brightness.displays
-        SliderRow {
-            required property var modelData
-            label: modelData.label
-            value: modelData.level
-            onMoved: v => modelData.set(v)
-        }
-    }
-    Repeater {
-        model: root.uncontrollable
-        Item {
-            width: root.width
-            height: 32
-            StyledText { x: 10; width: Theme.labelWidth; anchors.verticalCenter: parent.verticalCenter; text: "monitor"; color: Theme.dim }
-            StyledText {
-                x: Theme.valueX
-                width: parent.width - Theme.valueX - 10
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.brightnessReason()
-                color: Theme.dim
-                elide: Text.ElideRight
-            }
-        }
-    }
-
-    // ---- sound ----
-    Heading { text: "sound" }
-
-    SliderRow {
-        label: root.muted ? "muted" : "volume"
-        labelColor: root.muted ? Theme.warn : Theme.dim
-        labelClickable: true
-        value: root.volume
-        muted: root.muted
-        onLabelClicked: if (root.sink?.audio) root.sink.audio.muted = !root.sink.audio.muted
-        onMoved: v => { if (root.sink?.audio) root.sink.audio.volume = v }
-    }
-    SliderRow {
-        label: root.micMuted ? "muted" : "mic"
-        labelColor: root.micMuted ? Theme.warn : Theme.dim
-        labelClickable: true
-        value: root.micVolume
-        muted: root.micMuted
-        onLabelClicked: if (root.mic?.audio) root.mic.audio.muted = !root.mic.audio.muted
-        onMoved: v => { if (root.mic?.audio) root.mic.audio.volume = v }
-    }
-
-    // ---- media (only while a player is running) ----
-    MediaBlock { width: parent.width }
-
-    // ---- footer ----
-    Item {
-        width: parent.width
-        height: 11
-        Rectangle {
-            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 10; rightMargin: 10 }
-            height: 1
-            color: Theme.border
-        }
-    }
-
-    PowerSection {
-        width: parent.width
-        onDone: root.done()
     }
 }

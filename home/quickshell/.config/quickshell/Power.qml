@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// The session and power actions, in one place for the control center's footer (panel/PowerSection.qml) and the power
-// menu (power/PowerMenu.qml, Super + X). The ones that end your session (`ask`) want a second press to confirm.
+// The session and power actions, in one place for the power menu (power/PowerMenu.qml, Super + X; the control center's power icon opens it). The
+// ones that end your session (`ask`) want a second press to confirm.
 Singleton {
     readonly property var actions: [
         { name: "lock",     label: "Lock",      key: Qt.Key_L, glyph: Theme.glyphLock,    ask: false, command: ["loginctl", "lock-session"] },

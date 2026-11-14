@@ -221,12 +221,11 @@ journalctl --user -u quickshell -f       # logs / QML errors
   screen, or "no control" if the focused screen can't be adjusted. Changes appear instantly and the real
   command is sent a moment later, one at a time (DDC is slow). Setup for the external monitor is below.
 - `panel/`: the control center, for the quick things only. Click the clock area of the bar (or `Super + A`) to open it; Esc
-  or a click outside closes it; the gear in its header opens Settings. Three kinds of control, each with one look and
-  one behaviour: **tiles** (on/off: Wi-Fi, Bluetooth, Do Not Disturb, Night light, Keep awake; click toggles),
-  **sliders** (levels: a brightness slider per screen, volume, mic; click `volume` or `mic` to mute) and **actions**
-  (lock, logout, suspend, reboot, shutdown; the last three ask for a second click). Order: status header (battery,
-  gear), tiles, `display`, `sound`, `media` (only while a player runs: title, artist, previous / play-pause / next),
-  power actions. Rows share one grid (`labelWidth`, `valueX` in `Theme.qml`).
+  or a click outside closes it. Three bands: a row of round **toggles** (Wi-Fi, Bluetooth, Silence = Do Not Disturb,
+  Night light, Keep awake; filled when on), thick **pill sliders** with the icon inside (a brightness per screen, volume,
+  mic; click the icon to mute; the name turns into the value while you hover, drag or focus it), and the **media** card
+  while something plays. Footer: the battery (opens Settings > Power), Settings, and the power menu (`Super + X`).
+  Keyboard: Up / Down (or Tab) move, Left / Right move along the toggles and adjust a slider, Enter / Space press.
 - `settings/`: the Settings window (`Super + I`). `SettingsWindow.qml` is the window and sidebar; every section is a file
   (`WifiSection.qml`, `BluetoothSection.qml`, ...) built from the same rows (`SettingRow`, `ListRow`, `Segmented`,
   `Switch`, `Stepper`) and loaded only while it shows, so Wi-Fi and Bluetooth scan only while their section is open.

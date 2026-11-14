@@ -37,6 +37,9 @@ Singleton {
     property string wallpaperCurrent: ""
     signal wallpaperChosen(string path)
 
+    // The control center's power button asks the power menu (power/PowerMenu.qml) to open.
+    signal openPowerMenu()
+
     // Screen recording (home/bin/.local/bin/screenrecord): whether one is running and since when (seconds since 1970).
     // The script reports start and stop through IPC; when the shell starts it asks, in case one is already running.
     property bool recording: false

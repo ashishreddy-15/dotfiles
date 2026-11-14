@@ -4,25 +4,25 @@ import Quickshell.Services.Mpris
 import qs
 import "../ui"
 
-// What is playing (any player: a browser tab, mpv, Spotify...) with previous / play-pause / next.
+// What is playing (any player: a browser tab, mpv, Spotify...) with previous / play-pause / next, on a soft card.
 // Not shown at all when nothing is running.
-Column {
+Rectangle {
     id: root
+
+    radius: Theme.radiusCard
+    color: Theme.hover
 
     readonly property var players: Mpris.players.values
     readonly property var player: players.find(p => p.isPlaying) ?? players[0] ?? null
 
     visible: player !== null
-    height: visible ? implicitHeight : 0
-
-    Heading { text: "media" }
+    height: visible ? 56 : 0
 
     Item {
-        width: parent.width
-        height: 44
+        anchors.fill: parent
 
         Column {
-            anchors { left: parent.left; right: buttons.left; verticalCenter: parent.verticalCenter; leftMargin: 10; rightMargin: 8 }
+            anchors { left: parent.left; right: buttons.left; verticalCenter: parent.verticalCenter; leftMargin: 16; rightMargin: 8 }
             spacing: 2
             StyledText {
                 width: parent.width
@@ -41,7 +41,7 @@ Column {
 
         Row {
             id: buttons
-            anchors { right: parent.right; rightMargin: 6; verticalCenter: parent.verticalCenter }
+            anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
             spacing: 2
 
             component Button: Item {

@@ -88,6 +88,7 @@ quiet tiles, the control center's structure.
 
 ## 7. Ideas (not committed to)
 
+- [x] Control center redesign: a row of round toggles, pill sliders with icons, media card, footer (battery, settings, power)
 - [x] Power menu on Super + X (actions shared with the control center: Power.qml)
 
 - Clipboard: image thumbnails, delete an entry, pin entries

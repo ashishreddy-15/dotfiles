@@ -35,6 +35,7 @@ Singleton {
     readonly property color hover:    Qt.rgba(1, 1, 1, 0.07)
     readonly property color selected: Qt.rgba(1, 1, 1, 0.12)
     readonly property color selectedHover: Qt.rgba(1, 1, 1, 0.17)   // a selected / "on" item under the pointer
+    readonly property color sliderFill: Qt.rgba(0.424, 0.498, 0.569, 0.55)   // the filled part of a pill slider: accent, half see-through
 
     // ---- shape ----
     // One rule: a row inside a card has radius = card radius - the gap to the card's edge (10 - 4 = 6),
@@ -70,13 +71,23 @@ Singleton {
     readonly property string glyphBack:    "\uf104"   // chevron left: back
     readonly property string glyphClose:   "\uf00d"   // x
     readonly property string glyphMark:    "\uf111"   // filled dot: the chosen item in a list
+    readonly property string glyphWifi:      "\uf1eb"
+    readonly property string glyphBluetooth: "\uf293"
+    readonly property string glyphSilent:    "\uf1f6"   // bell with a line through it: Do Not Disturb
+    readonly property string glyphNight:     "\uf186"   // moon: night light
+    readonly property string glyphAwake:     "\uf0f4"   // coffee cup: keep awake
+    readonly property string glyphBright:    "\uf042"   // half-filled circle: brightness
+    readonly property string glyphVolume:    "\uf028"
+    readonly property string glyphMuted:     "\uf026"
+    readonly property string glyphMic:       "\uf130"
+    readonly property string glyphMicOff:    "\uf131"
     readonly property string glyphGear:    "\uf013"   // the settings button
     readonly property string glyphMinus:   "\uf068"
     readonly property string glyphPlus:    "\uf067"
     readonly property string glyphCheck:   "\uf00c"   // tick: a ticked menu entry
     readonly property string glyphLock:    "\uf023"   // padlock: secured network, lock the screen
     readonly property string glyphLogout:  "\uf08b"   // sign out
-    readonly property string glyphSuspend: "\uf186"   // moon
+    readonly property string glyphSuspend: "\uf236"   // bed
     readonly property string glyphReboot:  "\uf01e"   // circular arrow
     readonly property string glyphPower:   "\uf011"   // power symbol
     readonly property string glyphPrev:    "\uf048"
