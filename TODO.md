@@ -93,7 +93,9 @@ quiet tiles, the control center's structure.
 - [x] Notification archive: 7 days on disk, Settings > Notifications with Today / Yesterday / This week / All and search
 - [ ] Notification archive: optionally leave chosen apps out of it (for apps that send codes or private messages)
 - [x] Neovim config moved in from the swaywm repo (home/nvim), recoloured to Carbon & Pewter; packages/editor.txt
-- [ ] Run `./install.sh packages` (sudo) for Neovim and its build tools, then first start (plugins install)
+- [x] Neovim first start: 33 plugins, 16 Treesitter parsers, 8 Mason tools, IntelliJ server; checkhealth 0 errors;
+      starts in ~40 ms
+- [ ] Neovim: accept the IntelliJ server EULA (open a .java file once); Go toolchain for gopls, or drop gopls
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /
