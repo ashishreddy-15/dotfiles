@@ -41,34 +41,27 @@ MIME_DEFAULTS=(
 DRY_RUN=0
 ASSUME_YES=0
 
-# ---------- output helpers ----------
-if [[ -t 1 ]]; then
-  C_B=$'\e[1m' C_G=$'\e[32m' C_Y=$'\e[33m' C_R=$'\e[31m' C_0=$'\e[0m'
-else
-  C_B='' C_G='' C_Y='' C_R='' C_0=''
-fi
-step() { printf '\n%s==> %s%s\n' "$C_B" "$*" "$C_0"; }
-info() { printf '  %s\n' "$*"; }
-ok()   { printf '  %s✓%s %s\n' "$C_G" "$C_0" "$*"; }
-warn() { printf '  %s!%s %s\n' "$C_Y" "$C_0" "$*" >&2; }
-die()  { printf '%serror:%s %s\n' "$C_R" "$C_0" "$*" >&2; exit 1; }
+# ---------- output ----------
+# shellcheck source=scripts/lib/ui.sh
+source "$DOTFILES/scripts/lib/ui.sh"
 
 trap 'die "failed at line $LINENO: $BASH_COMMAND"' ERR
 
-# Run a command, or just print it in dry-run mode.
-run() {
-  if (( DRY_RUN )); then
-    printf '  [dry-run] %s\n' "$*"
-  else
-    "$@"
-  fi
-}
+# Run a command, or in a dry run skip it silently (each step says in words what it would do).
+act() { (( DRY_RUN )) || "$@"; }
 
 # Print the comment block at the top of this file.
 usage() { awk 'NR>2 && /^#/ {sub(/^# ?/, ""); print; next} NR>2 {exit}' "${BASH_SOURCE[0]}"; exit "${1:-0}"; }
 
 # Read package names from a list file: strip comments and blank lines.
 read_list() { sed -e 's/#.*//' -e 's/[[:space:]]\+$//' -e '/^[[:space:]]*$/d' "$1"; }
+
+# "a b c" as "a, b, c", or "a, b ... (12)" when long.
+list_words() {
+  local n=$# out
+  if (( n > 6 )); then out="$1, $2, $3, $4 and $(( n - 4 )) more"; else out=$(printf '%s, ' "$@"); out=${out%, }; fi
+  printf '%s' "$out"
+}
 
 # ---------- preflight ----------
 preflight() {
@@ -89,28 +82,26 @@ preflight() {
 
 need_sudo() {
   (( DRY_RUN )) && return 0
+  sudo -n true 2>/dev/null && return 0
+  doing "this needs your password (sudo)"
   sudo -v || die "sudo authentication failed"
 }
 
 # ---------- steps ----------
 step_repos() {
-  step "Repositories"
-  local src name dest
+  step "Repositories" "extra package sources: Hyprland and Quickshell (COPR)"
+  local src name dest fine=0
   for src in "$DOTFILES"/system/repos/*.repo; do
-    name=$(basename "$src")
-    dest="/etc/yum.repos.d/$name"
-    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
-      ok "$name (up to date)"
-      continue
-    fi
-    if [[ -f "$dest" ]]; then
-      warn "$name differs from installed copy; replacing:"
-      diff -u "$dest" "$src" | sed 's/^/      /' || true
-    fi
+    name=$(basename "$src" .repo); name=${name##*:}
+    dest="/etc/yum.repos.d/$(basename "$src")"
+    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then fine=$(( fine + 1 )); continue; fi
+    if (( DRY_RUN )); then would "add the $name repository"; continue; fi
+    [[ -f "$dest" ]] && warn "the installed $name repository differs: replacing it"
     need_sudo
-    run sudo install -m 0644 -o root -g root "$src" "$dest"
-    ok "$name installed"
+    sudo install -m 0644 -o root -g root "$src" "$dest"
+    done_ "added the $name repository"
   done
+  (( fine )) && ok "$fine repositories already set up"
 
   # Warn about other Hyprland COPRs that would compete with ours.
   local f ours
@@ -119,19 +110,19 @@ step_repos() {
     for src in "$DOTFILES"/system/repos/*.repo; do
       [[ "$(basename "$src")" == "$(basename "$f")" ]] && ours=1
     done
-    (( ours )) || warn "another Hyprland repo is present: $f (consider removing it)"
+    (( ours )) || warn "another Hyprland repository is present: $f (consider removing it)"
   done
 }
 
 step_packages() {
-  step "Packages"
-  local list p pkgs=() unwanted=()
+  step "Packages" "Fedora packages from packages/*.txt (and removals from remove.txt)"
+  local list p pkgs=() unwanted=() lists=0
   for list in "$DOTFILES"/packages/*.txt; do
     [[ "$list" == "$REMOVE_LIST" ]] && continue
     [[ "$(basename "$list")" == flatpak.txt ]] && continue      # Flathub apps: step_flatpaks
     [[ "$(basename "$list")" == sdkman.txt ]] && continue       # Java / Maven: step_sdkman
     mapfile -t -O "${#pkgs[@]}" pkgs < <(read_list "$list")
-    info "$(basename "$list"): $(read_list "$list" | wc -l) packages"
+    lists=$(( lists + 1 ))
   done
   [[ -f "$REMOVE_LIST" ]] && mapfile -t unwanted < <(read_list "$REMOVE_LIST")
 
@@ -148,37 +139,47 @@ step_packages() {
   for p in "${pkgs[@]}"; do
     rpm -q "$p" >/dev/null 2>&1 || missing+=("$p")
   done
-  if (( ${#missing[@]} )); then
-    info "to install: ${missing[*]}"
-    need_sudo
-    run sudo dnf install "${yes[@]}" "${missing[@]}"
+  if (( ${#missing[@]} == 0 )); then
+    ok "all ${#pkgs[@]} packages installed ($lists lists)"
+  elif (( DRY_RUN )); then
+    would "install ${#missing[@]}: $(list_words "${missing[@]}")"
   else
-    ok "all ${#pkgs[@]} packages already installed"
+    doing "installing ${#missing[@]} with dnf: $(list_words "${missing[@]}")"
+    need_sudo
+    sudo dnf install "${yes[@]}" "${missing[@]}"
+    done_ "installed $(list_words "${missing[@]}")"
   fi
 
   local present=()
   for p in "${unwanted[@]}"; do
     rpm -q "$p" >/dev/null 2>&1 && present+=("$p")
   done
-  if (( ${#present[@]} )); then
-    info "to remove (plus their unused dependencies): ${present[*]}"
-    need_sudo
-    run sudo dnf remove "${yes[@]}" "${present[@]}"
+  if (( ${#present[@]} == 0 )); then
+    (( ${#unwanted[@]} )) && ok "nothing to remove (${#unwanted[@]} unwanted packages are not installed)"
+  elif (( DRY_RUN )); then
+    would "remove ${#present[@]}: $(list_words "${present[@]}")"
   else
-    ok "nothing to remove"
+    doing "removing ${#present[@]} with dnf (and what only they needed): $(list_words "${present[@]}")"
+    need_sudo
+    sudo dnf remove "${yes[@]}" "${present[@]}"
+    gone "removed $(list_words "${present[@]}")"
   fi
 }
 
 step_services() {
-  step "Services"
-  need_sudo
+  step "Services" "which system and user services are on or off"
+  # Both scripts write into this run's summary; a dry run only reads the state, so it needs no root.
+  local vars=(UI_EVENTS_FILE="$UI_EVENTS_FILE" UI_STEP_NAME="$UI_STEP_NAME" DRY_RUN="$DRY_RUN")
+  [[ -t 1 ]] || vars+=(NO_COLOR=1)
+  info "system services"
   if (( DRY_RUN )); then
-    info "[dry-run] sudo bash system/services.sh"
-    info "[dry-run] bash system/user-services.sh"
+    env "${vars[@]}" bash "$DOTFILES/system/services.sh"
   else
-    sudo bash "$DOTFILES/system/services.sh"
-    bash "$DOTFILES/system/user-services.sh"
+    need_sudo
+    sudo env "${vars[@]}" bash "$DOTFILES/system/services.sh"
   fi
+  info "your services (start with your session)"
+  env "${vars[@]}" bash "$DOTFILES/system/user-services.sh"
 }
 
 # Catch config mistakes now instead of at the next login.
@@ -186,9 +187,9 @@ verify_configs() {
   if command -v Hyprland >/dev/null && [[ -f "$HOME/.config/hypr/hyprland.lua" ]]; then
     local out
     if out=$(Hyprland --verify-config -c "$HOME/.config/hypr/hyprland.lua" 2>&1); then
-      ok "Hyprland config is valid"
+      ok "the Hyprland config is valid"
     else
-      warn "Hyprland config has errors:"
+      warn "the Hyprland config has errors:"
       sed -n '/Config parsing result/,$p' <<<"$out" | sed 's/^/      /' >&2
       return 1
     fi
@@ -210,9 +211,10 @@ backup_conflicts() {
     fi
     [[ -d "$target" && ! -L "$target" ]] && die "$target is a directory but $pkg provides a file there"
 
-    run mkdir -p "$(dirname "$BACKUP_DIR/$rel")"
-    run mv "$target" "$BACKUP_DIR/$rel"
-    warn "backed up ~/$rel -> ${BACKUP_DIR/#"$HOME"/"~"}/$rel"
+    if (( DRY_RUN )); then would "move ~/$rel aside (to the backup folder), to link the repo's version"; continue; fi
+    mkdir -p "$(dirname "$BACKUP_DIR/$rel")"
+    mv "$target" "$BACKUP_DIR/$rel"
+    warn "moved ~/$rel aside to ${BACKUP_DIR/#"$HOME"/"~"}/$rel"
   done < <(find "$STOW_DIR/$pkg" \( -type f -o -type l \) -print0)
 }
 
@@ -224,83 +226,111 @@ list_pkgs() {
 # Login screen: the carbon theme (system/sddm/carbon). SDDM runs as its own user and cannot read $HOME, so the font
 # and the current wallpaper are copied into the theme. Re-run after changing the wallpaper to update it there too.
 step_sddm() {
-  step "Login screen (SDDM)"
-  command -v sddm >/dev/null 2>&1 || { ok "sddm is not installed: skipped"; return 0; }
-  need_sudo
+  step "Login screen" "the carbon theme for SDDM, with your font and wallpaper copied in"
+  command -v sddm >/dev/null 2>&1 || { ok "SDDM is not installed: nothing to do"; return 0; }
   local src="$DOTFILES/system/sddm" dest=/usr/share/sddm/themes/carbon
   local font="$HOME/.local/share/fonts/dotfiles/maple-mono-nf/MapleMono-NF-Regular.ttf"
   local wall
-  wall=$(cat "$HOME/.local/state/dotfiles/wallpaper" 2>/dev/null)
+  wall=$(cat "$HOME/.local/state/dotfiles/wallpaper" 2>/dev/null || true)
   [[ -f "$wall" ]] || wall=$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f 2>/dev/null | sort | head -1)
 
-  run sudo install -d -m 755 "$dest" /etc/sddm.conf.d
-  run sudo install -m 644 "$src"/carbon/* "$dest"/
+  # What should be where: "<source> <destination>" pairs.
+  local pairs=() f
+  for f in "$src"/carbon/*; do pairs+=("$f" "$dest/$(basename "$f")"); done
   if [[ -f "$font" ]]; then
-    run sudo install -m 644 "$font" "$dest/MapleMono-NF-Regular.ttf"
-    run sudo install -m 644 "${font%Regular.ttf}Light.ttf" "$dest/MapleMono-NF-Light.ttf"
-  else warn "Maple Mono not found (run ./install.sh fonts first): the login screen uses a plain monospace font"; fi
-  if [[ -f "$wall" ]]; then run sudo install -m 644 "$wall" "$dest/background.jpg"
-  else warn "no wallpaper found (run ./install.sh wallpapers): the login screen has a plain background"; fi
-  run sudo install -m 644 "$src/10-dotfiles.conf" /etc/sddm.conf.d/10-dotfiles.conf
-  ok "login screen: carbon (preview without logging out: sddm-greeter-qt6 --test-mode --theme $dest)"
+    pairs+=("$font" "$dest/MapleMono-NF-Regular.ttf" "${font%Regular.ttf}Light.ttf" "$dest/MapleMono-NF-Light.ttf")
+  else warn "Maple Mono is not installed (./install.sh fonts): the login screen falls back to a plain font"; fi
+  if [[ -f "$wall" ]]; then pairs+=("$wall" "$dest/background.jpg")
+  else warn "no wallpaper found (./install.sh wallpapers): the login screen gets a plain background"; fi
+  pairs+=("$src/10-dotfiles.conf" /etc/sddm.conf.d/10-dotfiles.conf)
+
+  # Only what differs is copied (and only then is your password needed).
+  local i changed=()
+  for (( i = 0; i < ${#pairs[@]}; i += 2 )); do
+    cmp -s "${pairs[i]}" "${pairs[i+1]}" 2>/dev/null || changed+=("${pairs[i]}" "${pairs[i+1]}")
+  done
+  if (( ${#changed[@]} == 0 )); then
+    ok "the login screen is up to date (wallpaper: $(basename "${wall:-none}"))"
+    return 0
+  fi
+  local n=$(( ${#changed[@]} / 2 )) files
+  files="$n file$( (( n == 1 )) || echo s)"
+  if (( DRY_RUN )); then would "update the login screen ($files; wallpaper: $(basename "${wall:-none}"))"; return 0; fi
+  need_sudo
+  sudo install -d -m 755 "$dest" /etc/sddm.conf.d
+  for (( i = 0; i < ${#changed[@]}; i += 2 )); do sudo install -m 644 "${changed[i]}" "${changed[i+1]}"; done
+  done_ "updated the login screen ($files; wallpaper: $(basename "${wall:-none}"))"
+  info "see it at the next login, or now: sddm-greeter-qt6 --test-mode --theme $dest"
 }
 
 # Apps from Flathub (packages/flatpak.txt), for your user only: no sudo, nothing system-wide.
 step_flatpaks() {
-  step "Flatpaks"
+  step "Flatpaks" "apps from Flathub, for your user only"
   local list="$DOTFILES/packages/flatpak.txt"
-  [[ -f "$list" ]] || { ok "no packages/flatpak.txt"; return 0; }
+  [[ -f "$list" ]] || { ok "no packages/flatpak.txt: nothing to do"; return 0; }
   command -v flatpak >/dev/null 2>&1 || { warn "flatpak is not installed: skipped"; return 0; }
-  run flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  act flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   # Let Flatpak apps read (only read) the GTK settings in this repo, so they get the same palette, corners and font.
-  run flatpak override --user --filesystem="$STOW_DIR/gtk:ro"
-  local app missing=()
+  act flatpak override --user --filesystem="$STOW_DIR/gtk:ro"
+  local app apps=() missing=()
   while read -r app; do
+    apps+=("$app")
     flatpak info --user "$app" >/dev/null 2>&1 || missing+=("$app")
   done < <(read_list "$list")
-  if (( ${#missing[@]} )); then
-    info "to install: ${missing[*]}"
-    run flatpak install --user --noninteractive flathub "${missing[@]}"
+  if (( ${#missing[@]} == 0 )); then
+    ok "all ${#apps[@]} Flathub apps installed ($(list_words "${apps[@]##*.}"))"
+  elif (( DRY_RUN )); then
+    would "install $(list_words "${missing[@]##*.}")"
   else
-    ok "all Flathub apps already installed"
+    doing "installing $(list_words "${missing[@]##*.}") from Flathub"
+    flatpak install --user --noninteractive flathub "${missing[@]}"
+    done_ "installed $(list_words "${missing[@]##*.}")"
   fi
   # Inside the sandbox GTK reads its config from the app's own folder (~/.var/app/<id>/config), not ~/.config:
   # link the repo's gtk.css and settings.ini into it (absolute paths: stow's relative links would not resolve there).
   local f
-  while read -r app; do
-    run mkdir -p "$HOME/.var/app/$app/config/gtk-4.0"
+  for app in "${apps[@]}"; do
+    act mkdir -p "$HOME/.var/app/$app/config/gtk-4.0"
     for f in gtk.css settings.ini; do
-      run ln -sfn "$STOW_DIR/gtk/.config/gtk-4.0/$f" "$HOME/.var/app/$app/config/gtk-4.0/$f"
+      act ln -sfn "$STOW_DIR/gtk/.config/gtk-4.0/$f" "$HOME/.var/app/$app/config/gtk-4.0/$f"
     done
-  done < <(read_list "$list")
+  done
 }
 
 # Java, Maven... with SDKMAN (packages/sdkman.txt), for your user only. SDKMAN is told not to edit ~/.bashrc:
 # home/bash/.bashrc.d/40-sdkman.sh sets up PATH and JAVA_HOME without slowing the shell down.
 step_sdkman() {
-  step "SDKMAN (Java, Maven)"
+  step "SDKMAN" "Java and Maven, for your user only"
   local list="$DOTFILES/packages/sdkman.txt" dir="$HOME/.sdkman"
-  [[ -f "$list" ]] || { ok "no packages/sdkman.txt"; return 0; }
-  if [[ ! -f "$dir/bin/sdkman-init.sh" ]]; then
-    if (( DRY_RUN )); then info "[dry-run] install SDKMAN into $dir"
-    else
-      local tmp; tmp=$(mktemp)
-      curl -fsSL "https://get.sdkman.io?rcupdate=false" -o "$tmp" || { warn "could not download SDKMAN"; rm -f "$tmp"; return 0; }
-      bash "$tmp" >/dev/null && ok "SDKMAN installed"
-      rm -f "$tmp"
-    fi
+  [[ -f "$list" ]] || { ok "no packages/sdkman.txt: nothing to do"; return 0; }
+  if [[ -f "$dir/bin/sdkman-init.sh" ]]; then
+    :
+  elif (( DRY_RUN )); then
+    would "install SDKMAN into ~/.sdkman"
   else
-    ok "SDKMAN already installed"
+    doing "installing SDKMAN"
+    local tmp; tmp=$(mktemp)
+    curl -fsSL "https://get.sdkman.io?rcupdate=false" -o "$tmp" || { warn "could not download SDKMAN"; rm -f "$tmp"; return 0; }
+    bash "$tmp" >/dev/null && done_ "installed SDKMAN"
+    rm -f "$tmp"
   fi
-  (( DRY_RUN )) && { read_list "$list" | while read -r c v; do info "[dry-run] sdk install $c $v; sdk default $c $v"; done; return 0; }
+  local cand ver
+  if (( DRY_RUN )); then
+    while read -r cand ver; do
+      if [[ -d "$dir/candidates/$cand/$ver" ]]; then ok "$cand $ver"; else would "install $cand $ver"; fi
+    done < <(read_list "$list")
+    return 0
+  fi
   # SDKMAN's scripts use unset variables, which this script treats as errors (set -u): allow them around its calls.
   set +u
   # shellcheck disable=SC1091
   source "$dir/bin/sdkman-init.sh"
-  local cand ver
   while read -r cand ver; do
-    if [[ -d "$dir/candidates/$cand/$ver" ]]; then ok "$cand $ver (installed)"
-    else yes | sdk install "$cand" "$ver" >/dev/null 2>&1 && ok "$cand $ver installed" || { warn "$cand $ver: install failed"; continue; }
+    if [[ -d "$dir/candidates/$cand/$ver" ]]; then ok "$cand $ver"
+    else
+      doing "installing $cand $ver"
+      if yes | sdk install "$cand" "$ver" >/dev/null 2>&1; then done_ "installed $cand $ver"
+      else warn "$cand $ver: install failed"; continue; fi
     fi
     sdk default "$cand" "$ver" >/dev/null 2>&1
   done < <(read_list "$list")
@@ -308,10 +338,10 @@ step_sdkman() {
 }
 
 step_link() {
-  step "Linking dotfiles (stow)"
+  step "Linking" "your configs from home/ into ~ (GNU stow)"
   local pkgs
   mapfile -t pkgs < <(list_pkgs)
-  (( ${#pkgs[@]} )) || { ok "no packages in home/"; return; }
+  (( ${#pkgs[@]} )) || { ok "no packages in home/: nothing to do"; return; }
 
   local p
   for p in "${pkgs[@]}"; do backup_conflicts "$p"; done
@@ -320,20 +350,20 @@ step_link() {
   local out
   out=$(stow --no-folding -n -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}" 2>&1) \
     || die "stow simulation failed; nothing was changed:"$'\n'"$out"
-  run stow --no-folding -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}"
-  ok "linked: ${pkgs[*]}"
+  act stow --no-folding -d "$STOW_DIR" -t "$HOME" -R "${pkgs[@]}"
+  ok "${#pkgs[@]} packages linked: ${pkgs[*]}"
   # GTK4 / libadwaita apps read gsettings, not settings.ini: copy the linked defaults (dark, fonts, themes) there.
-  if command -v gsettings >/dev/null 2>&1 && [[ -x "$HOME/.local/bin/appearance" || $DRY_RUN == 1 ]]; then
-    run "$HOME/.local/bin/appearance" sync
+  if command -v gsettings >/dev/null 2>&1 && [[ -x "$HOME/.local/bin/appearance" ]]; then
+    act "$HOME/.local/bin/appearance" sync >/dev/null
   fi
   (( DRY_RUN )) || verify_configs || die "fix the config above, then re-run ./install.sh link"
 }
 
 # Download fonts listed in system/fonts.txt (pinned URL + sha256) into the user font dir.
 step_fonts() {
-  step "Fonts"
+  step "Fonts" "pinned downloads, checked against their checksums"
   local manifest="$DOTFILES/system/fonts.txt" dest_root="$HOME/.local/share/fonts/dotfiles"
-  [[ -f "$manifest" ]] || { ok "no system/fonts.txt"; return 0; }
+  [[ -f "$manifest" ]] || { ok "no system/fonts.txt: nothing to do"; return 0; }
   local cmd
   for cmd in curl sha256sum unzip fc-cache; do
     command -v "$cmd" >/dev/null || die "missing command: $cmd"
@@ -344,15 +374,12 @@ step_fonts() {
     dest="$dest_root/$name"
     # The .sha256 marker records what is installed, so unchanged fonts are skipped.
     if [[ -f "$dest/.sha256" && "$(<"$dest/.sha256")" == "$sha" ]]; then
-      ok "$name (up to date)"
+      ok "$name"
       continue
     fi
-    if (( DRY_RUN )); then
-      info "[dry-run] download $name from $url"
-      continue
-    fi
+    if (( DRY_RUN )); then would "download $name"; continue; fi
 
-    info "downloading $name ..."
+    doing "downloading $name"
     tmp=$(mktemp -d)
     file="$tmp/${url##*/}"
     if ! curl -fsSL --retry 3 -o "$file" "$url"; then
@@ -375,19 +402,16 @@ step_fonts() {
     rm -rf "$dest"
     mv "$tmp/out" "$dest"
     rm -rf "$tmp"
-    ok "$name installed ($(find "$dest" -type f ! -name .sha256 | wc -l) files)"
+    done_ "installed $name ($(find "$dest" -type f ! -name .sha256 | wc -l) files)"
     changed=1
   done < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest")
 
-  if (( changed )); then
-    fc-cache -f "$dest_root"
-    ok "font cache refreshed"
-  fi
+  (( changed )) && fc-cache -f "$dest_root"
+  return 0
 }
 
-# Generate the wallpapers (kept out of git: they are a few MB each and fully reproducible).
 step_wallpapers() {
-  step "Wallpapers"
+  step "Wallpapers" "pinned photos from Unsplash, checked against their checksums"
   download_photos
 }
 
@@ -398,33 +422,29 @@ download_photos() {
   [[ -f "$manifest" ]] || return 0
   local cmd
   for cmd in curl sha256sum; do
-    command -v "$cmd" >/dev/null || { warn "missing $cmd; skipping photos"; return 0; }
+    command -v "$cmd" >/dev/null || { warn "missing $cmd: photos skipped"; return 0; }
   done
   mkdir -p "$dest"
 
-  local name sha url file tmp got
+  local name sha url file tmp got fine=0
   while read -r name sha url; do
     file="$dest/$name.jpg"
-    if [[ -f "$file" && "$(sha256sum "$file" | cut -d' ' -f1)" == "$sha" ]]; then
-      ok "$name.jpg (up to date)"
-      continue
-    fi
-    if (( DRY_RUN )); then
-      info "[dry-run] download $name.jpg"
-      continue
-    fi
+    if [[ -f "$file" && "$(sha256sum "$file" | cut -d' ' -f1)" == "$sha" ]]; then fine=$(( fine + 1 )); continue; fi
+    if (( DRY_RUN )); then would "download $name"; continue; fi
+    doing "downloading $name"
     tmp=$(mktemp)
     if ! curl -fsSL --retry 3 --max-time 120 -o "$tmp" "$url"; then
       warn "$name: download failed; skipped"; rm -f "$tmp"; continue
     fi
     got=$(sha256sum "$tmp" | cut -d' ' -f1)
     if [[ "$got" != "$sha" ]]; then
-      warn "$name: checksum changed upstream; skipped (update system/wallpapers.txt if you trust the new file)"
+      warn "$name: the photo changed upstream; skipped (update system/wallpapers.txt if you trust the new one)"
       rm -f "$tmp"; continue
     fi
     mv "$tmp" "$file"
-    ok "$name.jpg downloaded"
+    done_ "downloaded $name"
   done < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$manifest")
+  (( fine )) && ok "$fine wallpapers up to date"
 
   # Remove what is no longer in the list (this folder holds only the listed photos; your own are in ~/Pictures/Wallpapers).
   local listed f
@@ -432,39 +452,43 @@ download_photos() {
   for f in "$dest"/*; do
     [[ -f "$f" ]] || continue
     grep -qxF "$(basename "$f")" <<<"$listed" && continue
-    run rm -f "$f"
-    ok "removed $(basename "$f") (no longer listed)"
+    if (( DRY_RUN )); then would "remove $(basename "$f" .jpg) (no longer listed)"; continue; fi
+    rm -f "$f"
+    gone "removed $(basename "$f" .jpg) (no longer listed)"
   done
 }
 
 step_defaults() {
-  step "Default applications"
-  command -v xdg-mime >/dev/null || { warn "xdg-mime not found (dnf install xdg-utils); skipping"; return 0; }
+  step "Default apps" "which app opens what"
+  command -v xdg-mime >/dev/null || { warn "xdg-mime not found (dnf install xdg-utils): skipped"; return 0; }
   local entry app types t
   for entry in "${MIME_DEFAULTS[@]}"; do
     read -r app types <<<"$entry"
     if ! [[ -f "/usr/share/applications/$app" || -f "$HOME/.local/share/applications/$app" ]]; then
-      warn "$app is not installed; skipping"
+      warn "$app is not installed: skipped"
       continue
     fi
     for t in $types; do
       if [[ "$(xdg-mime query default "$t" 2>/dev/null)" == "$app" ]]; then
-        ok "$t -> $app (already set)"
+        ok "$t opens with ${app%.desktop}"
+      elif (( DRY_RUN )); then
+        would "open $t with ${app%.desktop}"
       else
-        run xdg-mime default "$app" "$t"
-        ok "$t -> $app"
+        xdg-mime default "$app" "$t"
+        done_ "$t now opens with ${app%.desktop}"
       fi
     done
   done
 }
 
 step_unlink() {
-  step "Unlinking dotfiles"
+  step "Unlinking" "removing the links into ~ (your files in the repo stay)"
   local pkgs
   mapfile -t pkgs < <(list_pkgs)
   (( ${#pkgs[@]} )) || return 0
-  run stow -d "$STOW_DIR" -t "$HOME" -D "${pkgs[@]}"
-  ok "removed links for: ${pkgs[*]}"
+  if (( DRY_RUN )); then would "remove the links of ${#pkgs[@]} packages"; return 0; fi
+  stow -d "$STOW_DIR" -t "$HOME" -D "${pkgs[@]}"
+  gone "removed the links of ${#pkgs[@]} packages: $(printf '%s ' "${pkgs[@]}")"
 }
 
 # ---------- main ----------
@@ -483,13 +507,20 @@ main() {
   (( ${#steps[@]} )) || steps=("${ALL_STEPS[@]}")
 
   preflight
-  (( DRY_RUN )) && info "${C_Y}dry run: no changes will be made${C_0}"
+  UI_EVENTS_FILE=$(mktemp)
+  export UI_EVENTS_FILE
+  trap 'rm -f "$UI_EVENTS_FILE"' EXIT
+  UI_STEP_TOTAL=${#steps[@]}
+
+  ui_banner "${NAME:-Fedora} ${VERSION_ID:-}  ·  $USER@$(hostname -s)" \
+    "$( (( DRY_RUN )) && printf 'dry run: nothing will be changed  ·  ' )steps: ${steps[*]}"
 
   local s
   for s in "${steps[@]}"; do "step_$s"; done
 
-  step "Done"
-  [[ -d "$BACKUP_DIR" ]] && info "replaced files were saved in ${BACKUP_DIR/#"$HOME"/"~"}"
+  ui_summary "$DRY_RUN"
+  [[ -d "$BACKUP_DIR" ]] && info "files that were in the way are in ${BACKUP_DIR/#"$HOME"/"~"}"
+  printf '\n'
   return 0
 }
 

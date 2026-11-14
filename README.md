@@ -390,5 +390,15 @@ Session environment variables go in `home/uwsm/.config/uwsm/env-hyprland`, not
 `system/services.sh` turns off what this bare-metal laptop doesn't use: VM guest
 tools, live-ISO units, iSCSI/RAID/LVM/Stratis, ModemManager, sssd, homed, CUPS,
 Avahi, PackageKit (masked). Bluetooth stays on.
-`system/user-services.sh` enables hypridle and hyprpolkitagent and disables obex. To undo one:
+`system/user-services.sh` turns on quickshell, hypridle, hyprpolkitagent and bt-agent and turns off obex.
+Each list is a set of `svc_group on|off|mask "<what they are>" units…` lines (helpers in `scripts/lib/svc.sh`); the
+run prints one line per group with its state (`✓ off  printing  cups.socket cups.path cups`) and a line per unit it
+actually changes. `./install.sh -n services` shows the real state without needing root. To undo one:
 `sudo systemctl unmask <unit> && sudo systemctl enable --now <unit>`.
+
+## Install output
+
+Every script shares `scripts/lib/ui.sh`: numbered steps with a line on what each does, then `✓` already fine (dim),
+`+` changed, `−` removed or turned off, `→` happening now (or, in a dry run, what would happen), `!` warning. The run
+ends with a summary of every change and warning, including the ones made under sudo. Colour follows the desktop
+palette and is off when the output is not a terminal or `NO_COLOR` is set.
