@@ -1,8 +1,9 @@
 import QtQuick
 import qs
+import "../ui"
 
-// A number with minus and plus buttons:   -   10 pt   +
-Row {
+// A number with minus and plus buttons:   -   10 pt   +      (Left / Right change it from the keyboard)
+Item {
     id: root
 
     property int value: 0
@@ -12,7 +13,19 @@ Row {
     property string suffix: ""
     signal changed(int value)
 
-    spacing: 4
+    implicitWidth: row.implicitWidth
+    implicitHeight: row.implicitHeight
+
+    function less() { if (value > from) changed(Math.max(from, value - step)) }
+    function more() { if (value < to) changed(Math.min(to, value + step)) }
+
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Left) root.less()
+        else if (event.key === Qt.Key_Right) root.more()
+        else return
+        event.accepted = true
+    }
 
     component Button: Rectangle {
         id: btn
@@ -42,13 +55,20 @@ Row {
         }
     }
 
-    Button { glyph: Theme.glyphMinus; active: root.value > root.from; onClicked: root.changed(Math.max(root.from, root.value - root.step)) }
-    StyledText {
-        width: 64
-        height: 32
-        horizontalAlignment: Text.AlignHCenter
-        text: root.value + root.suffix
-        color: Theme.bright
+    Row {
+        id: row
+        spacing: 4
+
+        Button { glyph: Theme.glyphMinus; active: root.value > root.from; onClicked: root.less() }
+        StyledText {
+            width: 64
+            height: 32
+            horizontalAlignment: Text.AlignHCenter
+            text: root.value + root.suffix
+            color: Theme.bright
+        }
+        Button { glyph: Theme.glyphPlus; active: root.value < root.to; onClicked: root.more() }
     }
-    Button { glyph: Theme.glyphPlus; active: root.value < root.to; onClicked: root.changed(Math.min(root.to, root.value + root.step)) }
+
+    FocusRing { visible: root.activeFocus; anchors.margins: -3 }
 }

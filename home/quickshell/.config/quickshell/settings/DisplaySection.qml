@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs
-import "../panel"
 
 // Display: brightness of each screen that can be controlled, and the night light (warmer colours at night).
 Page {
@@ -30,11 +29,7 @@ Page {
             required property var modelData
             title: "Brightness"
             description: modelData.label
-            Row {
-                spacing: 14
-                Slider { width: 200; value: modelData.level; onMoved: v => modelData.set(v) }
-                StyledText { width: 44; height: 32; horizontalAlignment: Text.AlignRight; text: Math.round(modelData.level * 100) + "%" }
-            }
+            LevelSlider { value: modelData.level; onMoved: v => modelData.set(v) }
         }
     }
     Repeater {
@@ -55,14 +50,11 @@ Page {
     SettingRow {
         title: "Warmth"
         description: "Right is warmer."
-        Row {
-            spacing: 14
-            Slider {
-                width: 200
-                value: (Modes.kelvinMax - Modes.kelvin) / (Modes.kelvinMax - Modes.kelvinMin)
-                onMoved: v => Modes.setWarmth(Modes.kelvinMax - v * (Modes.kelvinMax - Modes.kelvinMin))
-            }
-            StyledText { width: 60; height: 32; horizontalAlignment: Text.AlignRight; text: Modes.kelvin + " K" }
+        LevelSlider {
+            value: (Modes.kelvinMax - Modes.kelvin) / (Modes.kelvinMax - Modes.kelvinMin)
+            valueText: Modes.kelvin + " K"
+            textWidth: 64
+            onMoved: v => Modes.setWarmth(Modes.kelvinMax - v * (Modes.kelvinMax - Modes.kelvinMin))
         }
     }
 }

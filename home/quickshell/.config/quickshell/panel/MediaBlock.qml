@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 import qs
+import "../ui"
 
 // What is playing (any player: a browser tab, mpv, Spotify...) with previous / play-pause / next.
 // Not shown at all when nothing is running.

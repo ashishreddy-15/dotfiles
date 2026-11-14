@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import "../ui"
 
 // A row in a list of things you can pick or connect to (a network, a device, a sound output).
 //   ListRow { title: "Home"; detail: "82%"; marked: connected; onClicked: ... }
@@ -14,6 +15,12 @@ Item {
     property bool clickable: true
 
     signal clicked()
+
+    // Keyboard: Enter or Space picks it.
+    activeFocusOnTab: clickable
+    Keys.onPressed: event => {
+        if (clickable && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) { root.clicked(); event.accepted = true }
+    }
 
     width: parent.width
     height: subtitle !== "" ? 52 : 40
@@ -53,4 +60,6 @@ Item {
         text: root.detail
         color: root.detailColor
     }
+
+    FocusRing { visible: root.activeFocus }
 }

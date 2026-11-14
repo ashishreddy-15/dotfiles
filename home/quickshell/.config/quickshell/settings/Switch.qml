@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import "../ui"
 
 // An on / off switch.   Switch { checked: thing.on; onToggled: thing.on = !thing.on }
 Rectangle {
@@ -7,6 +8,16 @@ Rectangle {
 
     property bool checked: false
     signal toggled()
+
+    // Keyboard: Enter or Space flips it; Left switches it off, Right switches it on.
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) root.toggled()
+        else if (event.key === Qt.Key_Left) { if (root.checked) root.toggled() }
+        else if (event.key === Qt.Key_Right) { if (!root.checked) root.toggled() }
+        else return
+        event.accepted = true
+    }
 
     implicitWidth: 40
     implicitHeight: 22
@@ -33,4 +44,6 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         onClicked: root.toggled()
     }
+
+    FocusRing { visible: root.activeFocus; radius: root.radius; anchors.margins: -3 }
 }

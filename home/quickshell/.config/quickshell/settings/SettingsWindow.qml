@@ -12,7 +12,10 @@ import "../ui"
 //
 //   Super + I              show / hide      (qs ipc call settings toggle)
 //   Super + Shift + A      Appearance       (qs ipc call settings toggleSection appearance | open <section>)
-//   Esc, a click outside   close            Up / Down  change section (outside a text field)
+//   Esc, a click outside   close
+// Keyboard: it opens with the focus on the sidebar: Up / Down change section, Right / Enter / Tab go into the section.
+// Inside a section Tab (or Up / Down) moves between the controls, Enter and Space press, Left / Right adjust (switches,
+// choices, steppers, sliders). Left on a plain row, or Shift+Tab / Up from the first control, goes back to the sidebar.
 // Sections: wifi, bluetooth, sound, display, wallpaper, notifications, power, appearance. Each one is a file in this folder;
 // it is loaded only while it is showing (so scanning for networks and devices stops when Settings is closed).
 //
@@ -47,10 +50,23 @@ Scope {
 
     function go(i) { ShellState.settingsSection = sections[Math.max(0, Math.min(sections.length - 1, i))].id }
 
+    // ---- keyboard focus: the sidebar (the card itself has the focus) or a control inside the section ----
     Connections {
         target: ShellState
-        function onSettingsOpenChanged() { if (ShellState.settingsOpen) keys.forceActiveFocus() }
-        function onSettingsSectionChanged() { keys.forceActiveFocus() }
+        function onSettingsOpenChanged() { if (ShellState.settingsOpen) card.forceActiveFocus() }
+        function onSettingsSectionChanged() { card.forceActiveFocus() }
+    }
+    function inContent(item) {
+        for (let p = item; p; p = p.parent) if (p === content) return true
+        return false
+    }
+    // Into the section: the first control. Between controls: the next / previous one; before the first, the sidebar.
+    function moveFocus(forward) {
+        const cur = card.Window.activeFocusItem
+        const from = inContent(cur) ? cur : content
+        const next = from.nextItemInFocusChain(forward)
+        if (next && inContent(next) && next !== content) next.forceActiveFocus()
+        else if (!forward) card.forceActiveFocus()
     }
 
     PanelWindow {
@@ -76,18 +92,6 @@ Scope {
             onCleared: ShellState.settingsOpen = false
         }
 
-        Item {
-            id: keys
-            focus: true
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Escape) ShellState.settingsOpen = false
-                else if (event.key === Qt.Key_Down) root.go(root.index + 1)
-                else if (event.key === Qt.Key_Up) root.go(root.index - 1)
-                else return
-                event.accepted = true
-            }
-        }
-
         Card {
             id: card
             x: Theme.shadowMargin
@@ -95,6 +99,21 @@ Scope {
             width: root.cardWidth
             open: ShellState.settingsOpen
             contentHeight: root.cardHeight
+
+            // Keys the controls do not use come up to here (the controls handle Enter, Space and Left / Right themselves).
+            focus: true
+            Keys.onPressed: event => {
+                const inside = root.inContent(card.Window.activeFocusItem)
+                if (event.key === Qt.Key_Escape) ShellState.settingsOpen = false
+                else if (event.key === Qt.Key_Down) { if (inside) root.moveFocus(true); else root.go(root.index + 1) }
+                else if (event.key === Qt.Key_Up) { if (inside) root.moveFocus(false); else root.go(root.index - 1) }
+                else if (event.key === Qt.Key_Tab) root.moveFocus(true)
+                else if (event.key === Qt.Key_Backtab) root.moveFocus(false)
+                else if (!inside && (event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) root.moveFocus(true)
+                else if (inside && event.key === Qt.Key_Left) card.forceActiveFocus()
+                else return
+                event.accepted = true
+            }
 
             Row {
                 anchors.fill: parent
@@ -121,7 +140,7 @@ Scope {
                                 required property var modelData
                                 text: modelData.label
                                 current: ShellState.settingsSection === modelData.id
-                                onClicked: ShellState.settingsSection = modelData.id
+                                onClicked: { ShellState.settingsSection = modelData.id; card.forceActiveFocus() }
                             }
                         }
                     }
@@ -151,6 +170,7 @@ Scope {
                     }
 
                     Loader {
+                        id: content
                         anchors { left: parent.left; right: parent.right; top: heading.bottom; bottom: parent.bottom; margins: root.pad; topMargin: 16 }
                         active: ShellState.settingsOpen || card.shown > 0
                         source: root.sections[root.index].file

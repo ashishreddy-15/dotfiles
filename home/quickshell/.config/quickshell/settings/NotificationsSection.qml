@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs
+import "../ui"
 
 // Notifications: Do Not Disturb, and the history (everything that came in and has not been dismissed, newest first).
 // Click an entry to dismiss it.
@@ -33,9 +34,15 @@ Page {
         Rectangle {
             visible: Notifs.count > 0
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            id: clearButton
             width: clearText.implicitWidth + 24
             height: 28
             radius: Theme.radiusRow
+            activeFocusOnTab: true
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { Notifs.clearAll(); event.accepted = true }
+            }
+            FocusRing { visible: clearButton.activeFocus }
             color: clearArea.containsMouse ? Theme.hover : Theme.clear
             border.width: 1
             border.color: Theme.border
@@ -67,6 +74,13 @@ Page {
 
             width: root.width
             height: col.implicitHeight + 16
+
+            // Keyboard: Enter, Space or Delete dismisses it.
+            activeFocusOnTab: true
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space || event.key === Qt.Key_Delete) { Notifs.dismiss(entry.nid); event.accepted = true }
+            }
+            FocusRing { visible: entry.activeFocus }
 
             Rectangle {
                 anchors.fill: parent

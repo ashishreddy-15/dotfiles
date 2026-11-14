@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 import qs
-import "../panel"
 
 // Sound: volume and mute for the output and the microphone, and which device each one uses.
 Page {
@@ -21,15 +20,10 @@ Page {
     SettingRow {
         title: "Output volume"
         description: root.name(root.sink)
-        Row {
-            spacing: 14
-            Slider {
-                width: 200
-                value: root.sink?.audio?.volume ?? 0
-                muted: root.sink?.audio?.muted ?? false
-                onMoved: v => { if (root.sink?.audio) root.sink.audio.volume = v }
-            }
-            StyledText { width: 44; height: 32; horizontalAlignment: Text.AlignRight; text: Math.round((root.sink?.audio?.volume ?? 0) * 100) + "%" }
+        LevelSlider {
+            value: root.sink?.audio?.volume ?? 0
+            muted: root.sink?.audio?.muted ?? false
+            onMoved: v => { if (root.sink?.audio) root.sink.audio.volume = v }
         }
     }
     SettingRow {
@@ -39,15 +33,10 @@ Page {
     SettingRow {
         title: "Microphone volume"
         description: root.name(root.source)
-        Row {
-            spacing: 14
-            Slider {
-                width: 200
-                value: root.source?.audio?.volume ?? 0
-                muted: root.source?.audio?.muted ?? false
-                onMoved: v => { if (root.source?.audio) root.source.audio.volume = v }
-            }
-            StyledText { width: 44; height: 32; horizontalAlignment: Text.AlignRight; text: Math.round((root.source?.audio?.volume ?? 0) * 100) + "%" }
+        LevelSlider {
+            value: root.source?.audio?.volume ?? 0
+            muted: root.source?.audio?.muted ?? false
+            onMoved: v => { if (root.source?.audio) root.source.audio.volume = v }
         }
     }
     SettingRow {

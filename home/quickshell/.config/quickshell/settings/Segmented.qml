@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import "../ui"
 
 // A row of choices where exactly one is on (a segmented control).
 //   Segmented { options: [{ label: "dark", value: "prefer-dark" }, ...]; value: current; onPicked: v => ... }
@@ -10,6 +11,22 @@ Rectangle {
     property var options: []
     property var value
     signal picked(var value)
+
+    function valueOf(o) { return typeof o === "string" ? o : o.value }
+    function step(by) {
+        const i = options.findIndex(o => valueOf(o) === value)
+        const j = Math.max(0, Math.min(options.length - 1, (i < 0 ? 0 : i + by)))
+        if (options.length > 0 && j !== i) picked(valueOf(options[j]))
+    }
+
+    // Keyboard: Left / Right pick the previous / next choice.
+    activeFocusOnTab: true
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Left) root.step(-1)
+        else if (event.key === Qt.Key_Right) root.step(1)
+        else return
+        event.accepted = true
+    }
 
     implicitWidth: row.implicitWidth + 2 * Theme.segmentInset
     implicitHeight: 32
@@ -55,4 +72,6 @@ Rectangle {
             }
         }
     }
+
+    FocusRing { visible: root.activeFocus; anchors.margins: -3 }
 }

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs
+import "../ui"
 
 // lock  logout  suspend  reboot  shutdown
 // The ones that end your session ask for a second click ("reboot?") before they act.

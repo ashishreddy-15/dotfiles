@@ -6,6 +6,7 @@ import Quickshell.Bluetooth
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import qs
+import "../ui"
 
 // The control center: only the quick things. Everything with a list or options (networks, devices, wallpaper, ...)
 // is in Settings (Super + I; the gear in the header). Every control is one of three kinds, always in the same place:

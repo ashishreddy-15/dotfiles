@@ -91,7 +91,9 @@ containing `[Desktop Entry]`, `Type=Application`, `Name=...` and `NoDisplay=true
 **Settings:** press `Super + I` (again, or Esc, to close; `Super + Shift + A` opens it on Appearance). It is a window of its own,
 centred, with a sidebar: Wi-Fi, Bluetooth, Sound, Display (brightness, night light), Wallpaper (thumbnails), Notifications
 (Do Not Disturb, history), Power (profile, battery) and Appearance (colour scheme, GTK / icon / cursor theme, cursor size, fonts).
-Appearance runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
+Keyboard: it opens on the sidebar (Up / Down change section); Right, Enter or Tab go into the section, where Tab or Up / Down
+move between controls, Enter and Space press, Left / Right adjust (switches, choices, steppers, sliders, the wallpaper grid);
+Left on a plain row or Shift+Tab from the first control goes back to the sidebar. Appearance runs `appearance set ...`, which writes gsettings, the two `settings.ini` files (symlinks into
 `home/gtk/`, so `git diff` shows what changed and you can commit it) and the running cursor. In a terminal:
 `appearance get`, `appearance list gtk|icons|cursors|fonts`, `appearance set font-size 11`.
 GTK4 / libadwaita apps (Nautilus, pavucontrol) get the Carbon & Pewter palette in the dark scheme and stock Adwaita

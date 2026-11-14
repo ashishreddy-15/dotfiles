@@ -144,12 +144,17 @@ Item {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontBase
                 clip: true
+                onTextChanged: fonts.currentIndex = 0
+                // Keyboard: Up / Down move through the list, Enter chooses the marked family, Esc closes Settings.
                 Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Escape) { ShellState.settingsOpen = false; event.accepted = true }
-                    else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                        if (fonts.count > 0) Appearance.set("font", fonts.model[0])
-                        event.accepted = true
-                    }
+                    if (event.key === Qt.Key_Escape) ShellState.settingsOpen = false
+                    else if (event.key === Qt.Key_Down) fonts.currentIndex = Math.min(fonts.count - 1, fonts.currentIndex + 1)
+                    else if (event.key === Qt.Key_Up) fonts.currentIndex = Math.max(0, fonts.currentIndex - 1)
+                    else if (event.key === Qt.Key_PageDown) fonts.currentIndex = Math.min(fonts.count - 1, fonts.currentIndex + 8)
+                    else if (event.key === Qt.Key_PageUp) fonts.currentIndex = Math.max(0, fonts.currentIndex - 8)
+                    else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (fonts.count > 0) Appearance.set("font", fonts.model[fonts.currentIndex]) }
+                    else return
+                    event.accepted = true
                 }
                 StyledText {
                     visible: search.text === ""
@@ -166,6 +171,7 @@ Item {
             Layout.topMargin: 6
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
             model: {
                 const q = search.text.trim().toLowerCase()
                 return Appearance.fonts.filter(f => q === "" || f.toLowerCase().includes(q))
@@ -177,7 +183,7 @@ Item {
                 width: ListView.view.width
                 height: 30
                 radius: Theme.radiusRow
-                color: on ? Theme.selected : (area.containsMouse ? Theme.hover : Theme.clear)
+                color: on ? Theme.selected : (area.containsMouse || (ListView.isCurrentItem && search.activeFocus) ? Theme.hover : Theme.clear)
                 Behavior on color { ColorAnimation { duration: Theme.durFast } }
 
                 StyledText {

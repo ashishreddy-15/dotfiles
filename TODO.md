@@ -42,7 +42,8 @@ quiet tiles, the control center's structure.
 - [x] Control center slimmed to tiles (plain toggles), sliders, media and the power buttons; a gear opens Settings
 - [ ] Try by hand: connect to a saved Wi-Fi network and a new one with a password; pair a Bluetooth device; pick the sound
       output / input device; the brightness and warmth sliders; clear the notification history; switch the power profile
-- [ ] Settings: keyboard navigation inside a section (only Up / Down between sections and Esc work), a "forget network" action
+- [x] Settings: keyboard navigation (sidebar, Tab / arrows between controls, Enter / Space, Left / Right, scrolling to the focused row)
+- [ ] Settings: a "forget network" action; Bluetooth: forget / remove a device
 
 ## 4. Beyond the shell
 

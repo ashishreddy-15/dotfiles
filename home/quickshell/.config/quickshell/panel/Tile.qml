@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import "../ui"
 
 // A toggle tile (Wi-Fi, Bluetooth, ...): a label, a line of state, and a fill when it is on. Click it to toggle.
 Item {

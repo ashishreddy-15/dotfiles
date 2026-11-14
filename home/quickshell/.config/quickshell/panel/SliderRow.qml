@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import "../ui"
 
 // label | slider | value. Optionally the label is a button (volume: click to mute).
 Item {

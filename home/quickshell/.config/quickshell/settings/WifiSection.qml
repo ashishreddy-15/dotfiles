@@ -11,11 +11,12 @@ Page {
     readonly property var wifi: Networking.devices.values.find(d => d.type === DeviceType.Wifi) ?? null
     readonly property var connected: wifi?.networks.values.find(n => n.connected) ?? null
 
-    // Connected first, then saved ones, then by signal strength.
+    // Connected first, then saved ones, then by name. Not by signal strength: that changes with every scan, and a list that
+    // re-sorts itself is rebuilt each time, which would drop the keyboard focus (the signal still shows next to each name).
     readonly property var networks: {
         if (!wifi) return []
         return wifi.networks.values.slice().sort((a, b) =>
-            (b.connected - a.connected) || ((b.known ? 1 : 0) - (a.known ? 1 : 0)) || (b.signalStrength - a.signalStrength))
+            (b.connected - a.connected) || ((b.known ? 1 : 0) - (a.known ? 1 : 0)) || a.name.localeCompare(b.name))
     }
 
     property string askingFor: ""       // name of the secured network we are asking a password for
