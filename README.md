@@ -171,7 +171,7 @@ follows you between the 16:10 laptop and the 16:9 monitor), orientation (180° f
 the battery, and a pad to try it. `quickshell/Tablet.qml` applies the choices live with `hyprctl eval`
 (`qs ipc call tablet status` shows what it applied); `hypr/modules/tablet.lua` is the default without the shell.
 ExpressKeys: Settings > Tablet sets each of the four keys (Undo, Redo, Pen, Eraser by default; Xournal++'s shortcuts).
-The `tablet-keys` helper (`home/bin`) does it; it runs only while the tablet is plugged in (udev starts and stops
+The `tablet-keys` helper (`home/bin`) does it (Hyprland hands each shortcut to the focused window); it runs only while the tablet is plugged in (udev starts and stops
 `tablet-keys@<event>.service`, `system/udev/70-tablet-pad.rules`, installed by `./install.sh services`), and that rule
 gives your session read access to the pad only (not the `input` group). The pen's two buttons are set in the app
 (Xournal++: Edit > Preferences > Input System). Pressure curves too.
