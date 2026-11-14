@@ -110,6 +110,8 @@ four to re-theme.
 
 ## Quickshell
 
+After adding a new file run `./install.sh link` (stow links file by file).
+
 Runs as `quickshell.service` (Hyprland sessions only). It reloads when a file is saved in
 place; if a change does not show up (some tools replace the file instead), restart it.
 
@@ -120,7 +122,8 @@ journalctl --user -u quickshell -f       # logs / QML errors
 
 - `Theme.qml`: colours, fonts, sizes, and which monitor is the main one
 - `shell.qml`: entry point listing each piece
-- `bar/`: one bar per monitor. The main monitor gets the full bar; others show
+- `bar/`: one bar per monitor: bracket-style workspaces (`1 [2] 3`), clock, and a text-only
+  status area (tray, wifi, bt, vol, bat). Scroll on `vol` to change volume, click to mute. The main monitor gets the full bar; others show
   only their workspaces and the clock, unless the main monitor is unplugged.
 
 ## Desktop

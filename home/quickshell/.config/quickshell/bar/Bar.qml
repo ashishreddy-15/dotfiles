@@ -32,11 +32,17 @@ Variants {
             anchors.centerIn: parent
         }
 
-        // Right: status area (main bar only). Filled in step 2.
+        // Right: tray + status, text only (main bar only)
         RowLayout {
             visible: bar.full
-            spacing: Theme.pad
-            anchors { right: parent.right; rightMargin: Theme.pad; verticalCenter: parent.verticalCenter }
+            spacing: 18
+            anchors { right: parent.right; rightMargin: Theme.pad + 4; verticalCenter: parent.verticalCenter }
+
+            Tray { window: bar }
+            Network {}
+            BluetoothStatus {}
+            Volume {}
+            Battery {}
         }
 
         // Hairline under the bar

@@ -16,6 +16,7 @@ Singleton {
     // Text
     readonly property color text:    "#adb0b3"
     readonly property color dim:     "#666a6e"
+    readonly property color bright:  "#d0d3d6"   // the one thing that should stand out (current workspace)
 
     // Accent and status (kept muted on purpose)
     readonly property color accent:  "#6c7f91"
