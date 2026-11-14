@@ -5,5 +5,5 @@ import qs
 StyledText {
     color: Theme.barText
     font.pixelSize: Theme.barFontSize
-    Behavior on color { ColorAnimation { duration: 400 } }
+    Behavior on color { ColorAnimation { duration: Theme.durAmbient } }
 }

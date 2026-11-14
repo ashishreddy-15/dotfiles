@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.Pipewire
 import qs
+import "../ui"
 
 // Small volume / brightness indicator at the bottom-centre of a monitor: the one you are using for
 // volume, the one being adjusted for brightness.
@@ -58,24 +59,26 @@ Scope {
     // ---- the indicator ----
     PanelWindow {
         screen: Quickshell.screens.find(s => s.name === root.screenName) ?? ShellState.mainScreen
-        visible: root.shown
+        visible: root.shown || card.shown > 0    // stay mapped until the exit animation is done
 
         anchors.bottom: true                    // bottom only = horizontally centred
-        margins.bottom: 80
+        margins.bottom: 80 - Theme.shadowMargin
         exclusionMode: ExclusionMode.Ignore
-        implicitWidth: 260
-        implicitHeight: 38
+        implicitWidth: 260 + 2 * Theme.shadowMargin
+        implicitHeight: 38 + 2 * Theme.shadowMargin
         color: "transparent"
         mask: Region {}                         // clicks pass straight through
         WlrLayershell.namespace: "quickshell-osd"
         WlrLayershell.layer: WlrLayer.Overlay
 
-        Rectangle {
-            anchors.fill: parent
-            radius: height / 2
-            color: Theme.surface
-            border.width: 1
-            border.color: Theme.border
+        Card {
+            id: card
+            x: Theme.shadowMargin
+            y: Theme.shadowMargin
+            width: 260
+            open: root.shown
+            origin: Item.Bottom
+            contentHeight: 38
 
             Row {
                 anchors.centerIn: parent
@@ -92,7 +95,7 @@ Scope {
                     visible: root.note === ""
                     width: 150
                     height: 4
-                    radius: 2
+                    radius: Theme.radiusSmall
                     color: Theme.border
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -101,7 +104,7 @@ Scope {
                         height: parent.height
                         radius: parent.radius
                         color: root.muted ? Theme.dim : Theme.accent
-                        Behavior on width { NumberAnimation { duration: 80 } }
+                        Behavior on width { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
                     }
                 }
 

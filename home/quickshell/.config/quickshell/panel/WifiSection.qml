@@ -83,7 +83,7 @@ Column {
                     x: 78; y: 2
                     width: parent.width - 78 - 10
                     height: 30
-                    radius: Theme.radius
+                    radius: Theme.radiusRow
                     color: Theme.bg
                     border.width: 1
                     border.color: pass.activeFocus ? Theme.accent : Theme.border

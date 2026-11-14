@@ -19,7 +19,7 @@ Item {
         id: track
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
         height: 4
-        radius: 2
+        radius: Theme.radiusSmall
         color: Theme.border
 
         Rectangle {

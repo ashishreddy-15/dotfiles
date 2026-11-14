@@ -153,7 +153,7 @@ Scope {
                 // Decode at screen size, not at the file's (possibly huge) size.
                 sourceSize.width: Math.round(win.modelData.width * win.modelData.devicePixelRatio)
                 opacity: win.frontIsA === isA ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
+                Behavior on opacity { NumberAnimation { duration: Theme.durAmbient; easing.type: Theme.easeInOut } }
                 // When the one that was loading in the back is ready, bring it to the front.
                 onStatusChanged: if (status === Image.Ready && win.frontIsA !== isA) win.frontIsA = isA
             }
@@ -185,12 +185,12 @@ Scope {
                     GradientStop {
                         position: 0
                         color: Theme.barOnLight ? Qt.rgba(1, 1, 1, Theme.wallpaperScrimLight) : Qt.rgba(0, 0, 0, Theme.wallpaperScrim)
-                        Behavior on color { ColorAnimation { duration: 400 } }
+                        Behavior on color { ColorAnimation { duration: Theme.durAmbient } }
                     }
                     GradientStop {
                         position: 1
                         color: Theme.barOnLight ? Qt.rgba(1, 1, 1, 0) : Qt.rgba(0, 0, 0, 0)
-                        Behavior on color { ColorAnimation { duration: 400 } }
+                        Behavior on color { ColorAnimation { duration: Theme.durAmbient } }
                     }
                 }
             }

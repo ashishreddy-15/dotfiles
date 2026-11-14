@@ -13,7 +13,7 @@ hl.config({
     },
 
     decoration = {
-        rounding = 8,
+        rounding = 10,                -- = Theme.radiusCard
         shadow   = { enabled = true, range = 8, render_power = 3, color = 0xaa08090b },
         blur     = { enabled = true, size = 4, passes = 2 },
     },

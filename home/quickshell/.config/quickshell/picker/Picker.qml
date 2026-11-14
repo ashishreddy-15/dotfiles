@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import qs
+import "../ui"
 
 // Reusable Spotlight-style picker: a search field with a list under it, centred in the upper third of
 // the focused monitor. The launcher and the clipboard history are both built on it.
@@ -41,7 +42,10 @@ Scope {
 
     readonly property int searchHeight: 54
     readonly property int rowHeight: 40
-    readonly property int listPadding: 6
+    readonly property int listPadding: Theme.cardInset
+    readonly property int cardWidth: 600
+    // The tallest the card gets (search field + a full list), so the window never has to change size.
+    readonly property int maxCardHeight: searchHeight + 1 + 2 * listPadding + maxResults * rowHeight
 
     // Open with text already typed.
     function setQuery(text) { open = true; input.text = text }
@@ -85,11 +89,11 @@ Scope {
         visible: root.open || card.shown > 0
 
         anchors.top: true                            // top only = horizontally centred
-        margins.top: Math.round((screen?.height ?? 1080) * 0.22)
+        margins.top: Math.round((screen?.height ?? 1080) * 0.22) - Theme.shadowMargin
         exclusionMode: ExclusionMode.Ignore
-        implicitWidth: 600
-        // Always tall enough for the longest list, so the window itself never changes size.
-        implicitHeight: root.searchHeight + 1 + 2 * root.listPadding + root.maxResults * root.rowHeight
+        // Fixed size: the card plus room for its shadow on every side. The window never resizes; only the card does.
+        implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
+        implicitHeight: root.maxCardHeight + 2 * Theme.shadowMargin
         color: "transparent"
         mask: Region { item: card }                  // only the card takes clicks; the rest is see-through
         WlrLayershell.namespace: root.namespace
@@ -103,29 +107,15 @@ Scope {
             onCleared: root.open = false
         }
 
-        Rectangle {
+        Card {
             id: card
-
-            // 0 = hidden, 1 = fully shown. Drives the fade, the slight zoom and the slide.
-            property real shown: root.open ? 1 : 0
-            Behavior on shown { NumberAnimation { duration: root.open ? 140 : 90; easing.type: Easing.OutCubic } }
-
-            width: parent.width
-            height: column.implicitHeight
-            Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-
-            opacity: shown
-            scale: 0.97 + 0.03 * shown
-            transformOrigin: Item.Top
-            y: (1 - shown) * -8
+            x: Theme.shadowMargin
+            y: Theme.shadowMargin
+            width: root.cardWidth
+            open: root.open
+            contentHeight: column.implicitHeight
 
             WheelHandler { onWheel: e => root.move(e.angleDelta.y > 0 ? -1 : 1) }
-
-            clip: true                               // list rows are revealed as the card grows
-            radius: Theme.radius + 4
-            color: Theme.surface
-            border.width: 1
-            border.color: Theme.border
 
             Column {
                 id: column
@@ -144,7 +134,7 @@ Scope {
                         color: Theme.bright
                         selectionColor: Theme.border
                         font.family: Theme.fontFamily
-                        font.pixelSize: 16
+                        font.pixelSize: Theme.fontXL
                         clip: true
                         focus: true
 
@@ -183,7 +173,7 @@ Scope {
                             text: root.placeholder
                             color: Theme.dim
                             font.family: Theme.fontFamily
-                            font.pixelSize: 16
+                            font.pixelSize: Theme.fontXL
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -215,8 +205,20 @@ Scope {
                             x: root.listPadding
                             width: parent.width - 2 * root.listPadding
                             height: root.rowHeight
-                            radius: Theme.radius
-                            color: active ? Theme.raised : "transparent"
+                            radius: Theme.radiusRow
+                            color: active ? Theme.selected : Theme.clear
+                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+
+                            // The accent mark makes the selected row obvious on any wallpaper.
+                            Rectangle {
+                                visible: row.active
+                                x: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 2
+                                height: 16
+                                radius: 1
+                                color: Theme.accent
+                            }
 
                             RowLayout {
                                 anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
@@ -240,7 +242,7 @@ Scope {
                                         elide: Text.ElideRight
                                         text: row.modelData.title
                                         color: row.active ? Theme.bright : Theme.text
-                                        font.pixelSize: 14
+                                        font.pixelSize: Theme.fontLarge
                                     }
                                     StyledText {
                                         id: sub

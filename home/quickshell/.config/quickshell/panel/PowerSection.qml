@@ -43,8 +43,9 @@ Row {
 
             Rectangle {
                 anchors { fill: parent; margins: 2 }
-                radius: Theme.radius
-                color: area.containsMouse ? Theme.raised : "transparent"
+                radius: Theme.radiusRow
+                color: area.containsMouse ? Theme.hover : Theme.clear
+                Behavior on color { ColorAnimation { duration: Theme.durFast } }
             }
             MouseArea {
                 id: area

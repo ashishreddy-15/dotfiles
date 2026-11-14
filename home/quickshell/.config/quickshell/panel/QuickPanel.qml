@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs
+import "../ui"
 
 // Quick settings: volume + output, brightness, Wi-Fi, Bluetooth, wallpaper and the power actions.
 // Opens under the right end of the bar when you click the clock (or press Super+A).
@@ -49,12 +50,16 @@ Scope {
         // Stay mapped until the close animation has finished.
         visible: ShellState.panelOpen || card.shown > 0
 
+        // Where the card sits: just under the bar, a little in from the right edge. The window itself is
+        // larger (room for the shadow) and never changes size; the card is placed inside it.
+        readonly property int wantedTop: Theme.barHeight + 4
+        readonly property int wantedRight: 8
         anchors { top: true; right: true }
-        margins.top: Theme.barHeight + 4
-        margins.right: 8
+        margins.top: Math.max(0, wantedTop - Theme.shadowMargin)
+        margins.right: Math.max(0, wantedRight - Theme.shadowMargin)
         exclusionMode: ExclusionMode.Ignore
-        implicitWidth: root.panelWidth
-        implicitHeight: root.maxHeight
+        implicitWidth: root.panelWidth + 2 * Theme.shadowMargin
+        implicitHeight: wantedTop + root.maxHeight + Theme.shadowMargin
         color: "transparent"
         mask: Region { item: card }
         WlrLayershell.namespace: "quickshell-panel"
@@ -67,32 +72,21 @@ Scope {
             onCleared: ShellState.panelOpen = false
         }
 
-        Rectangle {
+        Card {
             id: card
-
-            property real shown: ShellState.panelOpen ? 1 : 0
-            Behavior on shown { NumberAnimation { duration: ShellState.panelOpen ? 140 : 90; easing.type: Easing.OutCubic } }
-
-            width: parent.width
-            height: Math.min(content.implicitHeight + 2 * 8, root.maxHeight)
-            Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-
-            opacity: shown
-            scale: 0.97 + 0.03 * shown
-            transformOrigin: Item.TopRight
-            y: (1 - shown) * -8
-
-            clip: true
-            radius: Theme.radius + 4
-            color: Theme.surface
-            border.width: 1
-            border.color: Theme.border
+            x: win.width - root.panelWidth - (win.wantedRight - win.margins.right)
+            y: win.wantedTop - win.margins.top
+            width: root.panelWidth
+            open: ShellState.panelOpen
+            origin: Item.TopRight
+            contentHeight: content.implicitHeight + 2 * Theme.cardInset
+            maxHeight: root.maxHeight
 
             focus: true
             Keys.onEscapePressed: ShellState.panelOpen = false
 
             Flickable {
-                anchors { fill: parent; margins: 8 }
+                anchors { fill: parent; margins: Theme.cardInset }
                 contentWidth: width
                 contentHeight: content.implicitHeight
                 interactive: contentHeight > height

@@ -15,9 +15,9 @@ Rectangle {
     property bool shown: true
 
     visible: shown
-    implicitHeight: shown ? content.implicitHeight + 2 * 14 : 0
+    implicitHeight: shown ? content.implicitHeight + 2 * Theme.padContent : 0
     height: implicitHeight
-    radius: Theme.radius + 2
+    radius: Theme.radiusCard
     color: Theme.surface
     border.width: 1
     border.color: critical ? Theme.err : Theme.border
@@ -34,7 +34,7 @@ Rectangle {
 
     RowLayout {
         id: content
-        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
+        anchors { left: parent.left; right: parent.right; top: parent.top; margins: Theme.padContent }
         spacing: 12
 
         // Picture sent with the notification (album art, contact photo...), if any
@@ -43,7 +43,7 @@ Rectangle {
             Layout.preferredWidth: 40
             Layout.preferredHeight: 40
             Layout.alignment: Qt.AlignTop
-            radius: Theme.radius
+            radius: Theme.radiusRow
             color: "transparent"
             Image { anchors.fill: parent; source: card.n?.image; fillMode: Image.PreserveAspectCrop }
         }
@@ -55,7 +55,7 @@ Rectangle {
             StyledText {
                 text: card.n?.appName || "Notification"
                 color: card.critical ? Theme.err : Theme.dim
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.fontSmall
             }
             StyledText {
                 Layout.fillWidth: true
