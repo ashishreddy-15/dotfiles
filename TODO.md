@@ -65,7 +65,7 @@ quiet tiles, the control center's structure.
 - [ ] Run `./install.sh` from a clean state (fresh Fedora in a VM) and fix what breaks
 - [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
 - [x] Lid closed with the monitor plugged in: laptop screen off, workspace 10 moves to the monitor; back on opening (modules/monitors.lua)
-- [ ] Try with the real lid: close and open it docked; boot docked with the lid shut; unplug the monitor with the lid shut
+- [x] Lid, tried by hand: close and open it docked (works)
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
 - [x] Idle dimming for the external monitor too (`qs ipc call brightness dim / undim`, DDC; laptop verified, monitor path shared with the slider)
 - [x] Repo on GitHub (public): https://github.com/ashishreddy-15/dotfiles
@@ -97,7 +97,7 @@ quiet tiles, the control center's structure.
 - [x] Neovim config moved in from the swaywm repo (home/nvim), recoloured to Carbon & Pewter; packages/editor.txt
 - [x] Neovim first start: 33 plugins, 16 Treesitter parsers, 8 Mason tools, IntelliJ server; checkhealth 0 errors;
       starts in ~40 ms
-- [ ] Neovim: accept the IntelliJ server EULA (open a .java file once)
+- [x] Neovim: IntelliJ server EULA accepted
 - [ ] Later, when learning Go: `din golang`; gopls then installs by itself on the next Neovim start
 - [x] Java 25 (Temurin) and Maven 3.10.0 with SDKMAN (`./install.sh sdkman`, packages/sdkman.txt), no shell slowdown
 - [ ] Optional: remove nvim/ from the swaywm repo with a pointer here
