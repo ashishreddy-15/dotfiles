@@ -8,8 +8,9 @@
 # scales down, which keeps them sharp on a 1440p monitor (smaller ones get scaled up and look soft).
 # The CDN returns identical bytes every time, so the checksums are pinned. A failed download or a changed
 # checksum only skips that photo with a warning; it never stops the install.
-# Photographer names are not recorded here (Unsplash blocks automated page lookups). To add one, find the
-# photo on unsplash.com and note it in the comment.
+# Unsplash photographers are not recorded here (Unsplash blocks automated page lookups). Photos from Wikimedia Commons
+# (upload.wikimedia.org) are: their licences (CC BY / CC BY-SA) require credit, so the author, licence and page are in the
+# comment above each one. Commons URLs are 3840 px previews (sizes it allows), not the 15-20 MB originals.
 #
 # To add a photo: take the long id from its image URL (photo-<id>), build the URL below, download it once,
 # run `sha256sum` on it, and add a line. To remove one, delete its line (and the file).
@@ -35,6 +36,28 @@ dusk-pines      a35298f6e5e914f3a5366b17f32c8630ec9431f29fd8f5ec87470e6484c7cd13
 
 # fog-valley: fog filling a forested valley (4288 px)
 fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
+
+# ---- quiet and misty (Wikimedia Commons: credit is required by the licences, so it is recorded here) ----
+
+# bois-raquet: spruce rows with soft light through the mist, High Fens (3840 px preview of a 4800+ px original)
+#   Trougnouf (Benoit Brummer), CC BY 4.0, https://commons.wikimedia.org/wiki/File:Bois_Raquet,_in_the_High_Fens_%E2%80%93_Eifel_Nature_Park_(DSCF6655).jpg
+bois-raquet     73415c6a56b8c0b7e3a678be5bb2779edae972620e89c041ad0e2cf26a9e64ad  https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Bois_Raquet%2C_in_the_High_Fens_%E2%80%93_Eifel_Nature_Park_%28DSCF6655%29.jpg/3840px-Bois_Raquet%2C_in_the_High_Fens_%E2%80%93_Eifel_Nature_Park_%28DSCF6655%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# caucasus-lake: a mountain lake under low cloud, Western Caucasus
+#   Vyacheslav Argenberg, CC BY 4.0, https://commons.wikimedia.org/wiki/File:Karachay-Cherkessia,_Western_Caucasus,_Mountain_Lake,_Clouds.jpg
+caucasus-lake   607a735ed88cf3fd56e2b44d78eb562c284b2dd1023b80c0e165e618c5c688c9  https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Karachay-Cherkessia%2C_Western_Caucasus%2C_Mountain_Lake%2C_Clouds.jpg/3840px-Karachay-Cherkessia%2C_Western_Caucasus%2C_Mountain_Lake%2C_Clouds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# khodz-canyon: a misty green canyon, Western Caucasus
+#   Vyacheslav Argenberg, CC BY 4.0, https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D0%BA%D0%B0%D0%BD%D1%8C%D0%BE%D0%BD_%D1%80%D0%B5%D0%BA%D0%B8_%D0%A5%D0%BE%D0%B4%D0%B7%D1%8C,_%D0%BF%D0%B0%D1%80%D0%BA_%D0%A2%D1%85%D0%B0%D1%87,_%D0%97%D0%B0%D0%BF%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_%D0%9A%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7.jpg
+khodz-canyon    2bac41412c2b2c875cfd0ef1d0d67624d32fa5b387497df72134439e0d4e34d8  https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/%D0%9C%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D0%BA%D0%B0%D0%BD%D1%8C%D0%BE%D0%BD_%D1%80%D0%B5%D0%BA%D0%B8_%D0%A5%D0%BE%D0%B4%D0%B7%D1%8C%2C_%D0%BF%D0%B0%D1%80%D0%BA_%D0%A2%D1%85%D0%B0%D1%87%2C_%D0%97%D0%B0%D0%BF%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_%D0%9A%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7.jpg/3840px-%D0%9C%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D0%BA%D0%B0%D0%BD%D1%8C%D0%BE%D0%BD_%D1%80%D0%B5%D0%BA%D0%B8_%D0%A5%D0%BE%D0%B4%D0%B7%D1%8C%2C_%D0%BF%D0%B0%D1%80%D0%BA_%D0%A2%D1%85%D0%B0%D1%87%2C_%D0%97%D0%B0%D0%BF%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_%D0%9A%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# fen-fog: bare trees and a pale sun in fog
+#   Dominicus Johannes Bergsma, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Put_van_Nederhorst_in_de_mist._28-02-2021._(d.j.b)_22.jpg
+fen-fog         1762d9929c75635f33b870266feed568679d2e1ca6666eec910ea0f82f49b9e0  https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Put_van_Nederhorst_in_de_mist._28-02-2021._%28d.j.b%29_22.jpg/3840px-Put_van_Nederhorst_in_de_mist._28-02-2021._%28d.j.b%29_22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# morning-mist: beech trunks in morning fog, warm and quiet
+#   Jakub Hałun, CC BY 4.0, https://commons.wikimedia.org/wiki/File:Las_w_porannej_mgle,_gmina_Czernich%C3%B3w,_Rudnia%C5%84ski_Park_Krajobrazowy,_20240225_0810_6628.jpg
+morning-mist    ec50b4f63e4a8e94b5ab7733211874ae8d07d3f27392fbe906fc82512deb09e6  https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Las_w_porannej_mgle%2C_gmina_Czernich%C3%B3w%2C_Rudnia%C5%84ski_Park_Krajobrazowy%2C_20240225_0810_6628.jpg/3840px-Las_w_porannej_mgle%2C_gmina_Czernich%C3%B3w%2C_Rudnia%C5%84ski_Park_Krajobrazowy%2C_20240225_0810_6628.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
 
 # ---- light and airy (the bar switches to dark text) ----
 

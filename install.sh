@@ -433,7 +433,7 @@ download_photos() {
     if (( DRY_RUN )); then would "download $name"; continue; fi
     doing "downloading $name"
     tmp=$(mktemp)
-    if ! curl -fsSL --retry 3 --max-time 120 -o "$tmp" "$url"; then
+    if ! curl -fsSL --retry 3 --max-time 120 -A "dotfiles-install/1.0" -o "$tmp" "$url"; then
       warn "$name: download failed; skipped"; rm -f "$tmp"; continue
     fi
     got=$(sha256sum "$tmp" | cut -d' ' -f1)
