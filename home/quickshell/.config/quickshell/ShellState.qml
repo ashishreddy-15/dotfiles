@@ -35,6 +35,10 @@ Singleton {
     // obeys wallpaperChosen.
     property var wallpaperFiles: []
     property string wallpaperCurrent: ""
+    // Small copies of the images, made once and kept in a cache folder, so Settings does not decode the full photos each
+    // time it opens. wallpaperThumbsReady turns true when they exist; the file for an image is <dir>/<md5 of its path>.jpg.
+    property string wallpaperThumbDir: ""
+    property bool wallpaperThumbsReady: false
     signal wallpaperChosen(string path)
 
     // Notification centre (notifications/NotificationCenter.qml): the bell in the bar and Super + N toggle it.

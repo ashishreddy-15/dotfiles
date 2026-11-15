@@ -79,6 +79,31 @@ Scope {
         set(files[(i + 1) % files.length])
     }
 
+    // ---- thumbnails for Settings ----
+    // 640 px wide copies in ~/.cache/dotfiles/wallpaper-thumbs, named by the md5 of the image's path. Only missing or
+    // outdated ones are made (Pillow, JPEG draft mode: fast), and ones for images that are gone are deleted.
+    readonly property string thumbDir: home + "/.cache/dotfiles/wallpaper-thumbs"
+    Process {
+        id: thumbs
+        property var images: []
+        command: ["python3", "-I", "-c",
+            "import sys, os, hashlib\nfrom PIL import Image\n" +
+            "d = sys.argv[1]; os.makedirs(d, exist_ok=True); keep = set()\n" +
+            "for p in sys.argv[2:]:\n" +
+            "    k = hashlib.md5(p.encode()).hexdigest() + '.jpg'; keep.add(k); t = os.path.join(d, k)\n" +
+            "    try:\n" +
+            "        if os.path.getmtime(t) >= os.path.getmtime(p): continue\n" +
+            "    except OSError: pass\n" +
+            "    try:\n" +
+            "        im = Image.open(p); im.draft('RGB', (1280, 1280)); im = im.convert('RGB'); im.thumbnail((640, 640))\n" +
+            "        im.save(t + '.tmp', 'JPEG', quality=85); os.replace(t + '.tmp', t)\n" +
+            "    except Exception: pass\n" +
+            "for f in os.listdir(d):\n" +
+            "    if f.endswith('.jpg') and f not in keep: os.remove(os.path.join(d, f))\n" +
+            "print('ok')", root.thumbDir].concat(images)
+        stdout: StdioCollector { onStreamFinished: ShellState.wallpaperThumbsReady = text.trim() === "ok" }
+    }
+
     // ---- find images ----
     Process {
         id: scan
@@ -88,6 +113,7 @@ Scope {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.files = text.split("\n").filter(l => l !== "")
+                if (root.files.length > 0 && !thumbs.running) { thumbs.images = root.files; thumbs.running = true }
                 // Nothing remembered (or the file is gone): use the first one.
                 if (root.files.length > 0 && !root.files.includes(root.current)) root.current = root.files[0]
             }
@@ -95,6 +121,7 @@ Scope {
     }
 
     Component.onCompleted: {
+        ShellState.wallpaperThumbDir = thumbDir
         try { current = saved.text().trim() } catch (e) { current = "" }
         scan.running = true
     }

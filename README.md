@@ -259,11 +259,12 @@ journalctl --user -u quickshell -f       # logs / QML errors
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
 - `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. Settings > Wallpaper
   picks one (thumbnails); `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
-  It lists `~/.local/share/wallpapers` (six Unsplash photos in one mood, atmospheric and muted: fog-forest,
-  fog-valley, forest-light, forest-path, moss-valley, cloud-sea; fetched by
-  `./install.sh wallpapers` from `system/wallpapers.txt`) and `~/Pictures/Wallpapers` (**put your own images there**;
-  png, jpg, webp). The picker labels each as
-  photo or yours. The choice is remembered in `~/.local/state/dotfiles/wallpaper`.
+  It lists `~/.local/share/wallpapers` (17 photos from Unsplash and Wikimedia Commons, fetched by
+  `./install.sh wallpapers` from `system/wallpapers.txt`, which also records the credit the Commons licences require)
+  and `~/Pictures/Wallpapers` (**put your own images there**; png, jpg, webp), alphabetically.
+  The choice is remembered in `~/.local/state/dotfiles/wallpaper`. Settings shows small cached copies
+  (`~/.cache/dotfiles/wallpaper-thumbs`, made once at login by Pillow and kept up to date) instead of decoding the
+  full photos each time it opens; delete the folder and it is rebuilt.
   The bar has no background of its own, so its text follows the wallpaper, like the macOS menu bar: when
   the top edge of a wallpaper is light (measured when you pick it), the bar switches to dark text, and
   to light text on dark wallpapers. The colours fade over 0.4 s with the wallpaper; the warning/error/ok

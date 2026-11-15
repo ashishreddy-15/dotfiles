@@ -60,7 +60,9 @@ Page {
 
                     Image {
                         anchors.fill: parent
-                        source: "file://" + cell.modelData
+                        // The small cached copy when it exists (Wallpaper.qml makes them), else the photo itself.
+                        source: "file://" + (ShellState.wallpaperThumbsReady
+                            ? ShellState.wallpaperThumbDir + "/" + Qt.md5(cell.modelData) + ".jpg" : cell.modelData)
                         sourceSize.width: Math.round(root.cellWidth * 2)       // decode small, these are large photos
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
