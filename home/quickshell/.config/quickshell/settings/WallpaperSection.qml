@@ -60,9 +60,12 @@ Page {
 
                     Image {
                         anchors.fill: parent
-                        // The small cached copy when it exists (Wallpaper.qml makes them), else the photo itself.
-                        source: "file://" + (ShellState.wallpaperThumbsReady
+                        // The small cached copy when it exists (Wallpaper.qml makes them), else the photo itself: a new image has
+                        // no copy until the next time Settings opens.
+                        property bool thumbMissing: false
+                        source: "file://" + (ShellState.wallpaperThumbsReady && !thumbMissing
                             ? ShellState.wallpaperThumbDir + "/" + Qt.md5(cell.modelData) + ".jpg" : cell.modelData)
+                        onStatusChanged: if (status === Image.Error) thumbMissing = true
                         sourceSize.width: Math.round(root.cellWidth * 2)       // decode small, these are large photos
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
