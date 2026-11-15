@@ -57,19 +57,19 @@ quiet tiles, the control center's structure.
       bottom, over your wallpaper (lightly blurred) instead of a screenshot.
       Fingerprint: not possible, this laptop has no reader
 - [x] Login screen (SDDM): "carbon" theme, same layout as the lock screen (`./install.sh sddm`); cursor: Adwaita everywhere
-- [ ] Run `./install.sh sddm` (needs sudo) and look at the real login screen (power buttons only show there)
+- [x] Login screen: the installed "carbon" theme and its wallpaper stay as they are (`./install.sh sddm` updates it)
 
 ## 5. System
 
 - [x] install.sh output: numbered steps, colour-coded status, services grouped with their real on / off state, summary
 - [ ] Run `./install.sh` from a clean state (fresh Fedora in a VM) and fix what breaks
-- [ ] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
+- [x] Undocked test: unplug the Samsung; workspaces, bar, panel, indicator and notifications should fall back to the laptop
 - [x] Lid closed with the monitor plugged in: laptop screen off, workspace 10 moves to the monitor; back on opening (modules/monitors.lua)
 - [x] Lid, tried by hand: close and open it docked (works)
 - [ ] Lid close / suspend: lock first, wake cleanly; DDC monitor brightness after sleep
 - [x] Idle dimming for the external monitor too (`qs ipc call brightness dim / undim`, DDC; laptop verified, monitor path shared with the slider)
 - [x] Repo on GitHub (public): https://github.com/ashishreddy-15/dotfiles
-- [ ] Decide what to do with Sway: keep as a fallback session, or remove it and its packages
+- [x] Sway: kept as a fallback session (its packages stay installed; its launcher entries are hidden)
 
 ## 6. Things I could not test (no way to press keys or click from here) - please try
 

@@ -41,6 +41,9 @@ Log in by picking **Hyprland (uwsm-managed)** in SDDM. The config is Lua (Hyprla
 `home/hypr/.config/hypr/modules/`: `monitors`, `input`, `look`, `rules`, `binds`, `autostart`, `tablet`. Hyprland reloads
 on save; `./install.sh link` also checks it with `Hyprland --verify-config`.
 
+Sway is still installed as a fallback session: if Hyprland ever fails to start, pick Sway in SDDM. Its leftover launcher
+entries are hidden (see [features](features.md#hiding-apps-and-autostart-entries)).
+
 Quickshell does as much as possible (bar, launcher, notifications, wallpaper, OSDs). The hypr* tools cover what is safer
 outside the shell: `hypridle`, `hyprpolkitagent` and `hyprlock` (the lock screen). File manager: Nautilus.
 
