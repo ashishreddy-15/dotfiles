@@ -100,6 +100,9 @@ Pair or Allow (Esc declines). The agent behind it is `bt-agent` (`bt-agent.servi
 `journalctl --user -u bt-agent -f`). Only `bluetoothd` can call it (system bus policy), and the computer is pairable only
 while Settings > Bluetooth is open.
 
+Connected devices that report a battery (headphones, mice, keyboards) show a small gauge and the percentage in their row;
+it turns amber at 30% or less and red at 15% or less.
+
 ## Screenshots and recording
 
 - **`Print`** freezes every screen first, so the control center, pop-ups and anything else that closes when it loses

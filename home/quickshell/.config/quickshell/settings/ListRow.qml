@@ -11,6 +11,7 @@ Item {
     property string subtitle
     property string detail                      // dim text at the end, e.g. "82%" or "paired"
     property color detailColor: Theme.dim
+    property real battery: -1                   // 0..1 draws a small battery gauge before the detail; -1 = none
     property bool marked: false                 // the current / connected one
     property bool clickable: true
     // Optional second action, e.g. "Forget": a small button that shows while the row is hovered or focused. It asks
@@ -70,7 +71,7 @@ Item {
     Rectangle {
         id: actionButton
         visible: root.actionText !== "" && (hover.hovered || root.activeFocus || root.confirming)
-        anchors { right: detailText.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
+        anchors { right: gauge.visible ? gauge.left : detailText.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
         width: visible ? actionLabel.implicitWidth + 20 : 0
         height: 26
         radius: Theme.radiusSmall
@@ -95,10 +96,34 @@ Item {
     }
 
     Column {
-        anchors { left: parent.left; right: actionButton.visible ? actionButton.left : detailText.left; verticalCenter: parent.verticalCenter; leftMargin: 32; rightMargin: 12 }
+        anchors { left: parent.left; right: actionButton.visible ? actionButton.left : (gauge.visible ? gauge.left : detailText.left); verticalCenter: parent.verticalCenter; leftMargin: 32; rightMargin: 12 }
         spacing: 1
         StyledText { width: parent.width; text: root.title; color: root.marked ? Theme.bright : Theme.text; elide: Text.ElideRight }
         StyledText { visible: root.subtitle !== ""; width: parent.width; text: root.subtitle; color: Theme.dim; font.pixelSize: Theme.fontSmall; elide: Text.ElideRight }
+    }
+    // Battery gauge: an outlined cell with a nub, filled to the charge; amber at 30% or less, red at 15% or less.
+    Item {
+        id: gauge
+        readonly property color level: root.battery <= 0.15 ? Theme.err : root.battery <= 0.3 ? Theme.warn : Theme.dim
+        visible: root.battery >= 0
+        anchors { right: detailText.left; rightMargin: 8; verticalCenter: parent.verticalCenter }
+        width: 24
+        height: 12
+        Rectangle {
+            width: 21; height: parent.height
+            radius: 3
+            color: Theme.clear
+            border.width: 1
+            border.color: gauge.level
+            Rectangle {
+                x: 2; y: 2
+                height: parent.height - 4
+                width: Math.max(2, (parent.width - 4) * Math.min(1, root.battery))
+                radius: 1
+                color: gauge.level
+            }
+        }
+        Rectangle { x: 22; width: 2; height: 5; anchors.verticalCenter: parent.verticalCenter; radius: 1; color: gauge.level }
     }
     StyledText {
         id: detailText

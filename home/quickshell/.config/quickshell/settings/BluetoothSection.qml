@@ -73,11 +73,12 @@ Page {
 
             title: modelData.name || modelData.address
             marked: modelData.connected
+            battery: modelData.connected && modelData.batteryAvailable ? modelData.battery : -1
             detail: modelData.pairing ? "pairing…"
                   : Pairing.hasFailed(modelData) ? "failed, try again"
                   : modelData.connected ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "connected")
                   : modelData.paired ? "paired" : "pair"
-            detailColor: modelData.connected ? Theme.ok : Pairing.hasFailed(modelData) ? Theme.warn : Theme.dim
+            detailColor: modelData.connected ? (item.battery >= 0 && item.battery <= 0.3 ? (item.battery <= 0.15 ? Theme.err : Theme.warn) : Theme.ok) : Pairing.hasFailed(modelData) ? Theme.warn : Theme.dim
 
             // Paired devices can be removed (unpaired; pair again to use it).
             actionText: modelData.paired ? "Remove" : ""
