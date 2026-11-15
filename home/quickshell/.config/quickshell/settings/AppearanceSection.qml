@@ -35,10 +35,10 @@ Item {
 
         SettingRow {
             title: "Colour scheme"
-            description: "Dark or light for GTK4 apps such as Files. GTK3 apps (Bluetooth, file dialogs) stay dark."
+            description: "Dark or light. Applies to the shell, window borders, the terminal and GTK apps."
             Segmented {
-                options: [{ label: "dark", value: "prefer-dark" }, { label: "light", value: "prefer-light" }, { label: "system", value: "default" }]
-                value: Appearance.scheme
+                options: [{ label: "dark", value: "prefer-dark" }, { label: "light", value: "prefer-light" }]
+                value: Appearance.scheme === "prefer-dark" ? "prefer-dark" : "prefer-light"
                 onPicked: v => Appearance.set("color-scheme", v)
             }
         }

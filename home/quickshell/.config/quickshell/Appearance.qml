@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// How GTK apps look: colour scheme, GTK / icon / cursor theme, font and sizes. The work is done by the `appearance`
+// How the shell and GTK apps look: colour scheme (dark or light), GTK / icon / cursor theme, font and sizes. The work is done by the `appearance`
 // script (home/bin/.local/bin/appearance), which writes gsettings and the settings.ini files in the dotfiles repo.
 // This file only holds the current values and the lists to choose from, for the appearance window (appearance/AppearanceWindow.qml).
 Singleton {
@@ -12,7 +12,33 @@ Singleton {
 
     readonly property string bin: Quickshell.env("HOME") + "/.local/bin/appearance"
 
-    property string scheme: "default"            // default | prefer-dark | prefer-light
+    property string scheme: "prefer-dark"       // default | prefer-dark | prefer-light (as in gsettings)
+
+    // What the shell itself looks like (Theme.dark). Read from the state file the script writes, synchronously, so
+    // the first frame already has the right colours. Everything but "light" and "default" is dark; a missing file is dark.
+    readonly property string stateFile: Quickshell.env("HOME") + "/.local/state/dotfiles/scheme"
+    property bool dark: true
+    FileView {
+        id: stateView
+        path: root.stateFile
+        blockLoading: true
+        printErrors: false
+    }
+    function setShade(value) { dark = (String(value).trim() !== "light" && value !== "prefer-light" && value !== "default") }
+    Component.onCompleted: {
+        const v = stateView.text().trim()
+        setShade(v)
+        scheme = dark ? "prefer-dark" : "prefer-light"
+        refresh()
+    }
+
+    // qs ipc call appearance scheme dark|light     (the script calls this after a change from a terminal)
+    // qs ipc call appearance toggle
+    IpcHandler {
+        target: "appearance"
+        function scheme(value: string): void { root.setShade(value); root.scheme = root.dark ? "prefer-dark" : "prefer-light" }
+        function toggle(): void { root.set("color-scheme", root.dark ? "prefer-light" : "prefer-dark") }
+    }
     property string gtkTheme: ""
     property string iconTheme: ""
     property string cursorTheme: ""
@@ -32,7 +58,7 @@ Singleton {
     function set(key, value) {
         value = String(value)
         switch (key) {
-        case "color-scheme": scheme = value; break
+        case "color-scheme": scheme = value; setShade(value); break
         case "gtk-theme":    gtkTheme = value; break
         case "icon-theme":   iconTheme = value; break
         case "cursor-theme": cursorTheme = value; break
@@ -80,5 +106,4 @@ Singleton {
         }
     }
 
-    Component.onCompleted: refresh()
 }

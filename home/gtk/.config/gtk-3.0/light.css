@@ -1,2 +1,49 @@
-/* GTK3, light scheme: the stock adw-gtk3 light colours (the palette is dark only). Loaded through scheme.css (see
-   gtk.css) while the colour scheme is light. */
+/* GTK3, light scheme: the "Carbon & Pewter" palette in its light form (the mirror of dark.css, same selectors).
+   The GTK3 theme has its colours compiled in, so they are set with plain rules. Loaded through scheme.css (see
+   gtk.css) only while the colour scheme is light. */
+@define-color theme_bg_color #ececea;
+@define-color theme_fg_color #3a3f44;
+@define-color theme_base_color #f3f3f1;
+@define-color theme_text_color #3a3f44;
+@define-color theme_selected_bg_color #4d6379;
+@define-color theme_selected_fg_color #fafaf9;
+
+* { color: #3a3f44; }
+*:disabled, label:disabled { color: #6b7177; }
+
+window, .background, dialog, messagedialog { background-color: #ececea; }
+headerbar, .titlebar, toolbar, .toolbar, .primary-toolbar, menubar, actionbar, statusbar, .inline-toolbar, notebook > header {
+    background-color: #f3f3f1; background-image: none; color: #15181b; border-color: #d3d3d0; box-shadow: none;
+}
+.view, treeview.view, iconview, textview text, list, row, stack, frame > border, scrolledwindow viewport {
+    background-color: #f3f3f1; color: #3a3f44;
+}
+treeview.view header button { background-color: #f3f3f1; color: #6b7177; border-color: #d3d3d0; }
+
+entry, spinbutton, combobox button, button {
+    background-image: none; background-color: #fafaf9; color: #3a3f44; border: 1px solid #d3d3d0; box-shadow: none;
+}
+button:hover, combobox button:hover { background-color: #e2e2df; }
+button:active, button:checked, button.suggested-action { background-color: #4d6379; color: #fafaf9; }
+button.destructive-action { background-color: #95434a; color: #fafaf9; }
+button:disabled, entry:disabled { color: #6b7177; background-color: #f3f3f1; }
+entry:focus, spinbutton:focus { border-color: #4d6379; }
+headerbar button, toolbar button, .toolbar button { background-color: transparent; border-color: transparent; }
+headerbar button:hover, toolbar button:hover, .toolbar button:hover { background-color: #e2e2df; }
+
+menu, .menu, popover, popover.background, .popup, tooltip, tooltip.background {
+    background-color: #fafaf9; color: #3a3f44; border: 1px solid #d3d3d0; box-shadow: none;
+}
+menuitem:hover, modelbutton:hover, row:hover { background-color: #e2e2df; }
+
+*:selected, row:selected, .view:selected, treeview.view:selected, iconview:selected, menuitem:active {
+    background-color: #4d6379; color: #fafaf9;
+}
+switch { background-color: #d3d3d0; border: 1px solid #d3d3d0; }
+switch:checked { background-color: #4d6379; }
+switch slider { background-color: #fafaf9; border-color: #d3d3d0; }
+scale trough, progressbar trough { background-color: #d3d3d0; }
+scale highlight, progressbar progress { background-color: #4d6379; }
+scrollbar slider { background-color: #d3d3d0; }
+scrollbar slider:hover { background-color: #b9b9b5; }
+separator { background-color: #d3d3d0; }

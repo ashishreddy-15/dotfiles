@@ -3,17 +3,19 @@
 #   its exit code (only when it failed), then ❯ (# as root). user@host first over SSH; (venv) when one is active.
 #
 # Built to never lag: drawing it starts no programs at all (no git, no subshells, no $(...)). The branch is read
-# from .git/HEAD with bash's own `read`; the time comes from $EPOCHREALTIME. Colours: the shell's palette.
+# from .git/HEAD with bash's own `read`; the time comes from $EPOCHREALTIME. Colours: the terminal's own palette slots, so it follows kitty's light/dark switch live.
 [[ $- == *i* ]] || return 0
 
 PROMPT_DIRTRIM=3
 
-# Colours (24-bit), wrapped in \[ \] so bash knows they take no space.
-__p_dir='\[\e[38;2;208;211;214m\]'      # bright
-__p_git='\[\e[38;2;108;127;145m\]'      # accent (pewter)
-__p_dim='\[\e[38;2;102;106;110m\]'      # dim
-__p_err='\[\e[38;2;166;122;126m\]'      # error
-__p_ok='\[\e[38;2;125;152;137m\]'       # ok
+# Colours are the terminal's palette slots, not fixed values: kitty swaps the palette when the desktop goes light or
+# dark, and even a shell that is already open follows. Wrapped in \[ \] so bash knows they take no space.
+# Each one starts with 0 (reset) so the bold of the folder does not leak into the next part.
+__p_dir='\[\e[0;1m\]'                 # default foreground, bold (readable on both backgrounds)
+__p_git='\[\e[0;34m\]'                # colour 4: the pewter blue-grey
+__p_dim='\[\e[0;90m\]'                # colour 8 (bright black): dim
+__p_err='\[\e[0;31m\]'                # colour 1: error
+__p_ok='\[\e[0;32m\]'                 # colour 2: ok
 __p_off='\[\e[0m\]'
 
 # The branch (or the short commit when detached), found by walking up to the nearest .git. Sets __p_branch.

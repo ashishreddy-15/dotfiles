@@ -5,19 +5,25 @@
   appearance dump                 the current settings and every list, as one JSON object (for the shell)
   appearance list <kind>          list what is installed: gtk | icons | cursors | fonts
   appearance set <key> <value>    change one setting and apply it everywhere
+  appearance toggle               flip between prefer-dark and prefer-light
   appearance sync                 push the settings.ini files (which live in the dotfiles repo) into gsettings
+                                  and write the scheme state file
   appearance icons                (re)build the "Carbon" icon theme: Adwaita with its folders in the palette's pewter
 
-Keys: color-scheme (default | prefer-dark | prefer-light), gtk-theme, icon-theme, cursor-theme, cursor-size,
-      font (family), font-size (points).
+Keys: color-scheme (prefer-dark | prefer-light; "default" is still accepted and counts as light), gtk-theme,
+      icon-theme, cursor-theme, cursor-size, font (family), font-size (points).
 
 A change is written to ~/.config/gtk-3.0/settings.ini and ~/.config/gtk-4.0/settings.ini (symlinks into the dotfiles
 repo, so it can be committed), to gsettings (what GTK4 / libadwaita and portals read) and, for the cursor, to the
 running Hyprland.
 
+The colour scheme is also written to ~/.local/state/dotfiles/scheme ("dark" or "light"), which the shell (Theme.qml)
+and Hyprland (look.lua) read. After a change the script reloads Hyprland and tells the running shell, both
+best-effort: neither has to be running. kitty (and Neovim inside it) follow gsettings by themselves.
+
 Light and dark: a theme with a "-dark" twin (adw-gtk3 / adw-gtk3-dark) is listed once, and the colour scheme picks the
 twin. GTK3 cannot ask for the scheme in css either, so ~/.config/gtk-3.0/scheme.css is pointed at dark.css (the palette)
-or light.css (stock colours).
+or light.css (the same palette in each scheme).
 """
 import configparser, json, os, re, subprocess, sys
 
@@ -26,6 +32,7 @@ INI = [f"{HOME}/.config/gtk-3.0/settings.ini", f"{HOME}/.config/gtk-4.0/settings
 SCHEMA = "org.gnome.desktop.interface"
 GTK_ROOTS = ["/usr/share/themes", f"{HOME}/.themes", f"{HOME}/.local/share/themes"]
 SCHEME_CSS = f"{HOME}/.config/gtk-3.0/scheme.css"
+STATE = f"{HOME}/.local/state/dotfiles/scheme"
 
 # The Carbon icon theme: Adwaita's folder icons with its five blues swapped for pewter of the same lightness
 # (the middle one is Theme.accent). Everything else is inherited from Adwaita.
@@ -78,6 +85,19 @@ def apply_gtk(base, dark):
         if os.path.lexists(tmp): os.remove(tmp)
         os.symlink("dark.css" if dark else "light.css", tmp)
         os.replace(tmp, SCHEME_CSS)
+
+def write_state(dark):
+    os.makedirs(os.path.dirname(STATE), exist_ok=True)
+    with open(STATE, "w") as f:
+        f.write("dark" if dark else "light")
+
+def notify(dark):
+    """Tell Hyprland and the shell about a new scheme. Best effort: silent, short, never fatal."""
+    for cmd in (["hyprctl", "reload"], ["qs", "ipc", "call", "appearance", "scheme", "dark" if dark else "light"]):
+        try:
+            subprocess.run(cmd, capture_output=True, timeout=3, check=False)
+        except Exception:
+            pass
 
 def build_icons():
     srcs = [f"{ADWAITA}/places/{f}" for f in sorted(os.listdir(f"{ADWAITA}/places"))
@@ -164,6 +184,8 @@ def apply(key, value):
         gs_set("color-scheme", value)
         for p in INI: write_ini(p, "gtk-application-prefer-dark-theme", "1" if value == "prefer-dark" else "0")
         apply_gtk(cur["gtk-theme"], value == "prefer-dark")
+        write_state(value == "prefer-dark")
+        notify(value == "prefer-dark")
     elif key == "gtk-theme":
         apply_gtk(gtk_base(value), cur["color-scheme"] == "prefer-dark")
     elif key == "icon-theme":
@@ -191,9 +213,10 @@ def apply(key, value):
 def sync():
     ini = read_ini(INI[1])
     dark = ini.get("gtk-application-prefer-dark-theme", "0") == "1"
+    write_state(dark)
     if ini.get("gtk-icon-theme-name") == "Carbon": build_icons()
     if ini.get("gtk-theme-name"): apply_gtk(gtk_base(ini["gtk-theme-name"]), dark)
-    pairs = [("color-scheme", "prefer-dark" if dark else "default"), ("icon-theme", ini.get("gtk-icon-theme-name")),
+    pairs = [("color-scheme", "prefer-dark" if dark else "prefer-light"), ("icon-theme", ini.get("gtk-icon-theme-name")),
              ("cursor-theme", ini.get("gtk-cursor-theme-name")), ("cursor-size", ini.get("gtk-cursor-theme-size"))]
     for k, v in pairs:
         if v: gs_set(k, v)
@@ -214,6 +237,8 @@ def main(a):
         print("\n".join(names))
     elif a[0] == "set" and len(a) == 3:
         apply(a[1], a[2])
+    elif a[0] == "toggle":
+        apply("color-scheme", "prefer-light" if current()["color-scheme"] == "prefer-dark" else "prefer-dark")
     elif a[0] == "sync":
         sync()
     elif a[0] == "icons":

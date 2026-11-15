@@ -65,7 +65,8 @@ what is already done.
 | Add a wallpaper | drop it in `~/Pictures/Wallpapers` (or pin one in `system/wallpapers.txt`) |
 | Change a default app | edit `MIME_DEFAULTS` at the top of `install.sh`, then `./install.sh defaults` |
 | Turn a service on or off | edit the lists in `system/services.sh`, then `./install.sh services` |
-| Change the theme colours | `Theme.qml` plus three more files (see [the look](docs/system.md#the-look)) |
+| Switch dark / light | Settings > Appearance, or `appearance toggle` |
+| Change the theme colours | `Theme.qml` plus the files that repeat it (see [the look](docs/system.md#the-look)) |
 | Restart the shell | `systemctl --user restart quickshell` (logs: `journalctl --user -u quickshell -f`) |
 | Check nothing drifted | `scripts/ui-check` |
 

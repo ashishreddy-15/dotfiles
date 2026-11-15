@@ -1,7 +1,7 @@
 /* GTK4 / libadwaita apps (Nautilus, pavucontrol...): the "Carbon & Pewter" palette and the shell's shape.
-   Same colours as quickshell/Theme.qml (checked by scripts/ui-check). libadwaita names its colours, so recolouring
-   is a matter of redefining them. 
-   Dark scheme only: in light mode the stock Adwaita light theme is used. */
+   The dark block is the same colours as quickshell/Theme.qml (checked by scripts/ui-check); the light block is the
+   light palette used while the colour scheme is light. libadwaita names its colours, so recolouring
+   is a matter of redefining them. The shape applies in both schemes. */
 @media (prefers-color-scheme: dark) {
   @define-color window_bg_color      #111111;
   @define-color window_fg_color      #adb0b3;
@@ -30,7 +30,7 @@
   @define-color shade_color          rgba(0, 0, 0, 0.45);
   @define-color scrollbar_outline_color #111111;
   @define-color borders              #262626;
-  
+
   @define-color accent_bg_color      #6c7f91;
   @define-color accent_fg_color      #0e1114;
   @define-color accent_color         #8fa3b5;
@@ -46,12 +46,58 @@
   @define-color destructive_bg_color #a67a7e;
   @define-color destructive_fg_color #0e1114;
   @define-color destructive_color    #a67a7e;
-  
-  /* Shape: windows and cards 10 px, rows, buttons and inputs 6 px (see Theme.radiusCard / radiusRow). */
-  window.csd, window.csd decoration, popover > contents, .card, .boxed-list, dialog.message {
-      border-radius: 10px;
-  }
-  button, entry, spinbutton, .linked > button, row, menuitem, modelbutton, tab, .navigation-sidebar > row {
-      border-radius: 6px;
-  }
+}
+
+@media (prefers-color-scheme: light) {
+  @define-color window_bg_color      #ececea;
+  @define-color window_fg_color      #3a3f44;
+  @define-color view_bg_color        #f3f3f1;
+  @define-color view_fg_color        #3a3f44;
+  @define-color headerbar_bg_color   #f3f3f1;
+  @define-color headerbar_fg_color   #15181b;
+  @define-color headerbar_border_color #d3d3d0;
+  @define-color headerbar_backdrop_color #ececea;
+  @define-color headerbar_shade_color rgba(0, 0, 0, 0.12);
+  @define-color card_bg_color        #fafaf9;
+  @define-color card_fg_color        #3a3f44;
+  @define-color card_shade_color     rgba(0, 0, 0, 0.12);
+  @define-color dialog_bg_color      #f3f3f1;
+  @define-color dialog_fg_color      #3a3f44;
+  @define-color popover_bg_color     #fafaf9;
+  @define-color popover_fg_color     #3a3f44;
+  @define-color sidebar_bg_color     #f3f3f1;
+  @define-color sidebar_fg_color     #3a3f44;
+  @define-color sidebar_backdrop_color #ececea;
+  @define-color sidebar_shade_color  rgba(0, 0, 0, 0.12);
+  @define-color secondary_sidebar_bg_color #ececea;
+  @define-color secondary_sidebar_fg_color #3a3f44;
+  @define-color thumbnail_bg_color   #fafaf9;
+  @define-color thumbnail_fg_color   #3a3f44;
+  @define-color shade_color          rgba(0, 0, 0, 0.12);
+  @define-color scrollbar_outline_color #ececea;
+  @define-color borders              #d3d3d0;
+
+  @define-color accent_bg_color      #4d6379;
+  @define-color accent_fg_color      #fafaf9;
+  @define-color accent_color         #4d6379;
+  @define-color success_bg_color     #3f7359;
+  @define-color success_fg_color     #fafaf9;
+  @define-color success_color        #3f7359;
+  @define-color warning_bg_color     #80631a;
+  @define-color warning_fg_color     #fafaf9;
+  @define-color warning_color        #80631a;
+  @define-color error_bg_color       #95434a;
+  @define-color error_fg_color       #fafaf9;
+  @define-color error_color          #95434a;
+  @define-color destructive_bg_color #95434a;
+  @define-color destructive_fg_color #fafaf9;
+  @define-color destructive_color    #95434a;
+}
+
+/* Shape: windows and cards 10 px, rows, buttons and inputs 6 px (see Theme.radiusCard / radiusRow). */
+window.csd, window.csd decoration, popover > contents, .card, .boxed-list, dialog.message {
+    border-radius: 10px;
+}
+button, entry, spinbutton, .linked > button, row, menuitem, modelbutton, tab, .navigation-sidebar > row {
+    border-radius: 6px;
 }

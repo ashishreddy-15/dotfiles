@@ -52,6 +52,8 @@ quiet tiles, the control center's structure.
 - [x] GTK apps: dark, palette, 10 px / 6 px corners, Maple Mono (`home/gtk`), plus appearance settings (now a section of Settings)
       (colour scheme, GTK / icon / cursor theme, cursor size, font and size; like nwg-look)
 - [x] Appearance: GTK3 apps follow the light / dark scheme (adw-gtk3 twins + scheme.css); folders in pewter (Carbon icon theme)
+- [x] Light theme: one switch (Settings > Appearance, `appearance toggle`) for the shell, window borders,
+      kitty, prompt / fzf, Neovim and GTK apps; lock and login screens unchanged (see docs/features.md, "Light and dark")
 - [x] Icons: Sway-era launcher entries hidden (`home/applications`); one icon theme (Adwaita + hicolor) and all icons resolve. The packages are still installed (see section 5, Sway)
 - [x] hyprlock: same tokens, no card: date and a large light clock at the top, name and a frosted password pill at the
       bottom, over your wallpaper (lightly blurred) instead of a screenshot.
@@ -87,6 +89,8 @@ quiet tiles, the control center's structure.
 - [x] hyprlock: how it looks, unlocking (no fingerprint reader on this laptop)
 - [ ] Launching an app from the launcher with Enter (tray: empty now that nm-applet no longer starts)
 - [ ] Frosted cards on a light wallpaper (e.g. `cloud-sea`)
+- [ ] Light theme: every panel and Settings section by eye; start the shell with the light scheme saved (no dark flash);
+      prompt and fzf in a light kitty; a running Neovim following the switch; Nautilus and blueman in light
 
 ## 7. Ideas (not committed to)
 

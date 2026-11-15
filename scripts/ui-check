@@ -21,7 +21,9 @@ fail() { printf '  FAIL  %s\n' "$*"; fails=$((fails + 1)); }
 ok()   { printf '  ok    %s\n' "$*"; }
 
 # Value of `readonly property <type> <name>: <value>` in Theme.qml (first token, comments stripped).
-tv() { sed -nE "s|^ *readonly property [a-z]+ +$1: *([^ /]+).*|\1|p" "$theme" | head -1; }
+# tv name: the value (for a colour written `dark ? "#a" : "#b"`, the dark hex); tvl name: the light hex.
+tv() { sed -nE -e "s|^ *readonly property [a-z]+ +$1: *dark \? *(\"#[0-9a-fA-F]+\") *:.*|\1|p" -e "s|^ *readonly property [a-z]+ +$1: *([^ /]+).*|\1|p" "$theme" | head -1; }
+tvl() { sed -nE "s|^ *readonly property [a-z]+ +$1: *dark \? *\"#[0-9a-fA-F]+\" *: *(\"#[0-9a-fA-F]+\").*|\1|p" "$theme" | head -1; }
 
 # ---------------------------------------------------------------------------------------------------------
 static() {
@@ -42,7 +44,7 @@ static() {
 
     echo "static: Theme.qml agrees with Hyprland, hyprlock and the kitty font"
     local radius accent border text rounding
-    radius=$(tv radiusCard); rounding=$(sed -nE 's/^ *rounding *= *([0-9]+).*/\1/p' "$look")
+    radius=$(tv radiusCard); rounding=$(sed -nE 's/^[[:space:]]*rounding *= *([0-9]+).*/\1/p' "$look")
     [ "$radius" = "$rounding" ] && ok "corner radius $radius = Hyprland rounding" || fail "radiusCard $radius vs Hyprland rounding ${rounding:-?}"
 
     # Hyprland animation speeds are in units of 100 ms.
@@ -56,6 +58,7 @@ static() {
     accent=$(tv accent | tr -d '"#'); border=$(tv border | tr -d '"#'); text=$(tv text | tr -d '"#')
     grep -qi "$accent" "$look" && ok "accent #$accent in Hyprland active border" || fail "accent #$accent missing from look.lua"
     grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
+    # (The light scheme's borders are tuned in look.lua itself, not copied from Theme.qml: see the comment there.)
     for name in text dim bright border accent warn err; do
         hex=$(tv "$name" | tr -d '"#')
         grep -qi "$hex" "$lock" && ok "$name #$hex in hyprlock" || fail "$name #$hex missing from hyprlock.conf"
@@ -68,16 +71,32 @@ static() {
         if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/dark.css; then ok "$name #$hex in the GTK stylesheets"
         else fail "$name #$hex missing from the GTK stylesheets (home/gtk)"; fi
     done
+    for name in bg surface border text dim bright accent; do
+        hex=$(tvl "$name" | tr -d '"#')
+        if grep -qi "#$hex" "$root"/home/gtk/.config/gtk-4.0/gtk.css "$root"/home/gtk/.config/gtk-3.0/light.css; then ok "light $name #$hex in the GTK stylesheets"
+        else fail "light $name #$hex missing from the GTK stylesheets (home/gtk)"; fi
+    done
+    # kitty: one theme file per scheme (it switches between them itself, following the desktop's colour scheme).
+    local kdir="$root/home/kitty/.config/kitty"
+    for name in bg text border accent; do
+        hex=$(tv "$name" | tr -d '"#')
+        grep -qi "#$hex" "$kdir/dark-theme.auto.conf" && ok "$name #$hex in kitty's dark theme" || fail "$name #$hex missing from kitty's dark-theme.auto.conf"
+        hex=$(tvl "$name" | tr -d '"#')
+        grep -qi "#$hex" "$kdir/light-theme.auto.conf" && ok "light $name #$hex in kitty's light theme" || fail "light $name #$hex missing from kitty's light-theme.auto.conf"
+    done
     # Neovim's colour scheme keeps a copy of the palette.
     local mono="$root/home/nvim/.config/nvim/colors/mono.lua"
     if [ -f "$mono" ]; then
         for name in bg surface raised border text dim accent err warn; do
             hex=$(tv "$name" | tr -d '"#')
             grep -qi "#$hex" "$mono" && ok "$name #$hex in Neovim's colours" || fail "$name #$hex missing from home/nvim/.config/nvim/colors/mono.lua"
+            hex=$(tvl "$name" | tr -d '"#')
+            grep -qi "#$hex" "$mono" && ok "light $name #$hex in Neovim's colours" || fail "light $name #$hex missing from home/nvim/.config/nvim/colors/mono.lua"
         done
     fi
 
-    # The login screen (SDDM) keeps copies of the palette and corners.
+    # The login screen (SDDM) keeps copies of the dark palette and corners (like the lock screen, it has no light version:
+    # both are light text over the darkened wallpaper).
     local sddm="$root/system/sddm/carbon/Main.qml"
     if [ -f "$sddm" ]; then
         for name in bg raised border text dim bright accent err; do

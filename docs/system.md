@@ -26,14 +26,26 @@ rebuilds Quickshell. That is expected.
 
 ## The look
 
-Palette **"Carbon & Pewter"**: a neutral near-black base (`#111111`), dim grey text, one pewter (grey-blue) accent and
-muted status colours. Font: **Maple Mono NF** everywhere (bar, notifications, launcher, lock screen, terminal). It is not
-in Fedora, so `./install.sh fonts` downloads the exact version in `system/fonts.txt` and verifies its checksum. To use
-another font, change `fontFamily` in `Theme.qml` (and `font_family` in `hyprlock.conf` and `kitty.conf`).
+Palette **"Carbon & Pewter"**: a neutral base, grey text, one pewter (grey-blue) accent and muted status colours. It
+comes in two versions, dark (near-black `#111111`) and light (warm off-white `#ececea`); see
+[light and dark](features.md#light-and-dark) for the switch. Font: **Maple Mono NF** everywhere (bar, notifications,
+launcher, lock screen, terminal). It is not in Fedora, so `./install.sh fonts` downloads the exact version in
+`system/fonts.txt` and verifies its checksum. To use another font, change `fontFamily` in `Theme.qml` (and
+`font_family` in `hyprlock.conf` and `kitty.conf`).
 
-The palette is defined in `home/quickshell/.config/quickshell/Theme.qml` and repeated in `hypr/modules/look.lua`,
-`hypr/hyprlock.conf` and `kitty/kitty.conf` (and, as CSS, in `home/gtk`, the SDDM theme and Neovim's `mono.lua`).
-Change them all to re-theme; `scripts/ui-check` fails if they drift apart.
+Both versions are defined in `home/quickshell/.config/quickshell/Theme.qml` (each colour is one line,
+`dark ? "<dark>" : "<light>"`) and repeated in:
+
+| File | Dark | Light |
+|---|---|---|
+| `hypr/modules/look.lua` (window borders, shadow) | yes | yes |
+| `kitty/dark-theme.auto.conf`, `light-theme.auto.conf` | yes | yes |
+| `gtk-4.0/gtk.css`, `gtk-3.0/dark.css` and `light.css` | yes | yes |
+| Neovim's `colors/mono.lua` | yes | yes |
+| `hypr/hyprlock.conf`, the SDDM theme | yes | no: light text over the darkened wallpaper in both schemes |
+
+Change them all to re-theme; `scripts/ui-check` fails if they drift apart. The prompt, fzf and the installer's output
+use the terminal's 16 colours, so they follow kitty's theme and need no change.
 
 ## Hyprland
 

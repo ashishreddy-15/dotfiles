@@ -12,12 +12,13 @@
 #   die "<text>"       ✗  stop
 #   ui_summary         changes and warnings of the whole run, and how long it took
 # Changes and warnings are also written to $UI_EVENTS_FILE (when set), so the summary includes the ones made by
-# scripts run with sudo. Colours are the desktop's palette; NO_COLOR or output that is not a terminal turns them off.
+# scripts run with sudo. Colours are the terminal's palette slots; NO_COLOR or output that is not a terminal turns them off.
 
 if [[ -t 1 && -z ${NO_COLOR:-} ]]; then
-  _c() { printf '\e[38;2;%d;%d;%dm' "$1" "$2" "$3"; }
-  UI_ACC=$(_c 108 127 145)  UI_OK=$(_c 125 152 137)  UI_WARN=$(_c 168 151 111)  UI_ERR=$(_c 166 122 126)
-  UI_DIM=$(_c 102 106 110)  UI_TXT=$(_c 173 176 179) UI_BRIGHT=$(_c 208 211 214)
+  # The terminal's own palette slots (not fixed RGB), so it reads on light and dark themes and in any terminal.
+  _c() { printf '\e[%sm' "$1"; }
+  UI_ACC=$(_c 34)  UI_OK=$(_c 32)  UI_WARN=$(_c 33)  UI_ERR=$(_c 31)
+  UI_DIM=$(_c 90)  UI_TXT=$(_c 39) UI_BRIGHT=$(_c 39)
   UI_BOLD=$'\e[1m' UI_0=$'\e[0m'
   unset -f _c
 else

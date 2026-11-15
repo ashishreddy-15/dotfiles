@@ -35,12 +35,30 @@ writes gsettings, the two `settings.ini` files (symlinks into `home/gtk/`, so `g
 commit it) and the running cursor. In a terminal: `appearance get`, `appearance list gtk|icons|cursors|fonts`,
 `appearance set font-size 11`.
 
-- GTK4 / libadwaita apps (Nautilus, pavucontrol) get the palette in the dark scheme and stock Adwaita in the light one.
-- GTK3 apps (blueman, file dialogs) follow the scheme too: `adw-gtk3` is listed once and the scheme picks `adw-gtk3` or
-  `adw-gtk3-dark`; `~/.config/gtk-3.0/scheme.css` points at `dark.css` (the palette) or `light.css` (stock colours).
+- GTK4 / libadwaita apps (Nautilus, pavucontrol) and GTK3 apps (blueman, file dialogs) get the palette in both
+  schemes. For GTK3, `adw-gtk3` is listed once and the scheme picks `adw-gtk3` or `adw-gtk3-dark`;
+  `~/.config/gtk-3.0/scheme.css` points at `dark.css` or `light.css`.
 - The icon theme is **Carbon**: Adwaita with its blue folders recoloured to the palette's pewter. It is built into
   `~/.local/share/icons/Carbon` by `appearance icons` (and by `appearance sync`, which `./install.sh link` runs), so
   nothing is copied into the repo.
+
+### Light and dark
+
+One switch changes everything: **Settings > Appearance > Colour scheme**, or `appearance toggle`
+(`appearance set color-scheme prefer-light`) in a terminal.
+
+| What | How it follows |
+|---|---|
+| The shell (cards, Settings, notifications) | `Theme.dark`, read from `~/.local/state/dotfiles/scheme` at startup and changed at once on a switch |
+| Window borders and shadows | `look.lua` reads the same file; the switch reloads Hyprland |
+| kitty | switches between `dark-theme.auto.conf` and `light-theme.auto.conf` itself, in every open window |
+| Prompt, fzf, bat, `install.sh` output | use the terminal's 16 colours, so they change with kitty |
+| Neovim | `mono.lua` has both palettes and follows `background`, which Neovim takes from the terminal |
+| GTK apps | gsettings, the theme twin and the stylesheets in `home/gtk` |
+
+The bar is the exception: it has no background, so its text follows the wallpaper, not the scheme (see
+[wallpapers](#wallpapers)). The lock and login screens are light text over the darkened wallpaper in both schemes. Apps with
+their own setting (Brave, JetBrains IDEs, Qt apps) follow only if that setting is "system" / "sync with OS".
 
 ## Wallpapers
 

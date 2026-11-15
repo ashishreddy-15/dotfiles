@@ -2,28 +2,50 @@
 vim.cmd("highlight clear")
 if vim.fn.exists("syntax_on") == 1 then vim.cmd("syntax reset") end
 vim.o.termguicolors = true
-vim.o.background = "dark"
 vim.g.colors_name = "mono"
 
--- Palette "Carbon & Pewter", the same as the desktop (quickshell/Theme.qml) and kitty, so the editor and the
--- terminal it runs in are one surface. `muted` sits between text and dim (strings, operators).
-local c = {
-  bg = "#111111", surface = "#141414", raised = "#1b1b1b", border = "#262626",
-  dim = "#666a6e", muted = "#878b8f", fg = "#adb0b3", bright = "#d0d3d6",
-  accent = "#6c7f91", red = "#a67a7e", amber = "#a8976f",
-}
--- Code gets a few muted hues so its parts are easy to tell apart (the interface above stays monochrome). They are
--- the desktop's status colours (ok = sage, warn = sand, err = rose) and its pewter, each lifted a little so it stands
--- out from plain text on the dark background.
-local syn = {
-  keyword = "#8ca3ba",   -- pewter, lifted        public, class, if, return
-  type    = "#86ab95",   -- sage                 String, List, int, MyClass
-  fn      = c.bright,    -- bright                methods and functions
-  field   = "#a9bfcd",   -- mist blue-grey        this.name, record components
-  string  = "#b8a576",   -- sand                 "text", 'c'
-  const   = "#c4989c",   -- rose, lifted          42, true, null, MAX_SIZE, enum constants
-  annot   = "#a99bc2",   -- lavender-grey         @Override, @Service
-}
+-- Two palettes, picked by 'background' (Neovim sets it from the terminal at start and again whenever the terminal
+-- reports a light/dark change, and setting it re-sources this scheme). "Carbon & Pewter" is the same as the desktop
+-- (quickshell/Theme.qml) and kitty, so the editor and the terminal it runs in are one surface.
+-- `muted` sits between text and dim (strings, operators); `sel` is the selection/current-item background.
+local light = vim.o.background == "light"
+local c, syn
+if light then
+  c = {
+    bg = "#ececea", surface = "#f3f3f1", raised = "#fafaf9", border = "#d3d3d0", sel = "#d3d3d0",
+    dim = "#6b7177", muted = "#555b61", fg = "#3a3f44", bright = "#15181b",
+    accent = "#4d6379", red = "#95434a", amber = "#80631a",
+  }
+  -- The same hue families as the dark set, but more saturated: on a light background, dark muted colours all read
+  -- as "dark grey". Each has a contrast of at least 4.5 on the background (contrast in brackets).
+  syn = {
+    keyword = "#2f5f9e",   -- blue          (5.5)   public, class, if, return
+    type    = "#23784a",   -- green         (4.6)   String, List, int, MyClass
+    fn      = c.bright,    -- near-black    (15)    methods and functions
+    field   = "#0f6e80",   -- teal          (5.0)   this.name, record components
+    string  = "#8a5800",   -- ochre         (5.1)   "text", 'c'
+    const   = "#b02e45",   -- red           (5.3)   42, true, null, MAX_SIZE, enum constants
+    annot   = "#7a3fb0",   -- purple        (5.6)   @Override, @Service
+  }
+else
+  c = {
+    bg = "#111111", surface = "#141414", raised = "#1b1b1b", border = "#262626", sel = "#1b1b1b",
+    dim = "#666a6e", muted = "#878b8f", fg = "#adb0b3", bright = "#d0d3d6",
+    accent = "#6c7f91", red = "#a67a7e", amber = "#a8976f",
+  }
+  -- Code gets a few muted hues so its parts are easy to tell apart (the interface above stays monochrome). They are
+  -- the desktop's status colours (ok = sage, warn = sand, err = rose) and its pewter, each lifted a little so it
+  -- stands out from plain text on the dark background.
+  syn = {
+    keyword = "#8ca3ba",   -- pewter, lifted        public, class, if, return
+    type    = "#86ab95",   -- sage                 String, List, int, MyClass
+    fn      = c.bright,    -- bright                methods and functions
+    field   = "#a9bfcd",   -- mist blue-grey        this.name, record components
+    string  = "#b8a576",   -- sand                 "text", 'c'
+    const   = "#c4989c",   -- rose, lifted          42, true, null, MAX_SIZE, enum constants
+    annot   = "#a99bc2",   -- lavender-grey         @Override, @Service
+  }
+end
 local function hl(g, o) vim.api.nvim_set_hl(0, g, o) end
 
 local groups = {
@@ -32,11 +54,11 @@ local groups = {
   FloatTitle = { fg = c.accent, bg = c.surface },
   Cursor = { fg = c.bg, bg = c.fg }, CursorLine = { bg = c.surface }, CursorLineNr = { fg = c.accent },
   LineNr = { fg = c.dim }, SignColumn = { bg = c.bg }, ColorColumn = { bg = c.surface },
-  Visual = { bg = c.raised }, Search = { fg = c.bg, bg = c.accent }, IncSearch = { fg = c.bg, bg = c.amber },
+  Visual = { bg = c.sel }, Search = { fg = c.bg, bg = c.accent }, IncSearch = { fg = c.bg, bg = c.amber },
   CurSearch = { fg = c.bg, bg = c.amber }, MatchParen = { fg = c.accent, bold = true },
   VertSplit = { fg = c.border }, WinSeparator = { fg = c.border },
   StatusLine = { fg = c.fg, bg = c.surface }, StatusLineNC = { fg = c.muted, bg = c.surface },
-  Pmenu = { fg = c.fg, bg = c.surface }, PmenuSel = { fg = c.accent, bg = c.raised },
+  Pmenu = { fg = c.fg, bg = c.surface }, PmenuSel = { fg = c.accent, bg = c.sel },
   PmenuSbar = { bg = c.surface }, PmenuThumb = { bg = c.dim },
   TabLine = { fg = c.muted, bg = c.surface }, TabLineSel = { fg = c.accent, bg = c.bg }, TabLineFill = { bg = c.surface },
   Folded = { fg = c.muted, bg = c.surface }, NonText = { fg = c.dim }, Whitespace = { fg = c.border },
@@ -58,11 +80,11 @@ local groups = {
   DiagnosticInfo = { fg = c.muted }, DiagnosticHint = { fg = c.dim },
   DiagnosticUnderlineError = { undercurl = true, sp = c.red }, DiagnosticUnderlineWarn = { undercurl = true, sp = c.amber },
   -- diff / gitsigns
-  DiffAdd = { fg = c.fg, bg = c.raised }, DiffChange = { bg = c.surface }, DiffDelete = { fg = c.red },
-  DiffText = { fg = c.accent, bg = c.raised }, Added = { fg = c.muted }, Changed = { fg = c.amber }, Removed = { fg = c.red },
+  DiffAdd = { fg = c.fg, bg = c.sel }, DiffChange = { bg = c.surface }, DiffDelete = { fg = c.red },
+  DiffText = { fg = c.accent, bg = c.sel }, Added = { fg = c.muted }, Changed = { fg = c.amber }, Removed = { fg = c.red },
   GitSignsAdd = { fg = c.muted }, GitSignsChange = { fg = c.amber }, GitSignsDelete = { fg = c.red },
   -- telescope
-  TelescopeBorder = { fg = c.border }, TelescopeSelection = { fg = c.accent, bg = c.raised },
+  TelescopeBorder = { fg = c.border }, TelescopeSelection = { fg = c.accent, bg = c.sel },
   TelescopeMatching = { fg = c.accent, bold = true }, TelescopePromptPrefix = { fg = c.accent },
 }
 for g, o in pairs(groups) do hl(g, o) end

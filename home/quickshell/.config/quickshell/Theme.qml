@@ -5,37 +5,42 @@ import Quickshell
 
 // The one place for colours, shape, depth, type and motion. Every other file reads from here:
 // no number or colour for how things look should be written anywhere else.
-// Palette: "Carbon & Pewter". The same colours are used in:
-//   hypr/modules/look.lua (borders), hypr/hyprlock.conf, kitty/kitty.conf
+// Palette: "Carbon & Pewter", in a dark and a light version. `dark` follows the colour scheme (Settings > Appearance,
+// `appearance toggle`); Appearance.qml reads it from ~/.local/state/dotfiles/scheme at startup.
+// Each colour is written as `dark ? "<dark>" : "<light>"` on one line (scripts/ui-check reads them). The same
+// colours are used in:
+//   hypr/modules/look.lua (borders), hypr/hyprlock.conf, kitty/kitty.conf, gtk-3.0/dark.css, nvim
 // The same shape and motion numbers are repeated in hypr/modules/look.lua (rounding, animation speeds).
 Singleton {
-    // ---- colour: surfaces, darkest to lightest ----
-    readonly property color bg:      "#111111"   // behind everything
-    readonly property color surface: "#141414"   // solid panels
-    readonly property color raised:  "#1b1b1b"   // solid raised parts
-    readonly property color border:  "#262626"
+    readonly property bool dark: Appearance.dark
+
+    // ---- colour: surfaces, darkest to lightest (in the light scheme: lightest to darkest) ----
+    readonly property color bg:      dark ? "#111111" : "#ececea"   // behind everything
+    readonly property color surface: dark ? "#141414" : "#f3f3f1"   // solid panels
+    readonly property color raised:  dark ? "#1b1b1b" : "#fafaf9"   // solid raised parts
+    readonly property color border:  dark ? "#262626" : "#d3d3d0"
 
     // ---- colour: text ----
-    readonly property color text:    "#adb0b3"
-    readonly property color dim:     "#666a6e"
-    readonly property color bright:  "#d0d3d6"   // the one thing that should stand out (current workspace)
+    readonly property color text:    dark ? "#adb0b3" : "#3a3f44"
+    readonly property color dim:     dark ? "#666a6e" : "#6b7177"
+    readonly property color bright:  dark ? "#d0d3d6" : "#15181b"   // the one thing that should stand out (current workspace)
 
     // ---- colour: accent and status (kept muted on purpose) ----
-    readonly property color accent:  "#6c7f91"
-    readonly property color ok:      "#7d9889"
-    readonly property color warn:    "#a8976f"
-    readonly property color err:     "#a67a7e"
+    readonly property color accent:  dark ? "#6c7f91" : "#4d6379"
+    readonly property color ok:      dark ? "#7d9889" : "#3f7359"
+    readonly property color warn:    dark ? "#a8976f" : "#80631a"
+    readonly property color err:     dark ? "#a67a7e" : "#95434a"
 
     // ---- floating cards (panel, pickers, indicator): frosted glass ----
     // The surface is slightly see-through; Hyprland blurs what is behind it (hypr/modules/rules.lua).
     readonly property real  cardOpacity: 0.80
-    readonly property color card:     Qt.rgba(0.078, 0.078, 0.078, cardOpacity)   // #141414, see-through
-    // Light wash over a card for hover and selection. White on a dark card works on any wallpaper.
-    readonly property color clear:    Qt.rgba(1, 1, 1, 0)      // "no wash": animates cleanly to hover/selected
-    readonly property color hover:    Qt.rgba(1, 1, 1, 0.07)
-    readonly property color selected: Qt.rgba(1, 1, 1, 0.12)
-    readonly property color selectedHover: Qt.rgba(1, 1, 1, 0.17)   // a selected / "on" item under the pointer
-    readonly property color sliderFill: Qt.rgba(0.424, 0.498, 0.569, 0.55)   // the filled part of a pill slider: accent, half see-through
+    readonly property color card:     Qt.rgba(surface.r, surface.g, surface.b, cardOpacity)   // the surface, see-through
+    // A wash over a card for hover and selection: white on a dark card, black on a light one. Works on any wallpaper.
+    readonly property color clear:    dark ? Qt.rgba(1, 1, 1, 0)    : Qt.rgba(0, 0, 0, 0)      // "no wash": animates cleanly to hover/selected
+    readonly property color hover:    dark ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.05)
+    readonly property color selected: dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.09)
+    readonly property color selectedHover: dark ? Qt.rgba(1, 1, 1, 0.17) : Qt.rgba(0, 0, 0, 0.13)   // a selected / "on" item under the pointer
+    readonly property color sliderFill: Qt.rgba(accent.r, accent.g, accent.b, 0.55)   // the filled part of a pill slider: accent, half see-through
 
     // ---- shape ----
     // One rule: a row inside a card has radius = card radius - the gap to the card's edge (10 - 4 = 6),
@@ -48,7 +53,7 @@ Singleton {
     readonly property int cardInset:   4     // gap between a card's edge and the rows inside it
 
     // ---- depth ----
-    readonly property color shadow:       Qt.rgba(0, 0, 0, 0.45)
+    readonly property color shadow:       Qt.rgba(0, 0, 0, dark ? 0.45 : 0.22)
     readonly property int   shadowBlur:   28
     readonly property int   shadowOffset: 8    // the shadow sits a little below the card
     readonly property int   shadowMargin: 36   // room a window must leave around a card so the shadow is not cut off
@@ -79,6 +84,7 @@ Singleton {
     readonly property string glyphBluetooth: "\uf293"
     readonly property string glyphBell:      "\uf0f3"   // bell: notifications
     readonly property string glyphSilent:    "\uf1f6"   // bell with a line through it: Do Not Disturb
+    readonly property string glyphSun:       "\uf185"   // sun: light / dark scheme
     readonly property string glyphNight:     "\uf186"   // moon: night light
     readonly property string glyphAwake:     "\uf0f4"   // coffee cup: keep awake
     readonly property string glyphBright:    "\uf042"   // half-filled circle: brightness
@@ -137,14 +143,15 @@ Singleton {
     readonly property real wallpaperScrimLight: 0.42  // whitening along the top edge, under dark text (dim text there: ~4.5:1)
     readonly property bool barOnLight: ShellState.topLuminance > lightWallpaper
 
-    // Bar colours: the normal palette, or darker versions of it for light wallpapers.
-    readonly property color barText:   barOnLight ? "#1b1e21" : text
-    readonly property color barDim:    barOnLight ? "#33393e" : dim
-    readonly property color barBright: barOnLight ? "#000000" : bright
-    readonly property color barAccent: barOnLight ? "#34495c" : accent
-    readonly property color barOk:     barOnLight ? "#2b6249" : ok
-    readonly property color barWarn:   barOnLight ? "#7a5a0b" : warn
-    readonly property color barErr:    barOnLight ? "#8a2c33" : err
+    // Bar colours: they follow the WALLPAPER, not the colour scheme. Light text on a dark wallpaper is always the dark
+    // palette's text colours (even in the light scheme); dark text on a light wallpaper is a set tuned for photos.
+    readonly property color barText:   barOnLight ? "#1b1e21" : "#adb0b3"
+    readonly property color barDim:    barOnLight ? "#33393e" : "#666a6e"
+    readonly property color barBright: barOnLight ? "#000000" : "#d0d3d6"
+    readonly property color barAccent: barOnLight ? "#34495c" : "#6c7f91"
+    readonly property color barOk:     barOnLight ? "#2b6249" : "#7d9889"
+    readonly property color barWarn:   barOnLight ? "#7a5a0b" : "#a8976f"
+    readonly property color barErr:    barOnLight ? "#8a2c33" : "#a67a7e"
     readonly property real barOpacity: 0      // 0 = no background, text sits on the wallpaper; 1 = solid strip
 
     // ---- screens ----

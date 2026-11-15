@@ -1,12 +1,29 @@
--- Colours: "Carbon & Pewter" (same palette as quickshell/Theme.qml).
+-- Colours: "Carbon & Pewter" (same palette as quickshell/Theme.qml), dark or light.
+-- The scheme is the one `appearance set color-scheme` wrote to ~/.local/state/dotfiles/scheme (missing = dark).
+local scheme = "dark"
+local f = io.open((os.getenv("HOME") or "") .. "/.local/state/dotfiles/scheme", "r")
+if f then
+	local v = (f:read("*a") or ""):gsub("%s+", "")
+	f:close()
+	if v == "light" then scheme = "light" end
+end
+local palette = {
+	dark = { active = "rgba(6c7f91ee)", inactive = "rgba(262626ee)", shadow = 0xaa08090b },
+	-- Light: the borders sit between a light window and (usually) a dark wallpaper, so they cannot be the light
+	-- palette's accent / border (a dark border vanished into the wallpaper, a light one looked lit up). The focused
+	-- window gets a mid-tone, more saturated pewter-blue that shows against both (about 3:1); the others a faint edge.
+	light = { active = "rgba(5f86b0ff)", inactive = "rgba(00000026)", shadow = 0x55000000 },
+}
+local colours = palette[scheme]
+
 hl.config({
 	general = {
 		gaps_in = 4,
 		gaps_out = 8,
 		border_size = 2,
 		col = {
-			active_border = "rgba(6c7f91ee)",
-			inactive_border = "rgba(262626ee)",
+			active_border = colours.active,
+			inactive_border = colours.inactive,
 		},
 		resize_on_border = true, -- drag window edges to resize
 		layout = "dwindle",
@@ -14,7 +31,7 @@ hl.config({
 
 	decoration = {
 		rounding = 10, -- = Theme.radiusCard
-		shadow = { enabled = true, range = 8, render_power = 3, color = 0xaa08090b },
+		shadow = { enabled = true, range = 8, render_power = 3, color = colours.shadow },
 		blur = { enabled = true, size = 4, passes = 2 },
 	},
 

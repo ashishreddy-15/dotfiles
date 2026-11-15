@@ -12,12 +12,14 @@ if command -v fzf >/dev/null; then
     export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
     export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 
-    # Looks: the desktop's palette (Carbon & Pewter), a rounded border, the list above the prompt.
+    # Looks: the terminal's own palette (-1 = its default colours, 0-15 = its slots), so fzf follows kitty's light/dark
+    # switch. Accent 4, ok 2, quiet parts 8. There is no slot "slightly off the background" in both themes, so the
+    # current line is shown by the ▌ pointer and bold text instead of a tinted background.
     export FZF_DEFAULT_OPTS="--height=45% --layout=reverse --border=rounded --info=inline-right \
 --prompt='❯ ' --pointer='▌' --marker='●' --scrollbar='│' \
---color=bg:#111111,bg+:#1b1b1b,fg:#adb0b3,fg+:#d0d3d6,hl:#8ca3ba,hl+:#8ca3ba \
---color=border:#262626,prompt:#6c7f91,pointer:#6c7f91,marker:#86ab95,info:#666a6e,spinner:#666a6e \
---color=header:#666a6e,gutter:#111111,separator:#262626,scrollbar:#262626,label:#666a6e,query:#d0d3d6"
+--color=bg:-1,bg+:-1,fg:-1,fg+:-1:bold,hl:4,hl+:4:bold \
+--color=border:8,prompt:4,pointer:4,marker:2,info:8,spinner:8 \
+--color=header:8,gutter:-1,separator:8,scrollbar:8,label:8,query:-1"
 
     # Previews: files with bat (plain cat if bat is missing), folders as a listing.
     if command -v bat >/dev/null; then
