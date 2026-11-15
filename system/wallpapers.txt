@@ -37,6 +37,24 @@ dusk-pines      a35298f6e5e914f3a5366b17f32c8630ec9431f29fd8f5ec87470e6484c7cd13
 # fog-valley: fog filling a forested valley (4288 px)
 fog-valley      bef5ef59c1e9d2c507d87dc9c7625f0ac469a9abd81cfc0877ab4a9efa579b67  https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=2560&h=1600&q=90&fm=jpg&fit=crop&crop=entropy
 
+# ---- darkest: dusk and storm (Wikimedia Commons; credit recorded as the licences require) ----
+
+# isaac-lake: Isaac Lake at nautical twilight: black hills, blue sky, a last amber glow on the water
+#   Trougnouf, CC BY 4.0, https://commons.wikimedia.org/wiki/File:Nautical_twilight_over_Isaac_Lake_(DSCF2518).jpg
+isaac-lake      97ab8d5ca172326bae4e07b2d63500dace48fcc558a299ea196b616422f16c7d  https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Nautical_twilight_over_Isaac_Lake_%28DSCF2518%29.jpg/3840px-Nautical_twilight_over_Isaac_Lake_%28DSCF2518%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# sandy-lake: Sandy Lake after sunset: a thin moon, dark clouds, amber reflections
+#   Trougnouf, CC BY 4.0, https://commons.wikimedia.org/wiki/File:Nautical_twilight_sunset_over_Sandy_Lake_(DSCF3005).jpg
+sandy-lake      024551f36174500b160e7105f72f9bbcd1046860b8d89e129e3f934b9ffa20cc  https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Nautical_twilight_sunset_over_Sandy_Lake_%28DSCF3005%29.jpg/3840px-Nautical_twilight_sunset_over_Sandy_Lake_%28DSCF3005%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# bare-woods: a cold blue avenue of bare trees fading into mist
+#   Dietmar Rabich, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Kirchspiel,_Neustr%C3%A4%C3%9Fer_Bruch_--_2021_--_9364.jpg
+bare-woods      f3306928c5142e4c8093ee9a05b088b6589b18b10ef543224da122d460118a6b  https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/D%C3%BClmen%2C_Kirchspiel%2C_Neustr%C3%A4%C3%9Fer_Bruch_--_2021_--_9364.jpg/3840px-D%C3%BClmen%2C_Kirchspiel%2C_Neustr%C3%A4%C3%9Fer_Bruch_--_2021_--_9364.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
+# storm-lake: a heavy storm sky over still water, a last strip of light
+#   Jakub Hałun, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:20171122_Sunset_Four_Thousand_Islands_Laos_3960.jpg
+storm-lake      fcc996c06a4e5107c2aad22ddea285ffa273ff1e2949d7fc913f72cce799c25e  https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/20171122_Sunset_Four_Thousand_Islands_Laos_3960.jpg/3840px-20171122_Sunset_Four_Thousand_Islands_Laos_3960.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail
+
 # ---- quiet and misty (Wikimedia Commons: credit is required by the licences, so it is recorded here) ----
 
 # bois-raquet: spruce rows with soft light through the mist, High Fens (3840 px preview of a 4800+ px original)

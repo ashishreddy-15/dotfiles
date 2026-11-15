@@ -259,7 +259,7 @@ journalctl --user -u quickshell -f       # logs / QML errors
   back to the clipboard; paste with Ctrl+V. Multi-line entries show on one line but are restored exactly.
 - `wallpaper/`: wallpaper on every monitor, cross-fading (about 0.3 s) when it changes. Settings > Wallpaper
   picks one (thumbnails); `qs ipc call wallpaper next` cycles; `qs ipc call wallpaper set <file>` uses any image.
-  It lists `~/.local/share/wallpapers` (17 photos from Unsplash and Wikimedia Commons, fetched by
+  It lists `~/.local/share/wallpapers` (21 photos from Unsplash and Wikimedia Commons, fetched by
   `./install.sh wallpapers` from `system/wallpapers.txt`, which also records the credit the Commons licences require)
   and `~/Pictures/Wallpapers` (**put your own images there**; png, jpg, webp), alphabetically.
   The choice is remembered in `~/.local/state/dotfiles/wallpaper`. Settings shows small cached copies
