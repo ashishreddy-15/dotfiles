@@ -1,0 +1,78 @@
+# System
+
+- [Repos](#repos)
+- [The look](#the-look)
+- [Hyprland](#hyprland)
+- [Monitors and the lid](#monitors-and-the-lid)
+- [Idle and sleep](#idle-and-sleep)
+- [Services](#services)
+
+## Repos
+
+Hyprland is not in the official Fedora 45 repos, and Fedora's Quickshell is an old 0.2.x snapshot, so two COPRs are
+added. Each is limited with `includepkgs=` to exactly the packages needed; everything else in them is invisible to dnf,
+so they can never replace a Fedora package (the Hyprland COPR ships its own kitty and waybar, for example).
+
+| Repo file in `system/repos/` | Allowed packages |
+|---|---|
+| [sdegler/hyprland](https://copr.fedorainfracloud.org/coprs/sdegler/hyprland/) | Hyprland, hypr* tools, their libraries |
+| [errornointernet/quickshell](https://copr.fedorainfracloud.org/coprs/errornointernet/quickshell/) | `quickshell`, `cpptrace` |
+
+If an update fails with `nothing provides <X>`, add `<X>` to that repo's `includepkgs`, then run
+`./install.sh repos packages`.
+
+Quickshell uses Qt private APIs. When Fedora updates Qt, dnf may hold the Qt update back for a few days until the COPR
+rebuilds Quickshell. That is expected.
+
+## The look
+
+Palette **"Carbon & Pewter"**: a neutral near-black base (`#111111`), dim grey text, one pewter (grey-blue) accent and
+muted status colours. Font: **Maple Mono NF** everywhere (bar, notifications, launcher, lock screen, terminal). It is not
+in Fedora, so `./install.sh fonts` downloads the exact version in `system/fonts.txt` and verifies its checksum. To use
+another font, change `fontFamily` in `Theme.qml` (and `font_family` in `hyprlock.conf` and `kitty.conf`).
+
+The palette is defined in `home/quickshell/.config/quickshell/Theme.qml` and repeated in `hypr/modules/look.lua`,
+`hypr/hyprlock.conf` and `kitty/kitty.conf` (and, as CSS, in `home/gtk`, the SDDM theme and Neovim's `mono.lua`).
+Change them all to re-theme; `scripts/ui-check` fails if they drift apart.
+
+## Hyprland
+
+Log in by picking **Hyprland (uwsm-managed)** in SDDM. The config is Lua (Hyprland 0.57+), split by topic in
+`home/hypr/.config/hypr/modules/`: `monitors`, `input`, `look`, `rules`, `binds`, `autostart`, `tablet`. Hyprland reloads
+on save; `./install.sh link` also checks it with `Hyprland --verify-config`.
+
+Quickshell does as much as possible (bar, launcher, notifications, wallpaper, OSDs). The hypr* tools cover what is safer
+outside the shell: `hypridle`, `hyprpolkitagent` and `hyprlock` (the lock screen). File manager: Nautilus.
+
+Session environment variables go in `home/uwsm/.config/uwsm/env-hyprland`, not `hl.env()`, so systemd services and apps
+get them too. Apps are launched with `uwsm app -- <cmd>`, so each runs in its own systemd scope.
+
+## Monitors and the lid
+
+The laptop `eDP-1` (1920x1200, scaled 1.2) sits on the left, bottom-aligned with the Samsung `HDMI-A-1` (2560x1440) in
+the centre, which is the main screen. Workspaces 1-9 live on the main screen, 10 on the laptop. Change the laptop scale
+with `laptopScale` in `modules/monitors.lua`; positions follow automatically.
+
+**The lid.** With another monitor connected, closing the lid turns the laptop screen off and Hyprland moves workspace 10
+(and its windows) to the main monitor. Opening the lid reloads the config, the screen comes back, and workspace 10 goes
+home. Starting with the lid shut keeps the laptop screen off, and unplugging the monitor while the lid is shut turns it
+back on so you are never left without a display. With no other monitor, closing the lid suspends as usual.
+
+## Idle and sleep
+
+`hypridle.conf`: dim at 2.5 min, lock at 5, screens off at 5.5, suspend at 30. Dimming covers every screen the shell can
+control (the laptop panel and, over DDC, the external monitor) down to 10% (`idleDimLevel` in `Theme.qml`), quietly (no
+indicator), and puts each back as it was; without the shell running, only the laptop dims. Apps that are playing media
+prevent all of this automatically.
+
+## Services
+
+`system/services.sh` turns off what this bare-metal laptop does not use: VM guest tools, live-ISO units,
+iSCSI / RAID / LVM / Stratis, ModemManager, sssd, homed, CUPS, Avahi, PackageKit (masked). Bluetooth stays on.
+`system/user-services.sh` turns on quickshell, hypridle, hyprpolkitagent and bt-agent and turns off obex.
+
+Each list is a set of `svc_group on|off|mask "<what they are>" units...` lines (helpers in `scripts/lib/svc.sh`). A run
+prints one line per group with its state (`✓ off  printing  cups.socket cups.path cups`) and a line per unit it actually
+changes. `./install.sh -n services` shows the real state without needing root.
+
+To undo one: `sudo systemctl unmask <unit> && sudo systemctl enable --now <unit>`.
