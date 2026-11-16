@@ -98,6 +98,8 @@ Singleton {
     readonly property string glyphSearch:    "\uf002"   // magnifying glass
     readonly property string glyphTouchpad:  "\uf25a"   // hand pointer: touchpad
     readonly property string glyphPen:       "\uf040"   // pencil: tablet
+    readonly property string glyphInfo:      "\uf05a"   // i in a circle: about
+    readonly property string glyphFedora:    "\uf30a"   // the Fedora mark (from the font's logo set, the one icon not from FontAwesome)
     readonly property string glyphGear:    "\uf013"   // the settings button
     readonly property string glyphMinus:   "\uf068"
     readonly property string glyphPlus:    "\uf067"

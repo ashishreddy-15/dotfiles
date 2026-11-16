@@ -23,7 +23,7 @@ How each part works day to day. For the keys, see the table in the [README](../R
 | Group | Sections |
 |---|---|
 | Connections | Wi-Fi, Bluetooth |
-| Device | Display (brightness, night light), Sound, Power (profile, battery), Touchpad, Tablet |
+| Device | Display (brightness, night light), Sound, Power (profile, battery), Touchpad, Tablet, About (system, memory and disk, hardware; read from `fastfetch`) |
 | Personal | Appearance, Wallpaper, Notifications |
 
 **Keyboard.** It opens on the sidebar: Up / Down change section. Right, Enter or Tab go into the section; there, Tab
