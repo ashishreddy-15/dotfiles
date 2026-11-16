@@ -75,6 +75,14 @@ Singleton {
     readonly property var mainScreen: Quickshell.screens.find(s => s.name === Theme.mainOutput)
                                       ?? Quickshell.screens[0]
 
+    // --- Launcher / handwriting contract -------------------------------------------------------------
+    // launcherSearchRect: null while the launcher is hidden, else {visible, screen (monitor name), x, y, w, h}:
+    // the search field in that monitor's logical pixels. Written by launcher/Launcher.qml.
+    property var launcherSearchRect: null
+    // Set true (by the handwriting popup while docked under the search field) so the launcher ignores outside clicks.
+    property bool launcherKeepOpen: false
+    // --- end launcher / handwriting contract ---------------------------------------------------------
+
     IpcHandler {
         target: "bar"
         function toggle(): void { barVisible = !barVisible }

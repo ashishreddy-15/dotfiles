@@ -16,6 +16,7 @@ import "settings"
 import "bluetooth"
 import "power"
 import "apps"
+import "handwriting"
 
 ShellRoot {
     // Singletons start the first time something uses them. These have work to do from the start (applying the tablet
@@ -35,4 +36,5 @@ ShellRoot {
     PairingPrompt {}
     PowerMenu {}
     AppMenu {}
+    HandwritingPopup {}
 }

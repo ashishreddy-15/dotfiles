@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """tablet-keys: the ExpressKeys of a pen tablet, each turned into an action you choose in Settings > Tablet.
 
-    tablet-keys /dev/input/eventN      read that pad (started by tablet-keys@eventN.service while it is plugged in)
+    tablet-keys /dev/input/eventN      read that pad (started by tablet-keys@eventN.service while it is plugged in);
+                                       given the pen's node instead, it reads the pen's lower side button
     tablet-keys --actions              list the actions, as "id<TAB>label" lines (Settings shows these)
 
 It waits for key presses (no CPU while idle) and reads your choices from ~/.local/state/dotfiles/tablet.json at each
 press, so a change in Settings applies at once. Shortcuts go to the window that has focus, through Hyprland.
+
+While the handwriting popup is open (the flag file below exists) the four keys are confirm / submit / undo / cancel
+instead; "popupKeys" in tablet.json overrides that list. The pen's lower button always calls `handwriting pen`
+(open the popup, or confirm what is written). It is only watched, never grabbed, so apps still see the button too.
 """
 import json, os, signal, struct, subprocess, sys
 
@@ -23,6 +28,12 @@ ACTIONS = {
     "select":      ("Select",             ("CTRL SHIFT", "r")),
     "zoom-in":     ("Zoom in",            ("CTRL", "equal")),
     "zoom-out":    ("Zoom out",           ("CTRL", "minus")),
+    "handwriting": ("Handwriting input",  ["qs", "ipc", "call", "handwriting", "toggle"]),
+    "hw-confirm":  ("Handwriting: insert",  ["qs", "ipc", "call", "handwriting", "confirm"]),
+    "hw-submit":   ("Handwriting: insert + Enter", ["qs", "ipc", "call", "handwriting", "submit"]),
+    "hw-undo":     ("Handwriting: undo stroke", ["qs", "ipc", "call", "handwriting", "undo"]),
+    "hw-cancel":   ("Handwriting: cancel", ["qs", "ipc", "call", "handwriting", "cancel"]),
+    "hw-pen":      ("Handwriting: pen button", ["qs", "ipc", "call", "handwriting", "pen"]),
     "screenshot":  ("Screenshot",         [os.path.expanduser("~/.local/bin/screenshot")]),
 }
 # For testing: send shortcuts to this window instead of the focused one (e.g. "class:__nothing__").
@@ -44,29 +55,57 @@ BTN_0 = 0x100                                    # the pad's keys are BTN_0, BTN
 EV_KEY = 1
 EVENT = struct.Struct("llHHi")                   # struct input_event: time (2 longs), type, code, value
 
-def chosen():
+POPUP_DEFAULT = ["hw-confirm", "hw-submit", "hw-undo", "hw-cancel"]
+POPUP_FLAG = os.path.join(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"), "hw-popup-open")
+BTN_STYLUS = 331                                 # the pen's lower side button (BTN_STYLUS2, 332, is the upper one)
+def setting(name, default):
     try:
-        keys = json.load(open(STATE)).get("expressKeys")
+        keys = json.load(open(STATE)).get(name)
         if isinstance(keys, list) and keys: return keys
     except (OSError, ValueError):
         pass
-    return DEFAULT
+    return default
+
+def chosen():
+    return setting("expressKeys", DEFAULT)
+
+def action_for(index, popup_open=None):
+    """The action id of ExpressKey `index` (0-based): the popup's while the handwriting popup is open."""
+    if popup_open is None: popup_open = os.path.exists(POPUP_FLAG)
+    keys = setting("popupKeys", POPUP_DEFAULT) if popup_open else chosen()
+    return keys[index] if index < len(keys) else "none"
+
+def is_pen(path):
+    try:
+        name = open(f"/sys/class/input/{os.path.basename(path)}/device/name").read()
+    except OSError:
+        return False
+    return "pen" in name.lower()
 
 def main(argv):
     if argv[:1] == ["--actions"]:
-        for k, (label, _) in ACTIONS.items(): print(f"{k}\t{label}")
+        for k, (label, _) in ACTIONS.items():
+            if not k.startswith("hw-"): print(f"{k}\t{label}")   # the popup's own actions are not choices for Settings
         return
     if len(argv) != 1: sys.exit(__doc__)
     signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # actions are not waited for: let the kernel clean them up
+    pen = is_pen(argv[0])
     with open(argv[0], "rb", buffering=0) as dev:
         while True:
             data = dev.read(EVENT.size)
             if len(data) < EVENT.size: break     # the pad went away
             _, _, etype, code, value = EVENT.unpack(data)
+            if pen:
+                # Only while the strip is open (the pointer is then over the strip, so the click apps also get from
+                # this button lands harmlessly on it). With the strip closed the same click would land in the app under
+                # the pointer and move its focus (e.g. off Brave's address bar), so the strip is opened by an ExpressKey.
+                if etype == EV_KEY and code == BTN_STYLUS and value == 1 and os.path.exists(POPUP_FLAG):
+                    print("pen button: handwriting confirm", flush=True)
+                    run(ACTIONS["hw-pen"][1])
+                continue
             if etype != EV_KEY or value != 1 or not (BTN_0 <= code < BTN_0 + 16): continue
             index = code - BTN_0
-            keys = chosen()
-            action = keys[index] if index < len(keys) else "none"
+            action = action_for(index)
             what = ACTIONS.get(action, ("", None))[1]
             print(f"key {index + 1}: {action}", flush=True)
             if what:

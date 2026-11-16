@@ -34,13 +34,14 @@ background.
 | `Notifs.qml` + `notifications/` | Quickshell **is** the notification daemon (dunst is kept out of Hyprland by a systemd drop-in). Keeps the history and the pop-ups |
 | `osd/` | small volume / brightness indicator, bottom-centre of the main monitor |
 | `picker/Picker.qml` | the shared search-field-plus-list window that the launcher and clipboard history are built on |
-| `launcher/` | app launcher (`Super + Space`): matches name, then description / keywords, then letters in order |
+| `launcher/` | app launcher (`Super + Space`): matches name, then description / keywords, then letters in order. IPC: `toggle`, `search <text>` (opens it), `setQuery <text>` (only if open), `activate` (the selected result). It publishes `ShellState.launcherSearchRect` and honours `ShellState.launcherKeepOpen` for the handwriting strip |
 | `apps/` | the app menu (`Super + A`): every app as an icon, with a search |
 | `clipboard/` | clipboard history (`Super + V`) from `cliphist`, fed by `wl-paste --watch` in `autostart.lua` |
 | `wallpaper/` | the wallpaper on every monitor (see [features](features.md#wallpapers)) |
 | `Brightness.qml` + `brightness/` | brightness of the focused screen |
 | `panel/` | the control center (`Super + D`) |
 | `settings/` | the Settings window (`Super + I`) |
+| `Handwriting.qml` + `handwriting/` | the handwriting popup (`Super + Shift + W`): ink canvas, link to the `hw-ocr` daemon, delivery of the text |
 | `power/` | the power menu (`Super + X`) |
 | `bluetooth/`, `Pairing.qml` | the pairing prompt and its state |
 | `Modes.qml` | Do Not Disturb, night light, keep awake |

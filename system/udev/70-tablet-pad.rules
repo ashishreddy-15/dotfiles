@@ -3,3 +3,6 @@
 #             every keyboard too)
 #   systemd   start the user service tablet-keys@<event node> while the pad is there; it stops when the pad goes away
 SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Wacom*Pad", TAG+="uaccess", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="tablet-keys@$kernel.service"
+
+# The pen of the same tablet: tablet-keys watches its lower side button (it only reads, it never grabs the pen).
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Wacom*Pen", TAG+="uaccess", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="tablet-keys@$kernel.service"

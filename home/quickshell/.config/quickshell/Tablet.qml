@@ -133,29 +133,50 @@ Singleton {
         const m = screen === "current" ? Hyprland.focusedMonitor : monitorFor(screen)
         return m ? m.width / m.height : areaWidth / areaHeight
     }
+    // While the handwriting strip is open the whole pad covers the strip: { screen, x, y, w, h } in that screen's logical
+    // pixels, or null. Hyprland 0.57 keys used: output + region_position / region_size (the mapped rectangle of the screen,
+    // absolute_region_position = false: relative to the screen) + active_area_size / active_area_position (the pad trimmed to
+    // the rectangle's shape, so writing is not stretched). Not used in mouse mode (the pen then moves the pointer relatively).
+    property var mapRect: null
+    readonly property bool mapped: mapRect !== null
+    function mapToRect(screenName, x, y, w, h) {
+        if (w <= 0 || h <= 0) return
+        mapRect = { screen: screenName, x: x, y: y, w: w, h: h }
+        apply()
+    }
+    function restore() {
+        if (mapRect === null) return
+        mapRect = null
+        apply()
+    }
+
     function apply() {
         if (!present) return
         const turned = orientation === 90 || orientation === 270
         // The tablet as you hold it: turned 90 degrees, its long side runs up and down.
         const W = turned ? areaHeight : areaWidth, H = turned ? areaWidth : areaHeight
+        const rect = mode === "mouse" ? null : mapRect
         let w = W, h = H
-        if (keepRatio) {
-            const r = targetRatio()
+        if (rect || keepRatio) {
+            const r = rect ? rect.w / rect.h : targetRatio()
             if (W / H > r) w = H * r; else h = W / r
         }
         // Hyprland measures the active area on the tablet itself (not turned).
         const aw = turned ? h : w, ah = turned ? w : h
         const ax = ((turned ? H : W) - aw) / 2, ay = ((turned ? W : H) - ah) / 2
-        const output = screen === "current" ? "current" : screen === "all" ? "" : screen
+        const output = rect ? rect.screen : screen === "current" ? "current" : screen === "all" ? "" : screen
+        // Always send the region too (zero size = none), so leaving the strip really restores the whole screen.
+        const region = rect
+            ? ', region_position = { ' + Math.round(rect.x) + ', ' + Math.round(rect.y) + ' }, region_size = { ' + Math.round(rect.w) + ', ' + Math.round(rect.h) + ' }'
+            : ', region_position = { 0, 0 }, region_size = { 0, 0 }'
         const lua = tablets.map(n => 'hl.device({ name = "' + n + '", output = "' + output + '", transform = ' + (orientation / 90) +
             ', relative_input = ' + (mode === "mouse") +
             ', active_area_size = { ' + aw.toFixed(1) + ', ' + ah.toFixed(1) + ' }' +
-            ', active_area_position = { ' + ax.toFixed(1) + ', ' + ay.toFixed(1) + ' } })').join("; ")
+            ', active_area_position = { ' + ax.toFixed(1) + ', ' + ay.toFixed(1) + ' }' + region +
+            ', absolute_region_position = false })').join("; ")
         lastApplied = lua
-        applier.command = ["hyprctl", "eval", lua]
-        applier.running = true
+        Quickshell.execDetached(["hyprctl", "eval", lua])     // detached: two quick calls (map, restore) never drop one
     }
-    Process { id: applier }
 
     // What was applied last, to check: `qs ipc call tablet status`.
     property string lastApplied: ""

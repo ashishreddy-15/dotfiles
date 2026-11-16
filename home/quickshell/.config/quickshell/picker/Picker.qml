@@ -28,6 +28,8 @@ Scope {
     id: root
 
     property bool open: false
+    // While true, focus leaving the picker does not close it (the handwriting strip docked under the launcher).
+    property bool keepOpen: false
     property string query: ""
     property var items: []
     property int selected: 0
@@ -102,9 +104,9 @@ Scope {
 
         // Close when clicking anywhere else.
         HyprlandFocusGrab {
-            active: root.open
+            active: root.open && !root.keepOpen
             windows: [win]
-            onCleared: root.open = false
+            onCleared: if (!root.keepOpen) root.open = false
         }
 
         Card {

@@ -161,4 +161,27 @@ Page {
             MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ink.clear() }
         }
     }
+
+    // ---- handwriting input (Super + Shift + W): see handwriting/HandwritingPopup.qml, Handwriting.qml ----
+    GroupLabel { text: "Handwriting input" }
+    SettingRow {
+        title: "Enter does"
+        description: "Type: into the window you were in. Copy: to the clipboard. Launcher: search the apps for it. Tab in the popup changes it."
+        Segmented { options: Handwriting.deliverModes; value: Handwriting.deliver; onPicked: v => Handwriting.set("deliver", v) }
+    }
+    SettingRow {
+        title: "Keep what I write"
+        description: "Saves each confirmed line (picture, strokes, final text) in ~/handwriting/usage, on this computer only, to train the model on your hand."
+        Switch { checked: Handwriting.logging; onToggled: Handwriting.set("logging", !Handwriting.logging) }
+    }
+    SettingRow {
+        title: "Continuous writing"
+        description: "Each pause in writing enters the line straight away and clears the ink, so you can keep going. In Type mode the strip does not take the keyboard from the window you write for. Undo with no ink takes the last line back. The strip's Continuous button switches it for one session."
+        Switch { checked: Handwriting.continuousDefault; onToggled: Handwriting.set("continuousDefault", !Handwriting.continuousDefault) }
+    }
+    SettingRow {
+        title: "A continuous line ends with"
+        description: "Space keeps typing on one line. Newline presses Return after each line, so it is off by default (Return can run a command in a terminal)."
+        Segmented { options: Handwriting.lineEnds; value: Handwriting.lineEnd; onPicked: v => Handwriting.set("lineEnd", v) }
+    }
 }

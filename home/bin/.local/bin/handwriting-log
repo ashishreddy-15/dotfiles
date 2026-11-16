@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""handwriting-log: keep one confirmed line of handwriting, to retrain the recognition model later.
+
+    handwriting-log <ink.png> <strokes.json> <final text>
+
+Called by the shell's handwriting popup (quickshell/Handwriting.qml) when you confirm, if logging is on
+(Settings > Tablet > Handwriting). Everything stays on this machine, in ~/handwriting/usage/ (or $HW_USAGE_DIR):
+
+    <id>.png      the picture that was read
+    <id>.json     {version, id, label, canvas:{w,h}, strokes}, the same format as ~/handwriting/data/*.json
+    labels.tsv    one row per sample: "<id>.png<TAB>text"
+
+id = first 8 hex digits of the sha1 of the text, a dash and a timestamp, so the same text twice never collides.
+The label is the FINAL text: what you typed over the reading, if you corrected it.
+"""
+import hashlib, json, os, shutil, sys
+from datetime import datetime
+
+def main(argv):
+    if len(argv) != 3: sys.exit(__doc__)
+    png, strokes_file, text = argv
+    text = " ".join(text.split())                       # one line, no tabs or newlines in the labels file
+    if not text: return
+    out = os.environ.get("HW_USAGE_DIR") or os.path.expanduser("~/handwriting/usage")
+    os.makedirs(out, exist_ok=True)
+    with open(strokes_file) as f: ink = json.load(f)
+    sid = hashlib.sha1(text.encode()).hexdigest()[:8] + "-" + datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3]
+    shutil.copyfile(png, os.path.join(out, sid + ".png"))
+    sample = {"version": 1, "id": sid, "label": text, "canvas": ink["canvas"], "strokes": ink["strokes"]}
+    with open(os.path.join(out, sid + ".json"), "w") as f: json.dump(sample, f, separators=(",", ":"))
+    with open(os.path.join(out, "labels.tsv"), "a") as f: f.write(f"{sid}.png\t{text}\n")
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

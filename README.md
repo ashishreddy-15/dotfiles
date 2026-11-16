@@ -37,6 +37,8 @@ what is already done.
 | `Super + I` | Settings (`Super + Shift + A`: on Appearance) |
 | `Super + N` | notification centre (also: the bell in the bar) |
 | `Super + V` | clipboard history |
+| `Caps Lock` (laptop: Copilot key) | handwriting strip: press, write with the pen, press again to type it in (see [features](docs/features.md#handwriting-input)) |
+| `Super + Shift + W` | open / close the handwriting strip |
 | `Super + X` | power menu (lock, log out, suspend, reboot, shut down) |
 | `Super + Escape` | lock |
 | `Super + Q` | close window |

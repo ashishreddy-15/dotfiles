@@ -112,6 +112,15 @@ quiet tiles, the control center's structure.
 - [x] ExpressKeys confirmed working in Xournal++ (udev rule installed)
 - [x] Handwriting app: Xournal++ (packages/desktop.txt)
 - [x] Xournal++ installed; pen and pressure work
+- [x] Handwriting input popup (`Super + Shift + W`), built and tested with a fake daemon
+- [x] Try the handwriting popup with the real pen and the hw-ocr daemon
+- [x] Handwriting strip: opens at the pointer or under the launcher, pad maps onto it, pen button, in-strip
+      ExpressKeys, continuous mode (built; see docs/features.md, Handwriting input)
+- [ ] Install the pen udev rule (`./install.sh services`) and try the pen's lower button
+- [ ] Try the pad mapping on the strip (if the pen lands in the wrong place, the region units in Tablet.qml are off)
+- [ ] Try docking under the launcher, and continuous mode typing into a real window
+- [ ] Retrain the model with the round-2 prompts and ~/handwriting/usage/
+- [ ] Maybe: open the strip by itself on text-field focus (input-method-v2 daemon; see features.md)
 - [x] fzf (Ctrl+R / Ctrl+T / Alt+C / **), zoxide (z, zi), bat previews; prompt still ~0.05 ms (zoxide without its
       per-prompt hook)
 - [x] Bash: fast prompt (no programs per prompt, ~0.07 ms), dnf aliases din / dup / drm / dse, git / systemd /

@@ -9,6 +9,7 @@ How each part works day to day. For the keys, see the table in the [README](../R
 - [Screenshots and recording](#screenshots-and-recording)
 - [Touchpad](#touchpad)
 - [Pen tablet](#pen-tablet)
+- [Handwriting input](#handwriting-input)
 - [Login screen](#login-screen)
 - [Bash](#bash)
 - [Neovim](#neovim)
@@ -133,8 +134,106 @@ applied); `hypr/modules/tablet.lua` is the default without the shell.
 **ExpressKeys.** Settings > Tablet sets each of the four keys (Undo, Redo, Pen, Eraser by default: Xournal++'s
 shortcuts). The `tablet-keys` helper (`home/bin`) sends them to the focused window. It runs only while the tablet is
 plugged in: udev starts and stops `tablet-keys@<event>.service` (`system/udev/70-tablet-pad.rules`, installed by
-`./install.sh services`), and that rule gives your session read access to the pad only, not the `input` group. The pen's
-two buttons and pressure curves are set in the app (Xournal++: Edit > Preferences > Input System).
+`./install.sh services`), and that rule gives your session read access to the pad only, not the `input` group. A second
+rule does the same for the pen, so the pen's lower button can open the [handwriting strip](#handwriting-input) (read
+only: the pen keeps working everywhere). While the strip is open, the keys change meaning (see there). The pen's two
+buttons and pressure curves are otherwise set in the app (Xournal++: Edit > Preferences > Input System).
+
+## Handwriting input
+
+A slim strip you write into with the pen; what you write becomes text. Made to be used from the pen alone.
+
+**The handwriting key: Caps Lock.** Tap the field with the pen tip, press **Caps Lock** (left hand; the pen is in the
+right): the strip opens just below where the pointer is (above it if there is no room), next to the field you tapped.
+Write, press **Caps Lock** again: the text is typed into that field and the strip closes. On the laptop keyboard the
+Copilot key does the same. Caps Lock no longer locks capitals (`kb_options = "caps:none"` in `input.lua`; the bind is
+on key code 66 in `binds.lua`, calling `qs ipc call handwriting pen`). Also `Super + Shift + W` (open / close) or an
+ExpressKey set to "Handwriting input". Not the pen's side button: apps get a click from it too (Hyprland cannot stop
+that), and that click would move the focus off the field (e.g. off Brave's address bar).
+With the launcher open, it docks under the launcher's search box instead, and the launcher stays open while you write.
+
+**The pad becomes the strip.** While the strip is open, the whole pad maps onto it (keeping proportions: the full width
+of the pad, a band about 36 mm tall), so you write at a natural size anywhere on the pad, and the pen can tap the strip's
+buttons.
+
+**Closing, in a fixed order** (`guardScript` in `Handwriting.qml`), so neither the focus nor the pointer jumps about:
+focus-follows-mouse and pointer warps are paused (`input:follow_mouse = 0`, `cursor:no_warps = true`; Hyprland's focus
+dispatcher otherwise moves the pointer to the middle of the window), the strip closes, the window you were in when the
+strip opened is focused, the text is typed, the pad goes back to the whole screen, and the two settings are put back
+(always, also if a step fails). What is left is one pointer move at the end, to where the pen really is over the pad;
+none if the pen is lifted. Cancel takes the same path without the typing. (`Tablet.mapToRect()` /
+`Tablet.restore()`: Hyprland's `region_position`, `region_size`, `absolute_region_position = false` plus a trimmed
+`active_area_*`.)
+
+**Flow.** Opening it wakes the recognition daemon (`warm`), so the model loads while you start writing. About 0.9 s after
+the last stroke (`Theme.handwritingPause`) the ink is saved as a picture and read; the text appears in the field under
+the ink ("reading..." while it works). Keep writing and the whole strip is read again, replacing the field, unless you
+have already typed in the field (then your text stays).
+
+**Pen and ExpressKeys.** While the strip is open the four ExpressKeys change meaning, and go back to their usual actions
+when it closes:
+
+| Pen / key | Strip closed | Strip open |
+|---|---|---|
+| Pen lower button | nothing extra (its normal click) | confirm (its click lands on the strip) |
+| ExpressKey 1 | your choice (Undo) | confirm: deliver the text |
+| ExpressKey 2 | your choice (Redo) | submit: deliver the text, then press Enter |
+| ExpressKey 3 | your choice (Pen) | undo the last stroke |
+| ExpressKey 4 | your choice (Eraser) | cancel |
+
+`tablet-keys` knows the strip is open from the file `$XDG_RUNTIME_DIR/hw-popup-open`. The in-strip keys can be changed
+with `"popupKeys": ["hw-confirm", "hw-submit", "hw-undo", "hw-cancel"]` in `~/.local/state/dotfiles/tablet.json` (any
+normal action id works too). Hyprland cannot bind pen buttons, so `tablet-keys` also watches the pen (a second udev
+rule starts it for the pen node). It only reads the pen and never grabs it, so the lower button **also still clicks**
+(usually a right-click) where the pointer is. If the lower button turns out to be the other one on your pen, swap
+`BTN_STYLUS` for `BTN_STYLUS2` in `tablet-keys`.
+
+**Keyboard** (when the strip has focus):
+
+| Key | Does |
+|---|---|
+| `Enter` | confirm (waits for a reading that is under way) |
+| `Shift + Enter` | submit: confirm, then press Enter |
+| `Esc` | cancel |
+| `Ctrl + Z` | undo the last stroke |
+| `Ctrl + Backspace` | clear the ink and the text (also the Clear button) |
+| `Tab` | change where the text goes (also the button) |
+
+Enter is never pressed for you except on submit, so a command written for a terminal is never run by accident.
+
+**Where the text goes** (Settings > Tablet > Handwriting, default Type):
+
+- **Type**: the window that was focused before the strip gets the text (`wtype`, 250 ms after the strip closes). If
+  `wtype` is missing the text is copied and a notification says so.
+- **Copy**: the clipboard only (`wl-copy`).
+- **Launcher**: the text goes into the launcher's search (submit runs the first result).
+
+**Continuous mode** (the Continuous button for this time, or Settings > Tablet > Handwriting for the default; off by
+default; for notes). Each pause sends the line straight away (followed by a space, or a newline, which presses Enter:
+Settings > "Line ends with") and clears the ink; the strip stays open. Undo with no ink removes the last line sent.
+Confirm with nothing pending closes the strip. In Type mode the strip takes no keyboard focus, so the text keeps going
+into your window. Not used in Launcher mode.
+
+**IPC** (`qs ipc call handwriting <fn>`): `toggle`, `open`, `close`, `cancel`, `confirm`, `submit`, `undo`, `pen` (open,
+or confirm if open), `continuous on|off`.
+
+**Keeping what you write** (Settings > Tablet > Handwriting > "Keep what I write", **on by default**). On Enter, the ink
+picture, the strokes and the final text (as you corrected it) are saved in `~/handwriting/usage/`, on this computer
+only, to retrain the model on your hand: `<id>.png`, `<id>.json` (same format as `~/handwriting/data/`) and a
+`labels.tsv` row. Note that this records what you write with the popup, including what you search for in Launcher
+mode. Turn it off in Settings, or delete the folder. The work is done by `home/bin/.local/bin/handwriting-log`.
+
+**Needs the `hw-ocr` daemon** (`home/bin`, a systemd user service; the model lives in `~/handwriting/models`). The popup
+talks to it over `$XDG_RUNTIME_DIR/hw-ocr.sock`: one line in (`warm`, or the absolute path of a PNG), one JSON line out
+(`{"text":"...","ms":N}` or `{"error":"..."}`). If it is not running the popup says so under the field; you can still
+type. The picture follows the training data: black ink on white, cropped with 14 px of margin, 3x (`collect.py`).
+
+**ExpressKey.** `tablet-keys` also has an action "Handwriting input" (`qs ipc call handwriting toggle`): pick it for any
+key in Settings > Tablet > ExpressKeys. The defaults are unchanged.
+
+**Not done: opening by itself.** Opening the strip when you tap any text field (like Windows) needs a Wayland input
+method (`zwp_input_method_v2`), which Hyprland supports but Quickshell does not: a separate small daemon, extra build
+packages, and per-app filtering (kitty asks for input on every focus; Brave and IntelliJ need flags). Left for later.
 
 ## Login screen
 

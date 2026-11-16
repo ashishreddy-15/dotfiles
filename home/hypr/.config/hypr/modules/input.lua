@@ -1,7 +1,7 @@
 hl.config({
     input = {
         kb_layout  = "us",
-        kb_options = "",            -- e.g. "caps:escape" to make Caps Lock an Escape key
+        kb_options = "caps:none",   -- Caps Lock does nothing by itself: it is the handwriting key (binds.lua)
 
         follow_mouse = 1,           -- focus follows the mouse
         sensitivity  = 0,           -- -1.0 .. 1.0
