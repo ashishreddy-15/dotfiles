@@ -146,7 +146,7 @@ A slim strip you write into with the pen; what you write becomes text. Made to b
 **The handwriting key: Caps Lock.** Tap the field with the pen tip, press **Caps Lock** (left hand; the pen is in the
 right): the strip opens just below where the pointer is (above it if there is no room), next to the field you tapped.
 Write, press **Caps Lock** again: the text is typed into that field and the strip closes. On the laptop keyboard the
-Copilot key does the same. Caps Lock no longer locks capitals (`kb_options = "caps:none"` in `input.lua`; the bind is
+Copilot key does the same. While a pen tablet is connected Caps Lock does not lock capitals (the shell sets `caps:none`, see `Tablet.qml`; with no tablet it is a normal Caps Lock again; the bind is
 on key code 66 in `binds.lua`, calling `qs ipc call handwriting pen`). Also `Super + Shift + W` (open / close) or an
 ExpressKey set to "Handwriting input". Not the pen's side button: apps get a click from it too (Hyprland cannot stop
 that), and that click would move the focus off the field (e.g. off Brave's address bar).

@@ -178,6 +178,13 @@ Singleton {
         Quickshell.execDetached(["hyprctl", "eval", lua])     // detached: two quick calls (map, restore) never drop one
     }
 
+    // Caps Lock is the handwriting key while a pen tablet is connected (it then does not lock capitals); with no tablet
+    // it is an ordinary Caps Lock again. The bind in binds.lua is non_consuming, so the key still reaches the system.
+    function applyCapsKey() {
+        Quickshell.execDetached(["hyprctl", "eval", 'hl.config({ input = { kb_options = "' + (present ? "caps:none" : "") + '" } })'])
+    }
+    onPresentChanged: applyCapsKey()
+
     // What was applied last, to check: `qs ipc call tablet status`.
     property string lastApplied: ""
     IpcHandler {
@@ -190,10 +197,11 @@ Singleton {
     Connections {
         target: Hyprland
         function onFocusedMonitorChanged() { if (root.screen === "current" && root.keepRatio) root.apply() }
-        function onRawEvent(event) { if (event.name === "configreloaded") root.apply() }
+        function onRawEvent(event) { if (event.name === "configreloaded") { root.apply(); root.applyCapsKey() } }
     }
 
     Component.onCompleted: {
+        applyCapsKey()
         try {
             const d = JSON.parse(saved.text())
             if (d.screen) screen = d.screen

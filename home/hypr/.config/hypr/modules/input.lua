@@ -1,7 +1,7 @@
 hl.config({
     input = {
         kb_layout  = "us",
-        kb_options = "caps:none",   -- Caps Lock does nothing by itself: it is the handwriting key (binds.lua)
+        kb_options = "",            -- the shell adds caps:none while a pen tablet is connected (Tablet.qml): Caps Lock is then the handwriting key
 
         follow_mouse = 1,           -- focus follows the mouse
         sensitivity  = 0,           -- -1.0 .. 1.0
