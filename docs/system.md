@@ -91,3 +91,31 @@ prints one line per group with its state (`✓ off  printing  cups.socket cups.p
 changes. `./install.sh -n services` shows the real state without needing root.
 
 To undo one: `sudo systemctl unmask <unit> && sudo systemctl enable --now <unit>`.
+
+## Handwriting recognition service
+
+`hw-ocr` turns a PNG of one handwritten line (dark ink on white, any size) into text, locally on the CPU, with the
+fine-tuned TrOCR model in `~/handwriting/models/trocr-small-ft` (the training code and data live in `~/handwriting`).
+
+It is **socket-activated**: `hw-ocr.socket` listens on `$XDG_RUNTIME_DIR/hw-ocr.sock` and costs nothing. The first
+connection starts `hw-ocr.service`, which loads the model (about 3 s, then ~700 MB of RAM) and exits after 10 idle
+minutes; the next connection starts it again. `./install.sh link` puts the files in place and `./install.sh services`
+enables the socket (it only needs your user, but that step also runs the root part).
+
+| Piece | Where |
+|---|---|
+| client | `home/bin/.local/bin/hw-ocr`: `hw-ocr line.png` prints the text, `hw-ocr warm` preloads the model |
+| daemon, clean-up, tests | `home/bin/.local/share/hw-ocr/` (`hw_ocrd.py`, `hw_post.py`, `hw_chunk.py`, `test_post.py`) |
+| units | `home/systemd/.config/systemd/user/hw-ocr.{socket,service}` |
+
+Protocol (one request line, one JSON reply line, requests served one at a time): `warm` gives `{"ok":true}`; an
+absolute path to a PNG gives `{"text":"...","ms":123}` or `{"error":"..."}`.
+
+- Output is cleaned conservatively (`hw_post.py`): trailing ` .` removed, `localhost : 8080` and `https : //` joined.
+  Run the tests with `python3 home/bin/.local/share/hw-ocr/test_post.py`.
+- Lines wider than 9:1 are split at wide blank gaps and recognised in pieces (the model squashes every image to
+  384x384, so long lines lose detail): on 16 synthetic 12-15:1 lines this cut the character error from 11% to 2.6%.
+- Settings (`systemctl --user edit hw-ocr`, then `[Service] Environment=...`): `HW_MODEL`, `HW_PYTHON` (default
+  `~/handwriting/venv/bin/python`), `HW_THREADS` (8), `HW_IDLE` (600 s), `HW_CHUNK=0` (no splitting).
+- Logs: `journalctl --user -u hw-ocr`. Typical speed once loaded: 0.25 to 0.4 s per line; the first request after
+  idle takes about 3 s.

@@ -1,0 +1,11 @@
+# Handwriting recognition: nothing runs until something connects (the popup, or `hw-ocr`).
+#   systemctl --user status hw-ocr.socket
+[Unit]
+Description=Handwriting recognition socket
+
+[Socket]
+ListenStream=%t/hw-ocr.sock
+SocketMode=0600
+
+[Install]
+WantedBy=sockets.target

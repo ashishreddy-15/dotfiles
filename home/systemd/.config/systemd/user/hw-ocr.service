@@ -1,0 +1,14 @@
+# Handwriting recognition daemon (TrOCR, CPU). Started by hw-ocr.socket on the first connection, exits after 10 idle
+# minutes to give back ~800 MB. Logs: journalctl --user -u hw-ocr
+# Override with `systemctl --user edit hw-ocr`: HW_MODEL, HW_PYTHON, HW_THREADS, HW_IDLE (seconds).
+[Unit]
+Description=Handwriting recognition (TrOCR)
+Requires=hw-ocr.socket
+After=hw-ocr.socket
+
+[Service]
+Type=simple
+Environment=PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+ExecStart=/bin/sh -c 'exec "${HW_PYTHON:-$HOME/handwriting/venv/bin/python}" "$HOME/.local/share/hw-ocr/hw_ocrd.py"'
+Nice=5
+MemoryMax=2G

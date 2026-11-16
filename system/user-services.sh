@@ -20,6 +20,10 @@ svc_group on  "idle: lock, screen off, sleep"  hypridle.service
 svc_group on  "password prompts for apps"      hyprpolkitagent.service
 svc_group on  "Bluetooth pairing prompts"      bt-agent.service
 svc_group off "Bluetooth file transfer"        obex.service
+# Socket-activated: nothing runs until the handwriting popup (or `hw-ocr`) connects; the daemon exits when idle.
+SVC_NOW=1
+svc_group on  "handwriting recognition (on demand)"  hw-ocr.socket
+SVC_NOW=0
 svc_missing_note
 
 # Tablet ExpressKeys: udev starts tablet-keys@<event node> when a pad is plugged in (system/udev/70-tablet-pad.rules).
