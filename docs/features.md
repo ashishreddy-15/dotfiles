@@ -273,6 +273,7 @@ zoxide are loaded from files, never with `eval "$(...)"`, so they start no progr
 | `Alt + C` | go into a folder |
 | `**` + Tab | complete anything fuzzily |
 | `z <part of a name>` / `zi` | jump to a folder you use often (zoxide) / pick one with fzf |
+| `fastfetch` | system info, including how many days ago this install was made (config: `home/fastfetch`) |
 | Up / Down | search the history for what you have typed |
 
 ## Neovim

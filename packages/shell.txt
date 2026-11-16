@@ -2,3 +2,4 @@
 fzf                        # fuzzy finder: Ctrl+R history, Ctrl+T files, Alt+C folders, ** + Tab
 zoxide                     # z <part of a folder name> jumps to it; zi picks with fzf
 bat                        # file previews with syntax colours (for Ctrl+T)
+fastfetch                  # system info: run `fastfetch` (config in home/fastfetch)
