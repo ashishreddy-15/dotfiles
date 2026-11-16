@@ -6,7 +6,7 @@ Protocol (newline-delimited, one request per connection line, handled serially):
   /abs/path.png     -> {"text":"...","ms":N}  or {"error":"..."}
 Started by systemd socket activation (LISTEN_FDS) or, when run by hand, binds $XDG_RUNTIME_DIR/hw-ocr.sock itself.
 Exits after HW_IDLE seconds (default 600) without a request; the model is loaded lazily.
-Env: HW_MODEL, HW_THREADS (default 8), HW_IDLE, HW_SOCK, HW_CHUNK (0 disables splitting of very wide lines).
+Env: HW_MODEL, HW_THREADS (default 8), HW_IDLE, HW_SOCK, HW_CHUNK (0 disables splitting of very wide lines), HW_BEAMS (beam search width, default 3; 1 = greedy).
 """
 import json, os, socket, sys, time
 
@@ -18,6 +18,7 @@ THREADS = int(os.environ.get("HW_THREADS", "8"))
 IDLE = float(os.environ.get("HW_IDLE", "600"))
 SOCK = os.environ.get("HW_SOCK") or os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "hw-ocr.sock")
 CHUNK = os.environ.get("HW_CHUNK", "1") != "0"
+BEAMS = int(os.environ.get("HW_BEAMS", "3"))    # 3 beams: +2 lines right of 104, none worse, ~0.05 s slower than greedy
 MAX_BYTES = 32 * 1024 * 1024
 
 _m = {}
@@ -55,7 +56,7 @@ def _recognise(imgs):
     torch, proc, model = _m["torch"], _m["proc"], _m["model"]
     px = proc(images=imgs, return_tensors="pt").pixel_values
     with torch.inference_mode():
-        out = model.generate(px, max_new_tokens=64, num_beams=1)
+        out = model.generate(px, max_new_tokens=64, num_beams=BEAMS)
     return proc.batch_decode(out, skip_special_tokens=True)
 
 

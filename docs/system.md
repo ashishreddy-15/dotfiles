@@ -116,6 +116,6 @@ absolute path to a PNG gives `{"text":"...","ms":123}` or `{"error":"..."}`.
 - Lines wider than 9:1 are split at wide blank gaps and recognised in pieces (the model squashes every image to
   384x384, so long lines lose detail): on 16 synthetic 12-15:1 lines this cut the character error from 11% to 2.6%.
 - Settings (`systemctl --user edit hw-ocr`, then `[Service] Environment=...`): `HW_MODEL`, `HW_PYTHON` (default
-  `~/handwriting/venv/bin/python`), `HW_THREADS` (8), `HW_IDLE` (600 s), `HW_CHUNK=0` (no splitting).
+  `~/handwriting/venv/bin/python`), `HW_THREADS` (8), `HW_IDLE` (600 s), `HW_CHUNK=0` (no splitting), `HW_BEAMS` (3; 1 = fastest).
 - Logs: `journalctl --user -u hw-ocr`. Typical speed once loaded: 0.25 to 0.4 s per line; the first request after
   idle takes about 3 s.

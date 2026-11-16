@@ -21,10 +21,17 @@ Scope {
 
     readonly property bool open: Handwriting.open
 
+    // The strip is for the pen: with no tablet connected the keys that open it do nothing (and it closes if the tablet goes).
+    function openIfTablet() { if (Tablet.present) Handwriting.open = true }
+    Connections {
+        target: Tablet
+        function onPresentChanged() { if (!Tablet.present && Handwriting.open) Handwriting.cancel() }
+    }
+
     IpcHandler {
         target: "handwriting"
-        function toggle(): void { if (Handwriting.open) Handwriting.cancel(); else Handwriting.open = true }
-        function open(): void   { Handwriting.open = true }
+        function toggle(): void { if (Handwriting.open) Handwriting.cancel(); else root.openIfTablet() }
+        function open(): void   { root.openIfTablet() }
         function close(): void  { Handwriting.cancel() }
         function cancel(): void { Handwriting.cancel() }
         // Steps of the closing order (Handwriting.guardScript calls these).
@@ -37,7 +44,7 @@ Scope {
         // Undo the last stroke; in continuous mode with no ink, take the last delivered line back.
         function undo(): void    { if (root.open) root.undoAction() }
         // The pen's button: open, or confirm when open.
-        function pen(): void     { if (root.open) root.request(false); else Handwriting.open = true }        // continuous("on" | "off" | anything else = toggle)
+        function pen(): void     { if (root.open) root.request(false); else root.openIfTablet() }        // continuous("on" | "off" | anything else = toggle)
         function continuous(on: string): void {
             const v = on.toLowerCase()
             root.setContinuous(v === "on" || v === "true" || v === "1" ? true : v === "off" || v === "false" || v === "0" ? false : !Handwriting.continuous)

@@ -135,7 +135,7 @@ Singleton {
     readonly property real idleDimLevel:   0.10   // every screen dims to this when idle (hypr/hypridle.conf)
     readonly property int  handwritingPause: 900  // ms without a new pen stroke before the handwriting popup reads the ink
     readonly property int  handwritingInkWidth:  900  // the handwriting strip: ink area (logical px; 6 px per mm on the 152 mm pad)
-    readonly property int  handwritingInkHeight: 150
+    readonly property int  handwritingInkHeight: 300
     readonly property int  handwritingGap:       16   // gap between the pen's last position and the strip
     readonly property int  handwritingButton:    40   // pen-tappable buttons are at least 36 px tall
 

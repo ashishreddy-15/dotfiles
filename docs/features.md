@@ -150,10 +150,12 @@ Copilot key does the same. Caps Lock no longer locks capitals (`kb_options = "ca
 on key code 66 in `binds.lua`, calling `qs ipc call handwriting pen`). Also `Super + Shift + W` (open / close) or an
 ExpressKey set to "Handwriting input". Not the pen's side button: apps get a click from it too (Hyprland cannot stop
 that), and that click would move the focus off the field (e.g. off Brave's address bar).
+The strip only opens while a pen tablet is connected (the keys do nothing otherwise), and it closes if the tablet is
+unplugged.
 With the launcher open, it docks under the launcher's search box instead, and the launcher stays open while you write.
 
 **The pad becomes the strip.** While the strip is open, the whole pad maps onto it (keeping proportions: the full width
-of the pad, a band about 36 mm tall), so you write at a natural size anywhere on the pad, and the pen can tap the strip's
+of the pad, a band about 61 mm of its 95 mm height), so you write at a natural size anywhere on the pad, and the pen can tap the strip's
 buttons.
 
 **Closing, in a fixed order** (`guardScript` in `Handwriting.qml`), so neither the focus nor the pointer jumps about:
