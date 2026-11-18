@@ -10,30 +10,88 @@
   },
   "categories": [
     {
-      "title": "Dev & Code",
+      "title": "Dev",
       "links": [
-        { "name": "GitHub", "url": "https://github.com", "key": "g" },
-        { "name": "Codeberg", "url": "https://codeberg.org", "key": "c" },
-        { "name": "DevDocs", "url": "https://devdocs.io", "key": "d" },
-        { "name": "Localhost:8080", "url": "http://localhost:8080", "key": "l", "ping": true }
+        {
+          "name": "GitHub",
+          "url": "https://github.com/",
+          "key": "g"
+        },
+        {
+          "name": "GitLab",
+          "url": "https://gitlab.com/",
+          "key": "e"
+        }
       ]
     },
     {
-      "title": "Productivity",
+      "title": "Comms",
       "links": [
-        { "name": "Gmail", "url": "https://mail.google.com", "key": "m" },
-        { "name": "Calendar", "url": "https://calendar.google.com", "key": "a" },
-        { "name": "Drive", "url": "https://drive.google.com", "key": "v" },
-        { "name": "Linear", "url": "https://linear.app", "key": "n" }
+        {
+          "name": "Gmail",
+          "url": "https://mail.google.com/",
+          "key": "m"
+        },
+        {
+          "name": "WhatsApp",
+          "url": "https://web.whatsapp.com/",
+          "key": "w"
+        }
       ]
     },
     {
-      "title": "Media & Reading",
+      "title": "AI",
       "links": [
-        { "name": "YouTube", "url": "https://youtube.com", "key": "y" },
-        { "name": "Hacker News", "url": "https://news.ycombinator.com", "key": "h" },
-        { "name": "Lobsters", "url": "https://lobste.rs", "key": "o" },
-        { "name": "Arch Wiki", "url": "https://wiki.archlinux.org", "key": "w" }
+        {
+          "name": "ChatGPT",
+          "url": "https://chatgpt.com/",
+          "key": "p"
+        },
+        {
+          "name": "Claude",
+          "url": "https://claude.ai/",
+          "key": "c"
+        },
+        {
+          "name": "Gemini",
+          "url": "https://gemini.google.com/",
+          "key": "x"
+        }
+      ]
+    },
+    {
+      "title": "Watch",
+      "links": [
+        {
+          "name": "YouTube",
+          "url": "https://www.youtube.com/",
+          "key": "y"
+        },
+        {
+          "name": "YouTube Music",
+          "url": "https://music.youtube.com/",
+          "key": "u"
+        },
+        {
+          "name": "Hotstar",
+          "url": "https://hotstar.com/",
+          "key": "s"
+        },
+        {
+          "name": "Prime Video",
+          "url": "https://www.primevideo.com/",
+          "key": "r"
+        },
+        {
+          "name": "Crunchyroll",
+          "url": "https://www.crunchyroll.com/discover",
+          "key": "a"
+        },
+        {
+          "name": "Netflix",
+          "url": "https://netflix.com",
+          "key": "n"
+        }
       ]
     }
   ]
