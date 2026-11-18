@@ -1,0 +1,40 @@
+{
+  "search": {
+    "default": "https://duckduckgo.com/?q=",
+    "bangs": {
+      "gh": "https://github.com/search?q=",
+      "aw": "https://wiki.archlinux.org/index.php?search=",
+      "yt": "https://www.youtube.com/results?search_query=",
+      "dd": "https://devdocs.io/#q="
+    }
+  },
+  "categories": [
+    {
+      "title": "Dev & Code",
+      "links": [
+        { "name": "GitHub", "url": "https://github.com", "key": "g" },
+        { "name": "Codeberg", "url": "https://codeberg.org", "key": "c" },
+        { "name": "DevDocs", "url": "https://devdocs.io", "key": "d" },
+        { "name": "Localhost:8080", "url": "http://localhost:8080", "key": "l", "ping": true }
+      ]
+    },
+    {
+      "title": "Productivity",
+      "links": [
+        { "name": "Gmail", "url": "https://mail.google.com", "key": "m" },
+        { "name": "Calendar", "url": "https://calendar.google.com", "key": "a" },
+        { "name": "Drive", "url": "https://drive.google.com", "key": "v" },
+        { "name": "Linear", "url": "https://linear.app", "key": "n" }
+      ]
+    },
+    {
+      "title": "Media & Reading",
+      "links": [
+        { "name": "YouTube", "url": "https://youtube.com", "key": "y" },
+        { "name": "Hacker News", "url": "https://news.ycombinator.com", "key": "h" },
+        { "name": "Lobsters", "url": "https://lobste.rs", "key": "o" },
+        { "name": "Arch Wiki", "url": "https://wiki.archlinux.org", "key": "w" }
+      ]
+    }
+  ]
+}
