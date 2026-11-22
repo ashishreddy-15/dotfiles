@@ -2,6 +2,11 @@
 # One package per line; '#' starts a comment. Already-installed ones are skipped.
 kitty                      # terminal
 nautilus                   # file manager
+gvfs-mtp                   # Android phones (MTP) in Nautilus: plug in, set USB to File transfer
+gvfs-gphoto2               # phones/cameras in PTP (photo transfer) mode
+gvfs-afc                   # iPhones/iPads in Nautilus
+gvfs-smb                   # Windows/Samba network shares in Nautilus
+libmtp                     # MTP library and udev rules (device access for your user)
 adw-gtk3-theme             # GTK3 apps in the libadwaita look (light and dark)
 grim                       # screenshot
 slurp                      # region select (for screenshots)

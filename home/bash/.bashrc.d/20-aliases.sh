@@ -17,6 +17,7 @@ alias ll='ls -lh'
 alias la='ls -lAh'
 alias lt='ls -lht'                      # newest first
 alias cp='cp -i'                        # ask before overwriting
+alias cpp='rsync -ah --info=progress2'
 alias mv='mv -i'
 alias rm='rm -I'                        # ask once before deleting more than three files, or folders
 alias df='df -h'
