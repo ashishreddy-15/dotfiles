@@ -58,6 +58,13 @@ Page {
         }
     }
 
+    SettingRow {
+        visible: root.hasBattery
+        title: "Percentage on the bar"
+        description: "Off: the bar shows only the icon, and the number when the charge is low or charging."
+        Switch { checked: Modes.batteryPercent; onToggled: Modes.toggleBatteryPercent() }
+    }
+
     GroupLabel { visible: root.hasBattery; text: "Battery" }
 
     component Fact: SettingRow {

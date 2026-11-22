@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// The shell's on/off modes: Do Not Disturb, night light, keep awake.
+// The shell's on/off modes: Do Not Disturb, night light, keep awake (and the bar's battery percentage).
 //   Do Not Disturb  pop-ups stay hidden (critical ones still show); everything still goes to the history
 //   night light     warms the screen colour with hyprsunset (2500 K warm .. 6500 K neutral)
 //   keep awake      stops the screen from locking or sleeping (an idle inhibitor held by the bar, see Bar.qml)
@@ -18,12 +18,14 @@ Singleton {
     property bool nightLight: false
     property int kelvin: 4000
     property bool keepAwake: false
+    property bool batteryPercent: true      // always show the battery percentage on the bar (else only when low or charging)
 
     readonly property int kelvinMin: 2500
     readonly property int kelvinMax: 6500
 
     function toggleDnd()   { dnd = !dnd; save() }
     function toggleAwake() { keepAwake = !keepAwake }
+    function toggleBatteryPercent() { batteryPercent = !batteryPercent; save() }
     function toggleNight() { nightLight = !nightLight; save() }
     function setWarmth(k) {
         kelvin = Math.max(kelvinMin, Math.min(kelvinMax, Math.round(k / 100) * 100))
@@ -54,7 +56,7 @@ Singleton {
         command: ["sh", "-c", 'mkdir -p "$(dirname "$1")" && printf "%s" "$2" > "$1"', "sh", root.stateFile, json]
     }
     function save() {
-        writer.json = JSON.stringify({ dnd: dnd, nightLight: nightLight, kelvin: kelvin })
+        writer.json = JSON.stringify({ dnd: dnd, nightLight: nightLight, kelvin: kelvin, batteryPercent: batteryPercent })
         writer.running = true
     }
 
@@ -64,6 +66,7 @@ Singleton {
             dnd = !!d.dnd
             kelvin = Number(d.kelvin) || 4000
             nightLight = !!d.nightLight
+            if (d.batteryPercent !== undefined) batteryPercent = !!d.batteryPercent
         } catch (e) { /* first run: defaults */ }
     }
 

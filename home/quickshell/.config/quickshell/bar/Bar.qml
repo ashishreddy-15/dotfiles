@@ -9,7 +9,7 @@ import qs
 //
 //   [1] 2  3   App name                              (status when it matters)   Sat 14  12:40   bell
 //
-// "Quiet" rule: the right side only shows things that need attention.
+// "Quiet" rule: the right side only shows things that need attention (the battery icon is always there).
 // Super+B hides/shows the bar.
 Variants {
     model: Quickshell.screens
@@ -74,7 +74,7 @@ Variants {
                         Network { visible: bar.full && attention }
                         BluetoothStatus { visible: bar.full && attention }
                         Volume { visible: bar.full && attention }
-                        Battery { visible: bar.full && attention }
+                        Battery { visible: bar.full && present }
                         Clock {}
                     }
 
