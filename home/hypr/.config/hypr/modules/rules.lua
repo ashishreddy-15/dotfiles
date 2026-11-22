@@ -14,10 +14,10 @@ hl.window_rule({
     no_focus = true,
 })
 
--- Small utility windows float instead of tiling.
+-- Small utility windows float instead of tiling (also the GTK file dialogs, which come from the portal).
 hl.window_rule({
     name  = "float-utilities",
-    match = { class = "^(org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor)$" },
+    match = { class = "^(org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|xdg-desktop-portal-gtk)$" },
     float = true,
 })
 
@@ -36,4 +36,12 @@ hl.layer_rule({
     match = { namespace = "^quickshell-(launcher|apps|clipboard|settings|pairing|power|center|panel|osd|notifications|traymenu|handwriting)$" },
     blur  = true,
     ignore_alpha = 0.5,
+})
+
+-- Settings (a Quickshell window titled "Settings"): floats, centred, at its own size.
+hl.window_rule({
+    name  = "settings-window",
+    match = { class = "^org.quickshell$", title = "^Settings$" },
+    float = true,
+    center = true,
 })

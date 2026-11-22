@@ -145,10 +145,9 @@ Item {
                 font.pixelSize: Theme.fontBase
                 clip: true
                 onTextChanged: fonts.currentIndex = 0
-                // Keyboard: Up / Down move through the list, Enter chooses the marked family, Esc closes Settings.
+                // Keyboard: Up / Down move through the list, Enter chooses the marked family.
                 Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Escape) ShellState.settingsOpen = false
-                    else if (event.key === Qt.Key_Down) fonts.currentIndex = Math.min(fonts.count - 1, fonts.currentIndex + 1)
+                    if (event.key === Qt.Key_Down) fonts.currentIndex = Math.min(fonts.count - 1, fonts.currentIndex + 1)
                     else if (event.key === Qt.Key_Up) fonts.currentIndex = Math.max(0, fonts.currentIndex - 1)
                     else if (event.key === Qt.Key_PageDown) fonts.currentIndex = Math.min(fonts.count - 1, fonts.currentIndex + 8)
                     else if (event.key === Qt.Key_PageUp) fonts.currentIndex = Math.max(0, fonts.currentIndex - 8)

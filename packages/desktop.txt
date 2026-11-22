@@ -24,6 +24,7 @@ xournalpp                  # handwritten notes and PDF annotation (pen tablet)
 network-manager-applet     # Wi-Fi tray / connection editor
 blueman                    # Bluetooth GUI (blueman-manager), tray stays off
 xdg-desktop-portal-gtk     # file pickers for GTK apps
+zenity                     # folder dialog in Settings > Wallpaper (themed by gtk-4.0/gtk.css)
 qt5-qtwayland              # native Wayland for Qt5 apps
 qt6-qtwayland              # native Wayland for Qt6 apps
 wf-recorder                # screen recording (also used to check UI animations frame by frame)

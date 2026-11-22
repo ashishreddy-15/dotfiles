@@ -3,8 +3,7 @@ import Quickshell
 import qs
 import "../ui"
 
-// Wallpaper: every image found (generated ones, downloaded photos, and anything you put in ~/Pictures/Wallpapers),
-// as thumbnails. Click one to use it. The list and the choice live in wallpaper/Wallpaper.qml (through ShellState).
+// Wallpaper: the folders searched (two built-in ones, and any you add), then every image found in them as thumbnails. Click one to use it. The list and the choice live in wallpaper/Wallpaper.qml (through ShellState).
 Page {
     id: root
 
@@ -12,6 +11,58 @@ Page {
     readonly property int gap: 12
     readonly property real cellWidth: (width - (columns - 1) * gap) / columns
     function baseName(path) { return path.split("/").pop().replace(/\.[^.]+$/, "") }
+    function shortPath(path) { const h = Quickshell.env("HOME"); return path.startsWith(h) ? "~" + path.slice(h.length) : path }
+
+    // The folders searched, subfolders included. Added ones can be removed (hover a row, or Delete); the images stay on disk.
+    Column {
+        width: root.width
+
+        GroupLabel { text: "Folders"; topPadding: 0 }
+        Repeater {
+            model: ShellState.wallpaperBuiltinFolders
+            ListRow {
+                required property string modelData
+                title: root.baseName(modelData)
+                subtitle: root.shortPath(modelData)
+                detail: "built in"
+                clickable: false
+            }
+        }
+        Repeater {
+            model: ShellState.wallpaperFolders
+            ListRow {
+                required property string modelData
+                title: root.baseName(modelData)
+                subtitle: root.shortPath(modelData)
+                actionText: "Remove"
+                clickable: false
+                onAction: ShellState.wallpaperRemoveFolder(modelData)
+            }
+        }
+        Item {
+            width: parent.width
+            height: 44
+            Rectangle {
+                id: addButton
+                anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
+                width: addText.implicitWidth + 24
+                height: 32
+                radius: Theme.radiusRow
+                color: addArea.containsMouse ? Theme.hover : Theme.clear
+                border.width: 1
+                border.color: Theme.border
+                Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                activeFocusOnTab: true
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { ShellState.wallpaperAddFolder(); event.accepted = true }
+                }
+                StyledText { id: addText; anchors.centerIn: parent; text: Theme.glyphPlus + "  Add folder"; color: Theme.text }
+                MouseArea { id: addArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.wallpaperAddFolder() }
+                FocusRing { visible: addButton.activeFocus; anchors.margins: -3 }
+            }
+        }
+        GroupLabel { text: ShellState.wallpaperFiles.length + (ShellState.wallpaperFiles.length === 1 ? " image" : " images") }
+    }
 
     Grid {
         columns: root.columns

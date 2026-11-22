@@ -40,6 +40,11 @@ Singleton {
     property string wallpaperThumbDir: ""
     property bool wallpaperThumbsReady: false
     signal wallpaperChosen(string path)
+    // Folders searched for images, besides the built-in ones (Wallpaper.qml keeps and saves the list).
+    property var wallpaperBuiltinFolders: []
+    property var wallpaperFolders: []
+    signal wallpaperAddFolder()                    // asks with a folder dialog
+    signal wallpaperRemoveFolder(string path)
 
     // Notification centre (notifications/NotificationCenter.qml): the bell in the bar and Super + N toggle it.
     property bool centerOpen: false

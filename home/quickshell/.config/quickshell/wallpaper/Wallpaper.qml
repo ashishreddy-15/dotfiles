@@ -9,15 +9,19 @@ import qs
 //   qs ipc call wallpaper next       cycle
 //   qs ipc call wallpaper set <path> use any image file
 //
-// Images are listed from ~/.local/share/wallpapers (downloaded by ./install.sh wallpapers) and
-// ~/Pictures/Wallpapers (put your own images there). The choice is remembered in
-// ~/.local/state/dotfiles/wallpaper.
+// Images are listed from ~/.local/share/wallpapers (downloaded by ./install.sh wallpapers),
+// ~/Pictures/Wallpapers (put your own images there) and any folder added in Settings > Wallpaper, all searched
+// recursively. The choice is remembered in ~/.local/state/dotfiles/wallpaper, the added folders in
+// ~/.local/state/dotfiles/wallpaper-folders (one path per line).
 Scope {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
     readonly property string stateFile: home + "/.local/state/dotfiles/wallpaper"
 
+    readonly property var builtinFolders: [home + "/.local/share/wallpapers", home + "/Pictures/Wallpapers"]
+    property var folders: []        // folders added in Settings
+    readonly property string foldersFile: home + "/.local/state/dotfiles/wallpaper-folders"
     property var files: []          // every image found, sorted
     property string current: ""     // absolute path of the wallpaper in use
 
@@ -27,6 +31,37 @@ Scope {
         path: root.stateFile
         blockLoading: true
         printErrors: false
+    }
+
+    FileView {
+        id: savedFolders
+        path: root.foldersFile
+        blockLoading: true
+        printErrors: false
+    }
+    Process {
+        id: foldersWriter
+        property string value
+        command: ["sh", "-c", 'mkdir -p "$(dirname "$1")" && printf "%s" "$2" > "$1"', "sh", root.foldersFile, value]
+    }
+    function setFolders(list) {
+        folders = list
+        ShellState.wallpaperFolders = list
+        foldersWriter.value = list.map(f => f + "\n").join("")
+        foldersWriter.running = true
+        rescan()
+    }
+
+    // The folder dialog (zenity, themed through ~/.config/gtk-4.0/gtk.css like the other GTK4 apps). Cancelling prints nothing.
+    Process {
+        id: chooser
+        command: ["zenity", "--file-selection", "--directory", "--title=Add a wallpaper folder", "--filename=" + root.home + "/Pictures/"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const dir = text.trim().replace(/\/+$/, "")
+                if (dir !== "" && !root.builtinFolders.includes(dir) && !root.folders.includes(dir)) root.setFolders(root.folders.concat([dir]))
+            }
+        }
     }
 
     Process {
@@ -51,6 +86,8 @@ Scope {
     Connections {
         target: ShellState
         function onWallpaperChosen(path) { root.set(path) }
+        function onWallpaperAddFolder() { if (!chooser.running) chooser.running = true }
+        function onWallpaperRemoveFolder(path) { root.setFolders(root.folders.filter(f => f !== path)) }
     }
     // The lock screen shows the same wallpaper: hyprlock.conf includes this one-line file (`source = ...`).
     readonly property string lockFile: home + "/.local/state/dotfiles/hyprlock-wallpaper.conf"
@@ -105,11 +142,19 @@ Scope {
     }
 
     // ---- find images ----
+    // Every image under the built-in and added folders, at any depth. The folders are passed as arguments, not put
+    // into the shell text, so any characters in a name are safe. A new scan waits for a running one to finish.
+    property bool rescanPending: false
+    function rescan() {
+        if (scan.running) { rescanPending = true; return }
+        scan.command = ["sh", "-c",
+            'find "$@" -type f \\( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \\) 2>/dev/null | sort -u',
+            "sh"].concat(builtinFolders, folders)
+        scan.running = true
+    }
     Process {
         id: scan
-        command: ["sh", "-c",
-            'find "$HOME/.local/share/wallpapers" "$HOME/Pictures/Wallpapers" -maxdepth 2 -type f ' +
-            '\\( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \\) 2>/dev/null | sort']
+        onExited: if (root.rescanPending) { root.rescanPending = false; root.rescan() }
         stdout: StdioCollector {
             onStreamFinished: {
                 root.files = text.split("\n").filter(l => l !== "")
@@ -122,8 +167,11 @@ Scope {
 
     Component.onCompleted: {
         ShellState.wallpaperThumbDir = thumbDir
+        ShellState.wallpaperBuiltinFolders = builtinFolders
         try { current = saved.text().trim() } catch (e) { current = "" }
-        scan.running = true
+        folders = savedFolders.text().split("\n").filter(l => l !== "")
+        ShellState.wallpaperFolders = folders
+        rescan()
     }
 
     IpcHandler {
@@ -135,7 +183,7 @@ Scope {
     // Look for new images whenever Settings opens (it shows them in Settings > Wallpaper).
     Connections {
         target: ShellState
-        function onSettingsOpenChanged() { if (ShellState.settingsOpen) scan.running = true }
+        function onSettingsOpenChanged() { if (ShellState.settingsOpen) root.rescan() }
     }
 
     // ---- the wallpaper itself ----

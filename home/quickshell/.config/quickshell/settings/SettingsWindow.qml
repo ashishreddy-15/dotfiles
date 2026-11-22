@@ -1,25 +1,25 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs
 import "../ui"
 
-// Settings: Wi-Fi, Bluetooth, sound, display, wallpaper, notifications, power and appearance, in a window of its own,
-// centred on the focused monitor and laid out like a settings app: a sidebar of sections and the settings of the chosen one.
+// Settings: Wi-Fi, Bluetooth, sound, display, wallpaper, notifications, power and appearance, in a window of its own
+// (an ordinary floating window, not a pop-up) laid out like a settings app: a sidebar of sections and the settings of the chosen one.
+// It stays until you close it: with the x at its top right, Super + I, or the compositor's close (Super + Q). Clicking
+// elsewhere or pressing Esc does not close it, so it can sit beside other windows and dialogs (the wallpaper folder dialog).
 // (The control center keeps only quick toggles, sliders, media and the power buttons.)
 //
 //   Super + I              show / hide      (qs ipc call settings toggle)
 //   Super + Shift + A      Appearance       (qs ipc call settings toggleSection appearance | open <section>)
-//   Esc, a click outside   close
+//   the x button           close
 // Keyboard: it opens with the focus on the sidebar: Up / Down change section, Right / Enter / Tab go into the section.
 // Inside a section Tab (or Up / Down) moves between the controls, Enter and Space press, Left / Right adjust (
 // choices, steppers, sliders). Left on a plain row, or Shift+Tab / Up from the first control, goes back to the sidebar.
 // Sections: wifi, bluetooth, display, sound, power, touchpad, tablet, about, appearance, wallpaper, notifications. Each one is a file in this folder;
 // it is loaded only while it is showing (so scanning for networks and devices stops when Settings is closed).
 //
-// Same build as the pickers: a fixed-size layer window with the Card inside it (see ui/Card.qml and picker/Picker.qml).
+// Hyprland floats and centres it by class and title (hypr/modules/rules.lua).
 Scope {
     id: root
 
@@ -41,6 +41,8 @@ Scope {
 
     readonly property int cardWidth: 900
     readonly property int cardHeight: 620
+    readonly property int minWidth: 720
+    readonly property int minHeight: 480
     readonly property int sidebarWidth: 210
     readonly property int pad: 28
 
@@ -57,7 +59,7 @@ Scope {
     // ---- keyboard focus: the sidebar (the card itself has the focus) or a control inside the section ----
     Connections {
         target: ShellState
-        function onSettingsOpenChanged() { if (ShellState.settingsOpen) card.forceActiveFocus() }
+        function onSettingsOpenChanged() { if (ShellState.settingsOpen) { win.requestActivate(); card.forceActiveFocus() } }
         function onSettingsSectionChanged() { card.forceActiveFocus() }
     }
     function inContent(item) {
@@ -73,43 +75,28 @@ Scope {
         else if (!forward) card.forceActiveFocus()
     }
 
-    PanelWindow {
+    FloatingWindow {
         id: win
 
-        // Open on the monitor you are working on.
-        screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
-        visible: ShellState.settingsOpen || card.shown > 0
+        title: "Settings"
+        visible: ShellState.settingsOpen
+        // Closed by the compositor (Super + Q): keep the shared state in step.
+        onVisibleChanged: if (!visible) ShellState.settingsOpen = false
+        implicitWidth: root.cardWidth
+        implicitHeight: root.cardHeight
+        minimumSize: Qt.size(root.minWidth, root.minHeight)
+        color: Theme.surface
 
-        // No anchors: the compositor centres the window.
-        exclusionMode: ExclusionMode.Ignore
-        implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
-        implicitHeight: root.cardHeight + 2 * Theme.shadowMargin
-        color: "transparent"
-        mask: Region { item: card }
-        WlrLayershell.namespace: "quickshell-settings"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: ShellState.settingsOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-        HyprlandFocusGrab {
-            active: ShellState.settingsOpen
-            windows: [win]
-            onCleared: ShellState.settingsOpen = false
-        }
-
-        Card {
+        Item {
             id: card
-            x: Theme.shadowMargin
-            y: Theme.shadowMargin
-            width: root.cardWidth
-            open: ShellState.settingsOpen
-            contentHeight: root.cardHeight
+            anchors.fill: parent
+            readonly property real shown: win.visible ? 1 : 0
 
             // Keys the controls do not use come up to here (the controls handle Enter, Space and Left / Right themselves).
             focus: true
             Keys.onPressed: event => {
                 const inside = root.inContent(card.Window.activeFocusItem)
-                if (event.key === Qt.Key_Escape) ShellState.settingsOpen = false
-                else if (event.key === Qt.Key_Down) { if (inside) root.moveFocus(true); else root.go(root.index + 1) }
+                if (event.key === Qt.Key_Down) { if (inside) root.moveFocus(true); else root.go(root.index + 1) }
                 else if (event.key === Qt.Key_Up) { if (inside) root.moveFocus(false); else root.go(root.index - 1) }
                 else if (event.key === Qt.Key_Tab) root.moveFocus(true)
                 else if (event.key === Qt.Key_Backtab) root.moveFocus(false)
@@ -165,12 +152,6 @@ Scope {
                         }
                     }
 
-                    StyledText {
-                        anchors { left: parent.left; bottom: parent.bottom; margins: 20 }
-                        text: "Esc to close"
-                        color: Theme.dim
-                        font.pixelSize: Theme.fontSmall
-                    }
                 }
 
                 Rectangle { width: 1; height: parent.height; color: Theme.border }
@@ -192,8 +173,26 @@ Scope {
                     Loader {
                         id: content
                         anchors { left: parent.left; right: parent.right; top: heading.bottom; bottom: parent.bottom; margins: root.pad; topMargin: 16 }
-                        active: ShellState.settingsOpen || card.shown > 0
+                        active: win.visible
                         source: root.sections[root.index].file
+                    }
+
+                    // Close: an x at the top right of the window.
+                    Rectangle {
+                        id: closeButton
+                        anchors { top: parent.top; right: parent.right; margins: 14 }
+                        width: 32
+                        height: 32
+                        radius: Theme.radiusRow
+                        color: closeArea.pressed ? Theme.selected : closeArea.containsMouse ? Theme.hover : Theme.clear
+                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                        activeFocusOnTab: true
+                        Keys.onPressed: event => {
+                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { ShellState.settingsOpen = false; event.accepted = true }
+                        }
+                        StyledText { anchors.centerIn: parent; text: Theme.glyphTimes; color: closeArea.containsMouse ? Theme.bright : Theme.dim; font.pixelSize: Theme.fontXL }
+                        MouseArea { id: closeArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.settingsOpen = false }
+                        FocusRing { visible: closeButton.activeFocus; anchors.margins: -3 }
                     }
                 }
             }
