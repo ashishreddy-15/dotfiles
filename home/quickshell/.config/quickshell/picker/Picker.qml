@@ -252,6 +252,14 @@ Scope {
                                 radius: Theme.radiusRow
                                 color: Theme.clear   // the highlight is drawn behind the list
 
+                                // The rows come in one after another when the picker opens. Rows made later (typing
+                                // filters the list, scrolling recycles rows) just show; rows that arrive while the
+                                // card is still fading in (history loaded late, text passed in with the open) still
+                                // join the entrance.
+                                Stagger { id: enter; order: row.index; play: card.open; fresh: card.shown < 1; fromHidden: card.shown === 0 }
+                                opacity: enter.progress
+                                transform: Translate { y: enter.rise }
+
                                 RowLayout {
                                     anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                                     spacing: 12

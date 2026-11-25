@@ -118,6 +118,8 @@ Scope {
                     MainPage {
                         id: mainPage
                         width: parent.width
+                        play: card.open
+                        fromHidden: card.shown === 0
                         onDone: ShellState.panelOpen = false
                     }
                 }

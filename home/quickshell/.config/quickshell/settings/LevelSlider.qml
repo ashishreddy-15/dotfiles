@@ -43,5 +43,5 @@ Item {
     }
 
     // A little roomier than the others: the value text should not touch the ring.
-    FocusRing { visible: root.activeFocus; anchors { margins: -3; leftMargin: -8; rightMargin: -8 } }
+    FocusRing { shown: root.activeFocus; anchors { margins: -3; leftMargin: -8; rightMargin: -8 } }
 }

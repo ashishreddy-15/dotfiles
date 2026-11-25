@@ -44,5 +44,5 @@ Rectangle {
         onClicked: root.toggled()
     }
 
-    FocusRing { visible: root.activeFocus; radius: root.radius; anchors.margins: -3 }
+    FocusRing { shown: root.activeFocus; radius: root.radius; anchors.margins: -3 }
 }

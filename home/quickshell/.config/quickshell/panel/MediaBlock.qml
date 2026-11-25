@@ -59,22 +59,13 @@ Rectangle {
                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { btn.clicked(); event.accepted = true }
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Theme.radiusRow
-                    color: area.containsMouse && btn.enabled ? Theme.hover : Theme.clear
-                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                }
-                StyledText { anchors.centerIn: parent; text: btn.glyph; color: Theme.text }
-                MouseArea {
-                    id: area
+                Pressable {
                     anchors.fill: parent
                     enabled: btn.enabled
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
                     onClicked: btn.clicked()
+                    StyledText { anchors.centerIn: parent; text: btn.glyph; color: Theme.text }
                 }
-                FocusRing { visible: btn.activeFocus }
+                FocusRing { shown: btn.activeFocus }
             }
 
             Button { glyph: Theme.glyphPrev; enabled: root.player?.canGoPrevious ?? false; onClicked: root.player.previous() }

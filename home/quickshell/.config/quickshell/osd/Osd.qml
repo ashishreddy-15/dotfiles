@@ -104,38 +104,58 @@ Scope {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    Rectangle {
-                        visible: root.note === ""
-                        width: 150
-                        height: 4
-                        radius: Theme.radiusSmall
-                        color: Theme.border
+                    // The level (bar and number) and the note ("no control") share one place and cross-fade,
+                    // so switching between a screen that has a control and one that has none does not pop.
+                    Item {
+                        width: 150 + 12 + 40
+                        height: Math.max(level.implicitHeight, noteText.implicitHeight)
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Rectangle {
-                            width: parent.width * (root.note === "" ? root.value : 0)
-                            height: parent.height
-                            radius: parent.radius
-                            color: root.muted ? Theme.dim : Theme.accent
-                            ValueMotion on width {}
+                        Row {
+                            id: level
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 12
+                            opacity: root.note === "" ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+
+                            Rectangle {
+                                width: 150
+                                height: 4
+                                radius: Theme.radiusSmall
+                                color: Theme.border
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Rectangle {
+                                    width: parent.width * (root.note === "" ? root.value : 0)
+                                    height: parent.height
+                                    radius: parent.radius
+                                    color: root.muted ? Theme.dim : Theme.accent
+                                    ValueMotion on width {}
+                                }
+                            }
+
+                            StyledText {
+                                width: 40
+                                text: root.muted ? "muted" : Math.round(root.value * 100)
+                                horizontalAlignment: Text.AlignRight
+                                color: root.muted ? Theme.dim : Theme.text
+                                Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
                         }
-                    }
 
-                    StyledText {
-                        visible: root.note !== ""
-                        width: 150 + 40 + 12
-                        text: root.note
-                        color: Theme.warn
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    StyledText {
-                        visible: root.note === ""
-                        width: 40
-                        text: root.muted ? "muted" : Math.round(root.value * 100)
-                        horizontalAlignment: Text.AlignRight
-                        color: root.muted ? Theme.dim : Theme.text
-                        anchors.verticalCenter: parent.verticalCenter
+                        StyledText {
+                            id: noteText
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            // Keeps the last note while it fades out (root.note is already "" by then).
+                            Binding on text { when: root.note !== ""; value: root.note; restoreMode: Binding.RestoreNone }
+                            color: Theme.warn
+                            opacity: root.note !== "" ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+                        }
                     }
                 }
             }

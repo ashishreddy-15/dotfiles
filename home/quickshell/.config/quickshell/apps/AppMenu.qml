@@ -245,7 +245,10 @@ Scope {
                 }
 
                 StyledText {
-                    visible: grid.count === 0
+                    // Fades in; leaves at once, so it never shows the next keystroke's text on its way out.
+                    opacity: grid.count === 0 ? 1 : 0
+                    visible: opacity > 0
+                    Behavior on opacity { NumberAnimation { duration: grid.count === 0 ? Theme.durBase : 0; easing.type: Theme.easeOut } }
                     anchors { horizontalCenter: parent.horizontalCenter; top: field.bottom; topMargin: root.pad + root.cellHeight / 2 - height / 2 }
                     text: "No app matches \u201c" + search.text + "\u201d"
                     color: Theme.dim

@@ -132,5 +132,5 @@ Item {
         color: root.detailColor
     }
 
-    FocusRing { visible: root.activeFocus }
+    FocusRing { shown: root.activeFocus }
 }

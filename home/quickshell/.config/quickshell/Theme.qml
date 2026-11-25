@@ -142,9 +142,14 @@ Singleton {
     readonly property real springSmooth:  3.8     // cards, bar slide, dynamic height, notification re-stacking: 0% / ~300 ms
     readonly property real dampingSmooth: 0.42
     readonly property int  exitDrift:     12      // px a dismissed notification drifts sideways as it fades
+    readonly property int  staggerStep:   18      // ms between rows when a list or panel first appears
+    readonly property int  staggerMax:    4       // at most this many steps, so the last row is never later than 72 ms
+    readonly property int  staggerRise:   6       // px a row rises as it fades in on first appearance
+    readonly property int  pageShift:     8       // px a new Settings page settles in from as it fades in
     readonly property real epsNorm:       0.004   // settling threshold for 0..1 properties (scale, progress)
     readonly property real epsPx:         0.4     // settling threshold for pixel coordinates (x, y, width, height)
     readonly property real pressScale:    0.94    // tactile press-in scale for round toggles and action tiles
+    readonly property real pressScaleRow: 0.98    // the same for a full-width row: a shallower press (0.94 visibly pulls its text to the middle)
 
     readonly property int durFast:    90
     readonly property int durBase:    140
@@ -165,6 +170,8 @@ Singleton {
 
     // ---- the bar ----
     readonly property int barHeight: 28
+    readonly property int barGap:      16      // between items on the bar
+    readonly property int barGapTight: 5       // between an icon and its own number (battery %, notification count)
     // The bar has no background, so its text must stand out from the wallpaper behind it. When the top edge
     // of the wallpaper is light (measured by Wallpaper.qml), the bar switches to dark text, like the macOS menu bar.
     readonly property real lightWallpaper: 105        // top-edge brightness (0-255) above which the bar text turns dark

@@ -145,6 +145,15 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size, sp
     `springFluid` for workspaces and the scratchpad drawer). A spring leaf ignores `speed` (it is still required, so it
     stays as documentation). `scripts/ui-check` compares the spring physics (damping ratio and frequency) of QML and
     Hyprland, checks every shell layer namespace is `no_anim`, and bans inline spring numbers.
+- **Building blocks for motion** (all in `ui/`, all honour reduce motion):
+  - `Reveal { shown: cond; gapAfter: 16; Item {} }` instead of `visible:` for anything that comes and goes in a Row:
+    the width opens while the item fades in, and on the way out it fades first and then closes, so neighbours glide
+    aside instead of jumping. The gap to the neighbour lives inside the animated width (the Row's spacing is 0).
+  - `Stagger { order: index; play: card.open }` on the rows of a surface that should arrive in order: each fades in
+    and rises `staggerRise` px, `staggerStep` ms apart, at most `staggerMax` steps. Only on open, never on filtering.
+  - `Pressable` for anything clickable: hover wash, press-in scale (`pressScale`; `pressScaleRow` for full-width rows,
+    where a deeper press pulls the text toward the middle), `durFast` colour fades.
+  - `FocusRing { shown: x.activeFocus }` fades in and out (`visible:` still works, without the fade).
 - **Icons** come from `Theme.glyph*`, never typed inline.
 - **New pieces** should use `Card`, the tokens and the Hyprland rules above, so they match without extra work.
 - **Check animations** by recording (`wf-recorder`, constant frame rate) and measuring frame to frame. Compare direct

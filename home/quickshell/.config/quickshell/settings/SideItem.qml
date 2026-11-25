@@ -2,6 +2,7 @@ import QtQuick
 import qs
 
 // One entry in the sidebar of the Settings window: its icon and its name.
+// The selected wash and accent mark are not drawn here: SettingsWindow.qml draws one pill that slides to the current entry.
 Rectangle {
     id: root
 
@@ -13,19 +14,9 @@ Rectangle {
     width: parent.width
     height: 36
     radius: Theme.radiusRow
-    color: current ? Theme.selected : (area.containsMouse ? Theme.hover : Theme.clear)
+    // Only the hover wash (the current entry already sits on the pill).
+    color: area.containsMouse && !current ? Theme.hover : Theme.clear
     Behavior on color { ColorAnimation { duration: Theme.durFast } }
-
-    // The accent mark, as in the pickers.
-    Rectangle {
-        visible: root.current
-        x: 4
-        anchors.verticalCenter: parent.verticalCenter
-        width: 2
-        height: 16
-        radius: Theme.radiusMark
-        color: Theme.accent
-    }
 
     StyledText {
         x: 16
@@ -34,12 +25,14 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: root.glyph
         color: root.current ? Theme.bright : Theme.dim
+        Behavior on color { ColorAnimation { duration: Theme.durFast } }
     }
     StyledText {
         x: 44
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
         color: root.current ? Theme.bright : Theme.text
+        Behavior on color { ColorAnimation { duration: Theme.durFast } }
     }
 
     MouseArea {

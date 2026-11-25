@@ -91,5 +91,5 @@ Item {
         onWheel: e => root.moved(root.clamp(root.value + (e.angleDelta.y > 0 ? Theme.brightnessStep : -Theme.brightnessStep)))
     }
 
-    FocusRing { visible: root.activeFocus; radius: root.height / 2 + 3; anchors.margins: -3 }
+    FocusRing { shown: root.activeFocus; radius: root.height / 2 + 3; anchors.margins: -3 }
 }

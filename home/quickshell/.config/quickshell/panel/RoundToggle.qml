@@ -53,7 +53,7 @@ Item {
                 Behavior on color { ColorAnimation { duration: Theme.durFast } }
             }
 
-            FocusRing { visible: root.activeFocus; radius: circle.radius + 3; anchors.margins: -3 }
+            FocusRing { shown: root.activeFocus; radius: circle.radius + 3; anchors.margins: -3 }
         }
 
         StyledText {

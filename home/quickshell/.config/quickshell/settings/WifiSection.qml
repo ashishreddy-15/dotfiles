@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Networking
 import qs
+import "../ui"
 
 // Wi-Fi: the switch, and the networks around you. A new secured network asks for its password under it.
 // Networks are scanned for only while Settings is open on this section.
@@ -66,11 +67,22 @@ Page {
                 onAction: entry.modelData.forget()
             }
 
-            // Password prompt under the network that needs one
+            // Password prompt under the network that needs one: it opens (and closes) smoothly, pushing the rows below
+            // down instead of making them jump (they jump for reduce motion), and fades with it.
             Item {
-                visible: root.askingFor === entry.modelData.name
+                id: prompt
+                readonly property bool open: root.askingFor === entry.modelData.name
+                visible: open || height > 0
                 width: parent.width
-                height: visible ? 44 : 0
+                height: open ? 44 : 0
+                clip: true
+                enabled: open                        // while closing it takes no keys (a second Enter would send "")
+                opacity: open ? 1 : 0
+                SmoothMotion on height {}
+                Behavior on opacity { NumberAnimation { duration: prompt.open ? Theme.durBase : Theme.durFast; easing.type: Theme.easeOut } }
+                function focusField() { Qt.callLater(() => { pass.text = ""; pass.forceActiveFocus() }) }
+                onOpenChanged: if (open) focusField()
+                Component.onCompleted: if (open) focusField()   // the list re-sorts and rebuilds rows while one is open
 
                 Rectangle {
                     x: 32; y: 4
@@ -90,7 +102,6 @@ Page {
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontBase
                         clip: true
-                        onVisibleChanged: if (visible) { text = ""; forceActiveFocus() }
                         onAccepted: { entry.modelData.connectWithPsk(text); root.askingFor = ""; text = "" }
                         Keys.onEscapePressed: root.askingFor = ""
 

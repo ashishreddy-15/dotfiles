@@ -18,6 +18,8 @@ Column {
     id: root
 
     signal done()                // close the panel
+    property bool fromHidden: true   // see ui/Stagger.qml
+    property bool play: false    // true while the panel is open: the bands come in one after another (see ui/Stagger.qml)
 
     readonly property int pad: 8
     readonly property real inner: width - 2 * pad
@@ -82,9 +84,18 @@ Column {
     }
 
 
+    // The entrance, one per band, top to bottom. Only on open: a band that appears later (media) or a change in
+    // height does not replay it.
+    Stagger { id: enterToggles; order: 0; play: root.play; fromHidden: root.fromHidden }
+    Stagger { id: enterLevels; order: 1; play: root.play; fromHidden: root.fromHidden }
+    Stagger { id: enterMedia; order: 2; play: root.play; fromHidden: root.fromHidden }
+    Stagger { id: enterFooter; order: 3; play: root.play; fromHidden: root.fromHidden }
+
     // ---- toggles ----
     Row {
         width: root.inner
+        opacity: enterToggles.progress
+        transform: Translate { y: enterToggles.rise }
         readonly property real cell: width / 5
 
         RoundToggle {
@@ -139,6 +150,8 @@ Column {
     Column {
         width: root.inner
         spacing: 8
+        opacity: enterLevels.progress
+        transform: Translate { y: enterLevels.rise }
 
         Repeater {
             model: Brightness.displays
@@ -181,7 +194,11 @@ Column {
     }
 
     // ---- media (only while a player is running) ----
-    MediaBlock { width: root.inner }
+    MediaBlock {
+        width: root.inner
+        opacity: enterMedia.progress
+        transform: Translate { y: enterMedia.rise }
+    }
 
     // ---- footer: battery, Settings, power ----
     component IconButton: Item {
@@ -195,44 +212,36 @@ Column {
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { btn.clicked(); event.accepted = true }
         }
-        Rectangle {
+        Pressable {
             anchors.fill: parent
             radius: height / 2
-            color: btnArea.containsMouse ? Theme.hover : Theme.clear
-            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+            onClicked: btn.clicked()
+            StyledText { anchors.centerIn: parent; text: btn.glyph; color: Theme.text }
         }
-        StyledText { anchors.centerIn: parent; text: btn.glyph; color: Theme.text }
-        MouseArea { id: btnArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: btn.clicked() }
-        FocusRing { visible: btn.activeFocus; radius: height / 2 }
+        FocusRing { shown: btn.activeFocus; radius: height / 2 }
     }
 
     Item {
         width: root.inner
         height: 36
+        opacity: enterFooter.progress
+        transform: Translate { y: enterFooter.rise }
 
         // The battery opens Settings on Power.
-        MouseArea {
+        Pressable {
             id: batteryArea
             visible: root.hasBattery
             anchors { left: parent.left; verticalCenter: parent.verticalCenter }
             width: batteryText.implicitWidth + 20
             height: 30
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
             onClicked: root.openSettings("power")
 
             activeFocusOnTab: true
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { root.openSettings("power"); event.accepted = true }
             }
-            FocusRing { visible: batteryArea.activeFocus }
+            FocusRing { shown: batteryArea.activeFocus }
 
-            Rectangle {
-                anchors.fill: parent
-                radius: Theme.radiusRow
-                color: batteryArea.containsMouse ? Theme.hover : Theme.clear
-                Behavior on color { ColorAnimation { duration: Theme.durFast } }
-            }
             StyledText {
                 id: batteryText
                 x: 10

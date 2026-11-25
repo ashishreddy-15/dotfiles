@@ -87,6 +87,7 @@ Item {
                         color: closeArea.containsMouse ? Theme.bright : Theme.dim
                         font.pixelSize: Theme.fontLarge
                         Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                        // the shared press-in (a bare glyph with a wider hit area: no wash, so not a Pressable)
                         MouseArea {
                             id: closeArea
                             anchors { fill: parent; margins: -6 }
@@ -126,8 +127,11 @@ Item {
                             text: modelData.text
                             color: actHover.hovered ? Theme.bright : Theme.accent
                             Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                            // a text link: the shared press-in only, no wash
+                            scale: actTap.pressed ? Theme.pressScale : 1
+                            PressMotion on scale {}
                             HoverHandler { id: actHover; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: Notifs.invoke(root.nid, modelData.id) }
+                            TapHandler { id: actTap; onTapped: Notifs.invoke(root.nid, modelData.id) }
                         }
                     }
                 }

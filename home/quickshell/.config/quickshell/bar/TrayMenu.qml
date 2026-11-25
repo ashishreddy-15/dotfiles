@@ -134,18 +134,11 @@ Scope {
                             id: backRow
                             visible: root.path.length > 0
                             height: visible ? root.rowHeight : 0
-                            MouseArea {
+                            Pressable {
+                                pressedScale: Theme.pressScaleRow   // full-width row
                                 width: column.width
                                 height: root.rowHeight
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
                                 onClicked: win.leave(1)
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: Theme.radiusRow
-                                    color: parent.containsMouse ? Theme.hover : Theme.clear
-                                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                                }
                                 StyledText {
                                     x: 10
                                     anchors.verticalCenter: parent.verticalCenter
@@ -174,58 +167,50 @@ Scope {
                                     color: Theme.border
                                 }
 
-                                Rectangle {
-                                    visible: !entry.separator
-                                    anchors.fill: parent
-                                    radius: Theme.radiusRow
-                                    color: area.containsMouse && entry.modelData.enabled ? Theme.hover : Theme.clear
-                                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                                }
-
-                                // tick / dot column
-                                StyledText {
-                                    visible: !entry.separator
-                                    x: 10
-                                    width: 14
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    color: Theme.accent
-                                    text: entry.modelData.checkState === Qt.Checked
-                                          ? (entry.modelData.buttonType === 2 ? Theme.glyphMark : Theme.glyphCheck) : ""
-                                }
-                                IconImage {
-                                    visible: !entry.separator && (entry.modelData.icon ?? "") !== ""
-                                    x: 28
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    implicitSize: 16
-                                    source: entry.modelData.icon ?? ""
-                                }
-                                StyledText {
-                                    visible: !entry.separator
-                                    x: (entry.modelData.icon ?? "") !== "" ? 50 : 28
-                                    width: parent.width - x - (entry.modelData.hasChildren ? 30 : 12)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    elide: Text.ElideRight
-                                    // D-Bus menus mark the keyboard accelerator with an underscore: "_Quit".
-                                    text: (entry.modelData.text ?? "").replace(/_(.)/g, "$1")
-                                    color: entry.modelData.enabled ? Theme.text : Theme.dim
-                                }
-                                StyledText {
-                                    visible: entry.modelData.hasChildren
-                                    anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-                                    text: Theme.glyphNext
-                                    color: Theme.dim
-                                }
-
-                                MouseArea {
+                                // The entry: the shared hover wash and press-in. (A disabled entry takes no hover or click.)
+                                Pressable {
+                                    pressedScale: Theme.pressScaleRow   // full-width row
                                     id: area
                                     visible: !entry.separator
                                     anchors.fill: parent
-                                    hoverEnabled: true
                                     enabled: entry.modelData.enabled
-                                    cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         if (entry.modelData.hasChildren && root.path.length < 3) win.enter(entry.index)
                                         else { entry.modelData.triggered(); root.close() }
+                                    }
+
+                                    // tick / dot column
+                                    StyledText {
+                                        visible: !entry.separator
+                                        x: 10
+                                        width: 14
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: Theme.accent
+                                        text: entry.modelData.checkState === Qt.Checked
+                                              ? (entry.modelData.buttonType === 2 ? Theme.glyphMark : Theme.glyphCheck) : ""
+                                    }
+                                    IconImage {
+                                        visible: !entry.separator && (entry.modelData.icon ?? "") !== ""
+                                        x: 28
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        implicitSize: 16
+                                        source: entry.modelData.icon ?? ""
+                                    }
+                                    StyledText {
+                                        visible: !entry.separator
+                                        x: (entry.modelData.icon ?? "") !== "" ? 50 : 28
+                                        width: parent.width - x - (entry.modelData.hasChildren ? 30 : 12)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        elide: Text.ElideRight
+                                        // D-Bus menus mark the keyboard accelerator with an underscore: "_Quit".
+                                        text: (entry.modelData.text ?? "").replace(/_(.)/g, "$1")
+                                        color: entry.modelData.enabled ? Theme.text : Theme.dim
+                                    }
+                                    StyledText {
+                                        visible: entry.modelData.hasChildren
+                                        anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                                        text: Theme.glyphNext
+                                        color: Theme.dim
                                     }
                                 }
                             }

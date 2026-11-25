@@ -3,10 +3,10 @@ import Quickshell
 import qs
 
 // "● rec 1:23" while the screen is being recorded (home/bin/.local/bin/screenrecord). Click it to stop.
+// The bar shows it only while recording, through a Reveal (Bar.qml), so it can fade out before it goes.
 Item {
     id: root
 
-    visible: ShellState.recording
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 

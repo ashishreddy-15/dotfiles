@@ -83,7 +83,7 @@ Page {
             onActiveFocusChanged: if (!activeFocus) confirming = false
             StyledText { id: clearText; anchors.centerIn: parent; text: clearButton.confirming ? "Sure?" : "Clear history"; color: clearButton.confirming ? Theme.warn : Theme.text }
             MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: clearButton.press() }
-            FocusRing { visible: clearButton.activeFocus; anchors.margins: -3 }
+            FocusRing { shown: clearButton.activeFocus; anchors.margins: -3 }
         }
 
         Rectangle {

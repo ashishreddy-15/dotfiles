@@ -55,5 +55,5 @@ Item {
         Arrow { glyph: Theme.glyphNext; onClicked: root.step(1) }
     }
 
-    FocusRing { visible: root.activeFocus; anchors.margins: -3 }
+    FocusRing { shown: root.activeFocus; anchors.margins: -3 }
 }

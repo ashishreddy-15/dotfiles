@@ -84,6 +84,7 @@ Scope {
             }
             // Into the section: the first control. Between controls: the next / previous one; before the first, the sidebar.
             function moveFocus(forward) {
+                if (swap.running) swap.complete()     // land on the new page first, or the key press is lost
                 const cur = card.Window.activeFocusItem
                 const from = inContent(cur) ? cur : content
                 const next = from.nextItemInFocusChain(forward)
@@ -115,12 +116,44 @@ Scope {
 
                     // ---- sidebar ----
                     Item {
+                        id: sidebar
                         width: root.sidebarWidth
                         height: parent.height
 
+                        // The selection: one pill (the selected wash and the accent mark) that slides to the current entry.
+                        // Its y is the current entry's, mapped into the sidebar. It does not slide in when Settings opens:
+                        // the motion is armed only once the sidebar's layout has settled (no re-positioning for durFast;
+                        // the nested group columns lay out over a few passes, so the first pass is too early).
+                        property bool pillReady: false
+                        Timer { id: pillArm; interval: Theme.durFast; onTriggered: sidebar.pillReady = true }
+                        readonly property Item currentEntry: { sideRepeater.count; return sideRepeater.itemAt(root.index) }
+                        Rectangle {
+                            id: pill
+                            visible: sidebar.currentEntry !== null
+                            x: sideColumn.x
+                            y: sidebar.currentEntry ? sideColumn.y + sidebar.currentEntry.y + sidebar.currentEntry.entry.y : 0
+                            width: sideColumn.width
+                            height: sidebar.currentEntry ? sidebar.currentEntry.entry.height : 0
+                            radius: Theme.radiusRow
+                            color: Theme.selected
+                            HighlightMotion on y { active: sidebar.pillReady }
+
+                            // The accent mark, as in the pickers.
+                            Rectangle {
+                                x: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 2
+                                height: 16
+                                radius: Theme.radiusMark
+                                color: Theme.accent
+                            }
+                        }
+
                         Column {
+                            id: sideColumn
                             anchors { fill: parent; margins: Theme.cardInset + 8 }
                             spacing: 2
+                            onPositioningComplete: if (!sidebar.pillReady) pillArm.restart()
 
                             StyledText {
                                 text: "Settings"
@@ -130,10 +163,12 @@ Scope {
                                 leftPadding: 8
                             }
                             Repeater {
+                                id: sideRepeater
                                 model: root.sections
                                 Column {
                                     required property var modelData
                                     required property int index
+                                    readonly property alias entry: sideEntry
                                     width: parent.width
 
                                     // A small heading where a group starts
@@ -147,6 +182,7 @@ Scope {
                                         font.pixelSize: Theme.fontSmall
                                     }
                                     SideItem {
+                                        id: sideEntry
                                         text: modelData.label
                                         glyph: modelData.glyph
                                         current: ShellState.settingsSection === modelData.id
@@ -162,23 +198,57 @@ Scope {
 
                     // ---- the settings of the chosen section ----
                     Item {
+                        id: pane
                         width: parent.width - root.sidebarWidth - 1
                         height: parent.height
+
+                        // A new section changes in place: the page showing (and its heading) fades out, then the new one is
+                        // loaded and fades in while settling Theme.pageShift px from the right (fades only for reduce motion).
+                        // `shown` is the section on screen, which trails root.index by the fade-out. Each change restarts
+                        // the sequence from wherever it is, and its swap step reads root.index then, so rapid clicks always
+                        // end on the latest section, fully opaque. Settings opens straight on its section (no fade).
+                        property int shown: -1
+                        property real fade: 1
+                        property real shift: 0
+                        readonly property int wanted: root.index
+                        Component.onCompleted: shown = wanted
+                        onWantedChanged: if (shown >= 0) swap.restart()
+
+                        SequentialAnimation {
+                            id: swap
+                            NumberAnimation { target: pane; property: "fade"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
+                            ScriptAction {
+                                script: {
+                                    // The control with the focus is about to go with its page: give the focus back to the sidebar.
+                                    if (win.inContent(card.Window.activeFocusItem)) card.forceActiveFocus()
+                                    pane.shown = pane.wanted
+                                    pane.shift = Theme.reduceMotion ? 0 : Theme.pageShift
+                                }
+                            }
+                            ParallelAnimation {
+                                NumberAnimation { target: pane; property: "fade"; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
+                                NumberAnimation { target: pane; property: "shift"; to: 0; duration: Theme.durBase; easing.type: Theme.easeOut }
+                            }
+                        }
 
                         StyledText {
                             id: heading
                             x: root.pad
                             y: root.pad
-                            text: root.sections[root.index].label
+                            text: pane.shown >= 0 ? root.sections[pane.shown].label : ""
                             color: Theme.bright
                             font.pixelSize: Theme.fontXL
+                            opacity: pane.fade
+                            transform: Translate { x: pane.shift }
                         }
 
                         Loader {
                             id: content
                             anchors { left: parent.left; right: parent.right; top: heading.bottom; bottom: parent.bottom; margins: root.pad; topMargin: 16 }
                             active: win.visible
-                            source: root.sections[root.index].file
+                            source: pane.shown >= 0 ? root.sections[pane.shown].file : ""
+                            opacity: pane.fade
+                            transform: Translate { x: pane.shift }
                         }
 
                         // Close: an x at the top right of the window.
@@ -196,7 +266,7 @@ Scope {
                             }
                             StyledText { anchors.centerIn: parent; text: Theme.glyphTimes; color: closeArea.containsMouse ? Theme.bright : Theme.dim; font.pixelSize: Theme.fontXL }
                             MouseArea { id: closeArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.settingsOpen = false }
-                            FocusRing { visible: closeButton.activeFocus; anchors.margins: -3 }
+                            FocusRing { shown: closeButton.activeFocus; anchors.margins: -3 }
                         }
                     }
                 }

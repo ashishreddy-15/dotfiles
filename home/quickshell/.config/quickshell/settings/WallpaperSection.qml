@@ -58,7 +58,7 @@ Page {
                 }
                 StyledText { id: addText; anchors.centerIn: parent; text: Theme.glyphPlus + "  Add folder"; color: Theme.text }
                 MouseArea { id: addArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.wallpaperAddFolder() }
-                FocusRing { visible: addButton.activeFocus; anchors.margins: -3 }
+                FocusRing { shown: addButton.activeFocus; anchors.margins: -3 }
             }
         }
         GroupLabel { text: ShellState.wallpaperFiles.length + (ShellState.wallpaperFiles.length === 1 ? " image" : " images") }
@@ -123,7 +123,7 @@ Page {
                         opacity: status === Image.Ready ? 1 : 0
                         Behavior on opacity { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
                     }
-                    FocusRing { visible: cell.activeFocus; z: 20 }
+                    FocusRing { shown: cell.activeFocus; z: 20 }
                     // Selected: an accent outline over the image; hover: a light wash.
                     Rectangle {
                         anchors.fill: parent

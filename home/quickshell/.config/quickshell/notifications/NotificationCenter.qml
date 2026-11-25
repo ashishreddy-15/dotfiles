@@ -140,31 +140,31 @@ Scope {
                         StyledText { anchors.verticalCenter: parent.verticalCenter; text: Theme.glyphSilent; color: Modes.dnd ? Theme.bright : Theme.dim }
                         Switch { anchors.verticalCenter: parent.verticalCenter; checked: Modes.dnd; onToggled: Modes.toggleDnd() }
 
-                        Rectangle {
+                        Pressable {
                             id: clearAll
                             visible: Notifs.count > 0
                             anchors.verticalCenter: parent.verticalCenter
                             width: clearText.implicitWidth + 20
                             height: 28
-                            radius: Theme.radiusRow
-                            color: clearArea.containsMouse ? Theme.hover : Theme.clear
                             border.width: 1
                             border.color: Theme.border
-                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                            onClicked: Notifs.clearAll()
                             activeFocusOnTab: true
                             Keys.onPressed: event => {
                                 if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { Notifs.clearAll(); event.accepted = true }
                             }
                             StyledText { id: clearText; anchors.centerIn: parent; text: "Clear all"; font.pixelSize: Theme.fontSmall }
-                            MouseArea { id: clearArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
-                            FocusRing { visible: clearAll.activeFocus; anchors.margins: -3 }
+                            FocusRing { shown: clearAll.activeFocus; anchors.margins: -3 }
                         }
                     }
                 }
 
                 // ---- nothing new ----
                 Column {
-                    visible: Notifs.count === 0
+                    // fades in when the last one is cleared, out when one arrives
+                    opacity: Notifs.count === 0 ? 1 : 0
+                    visible: opacity > 0
+                    Behavior on opacity { NumberAnimation { duration: Notifs.count === 0 ? Theme.durBase : Theme.durFast; easing.type: Theme.easeOut } }
                     anchors.centerIn: parent
                     spacing: 10
                     StyledText { anchors.horizontalCenter: parent.horizontalCenter; text: Theme.glyphBell; color: Theme.dim; font.pixelSize: Theme.fontIcon }
@@ -252,7 +252,7 @@ Scope {
                                             else return
                                             event.accepted = true
                                         }
-                                        FocusRing { visible: note.activeFocus; radius: note.radius }
+                                        FocusRing { shown: note.activeFocus; radius: note.radius }
 
                                         Column {
                                             id: body
@@ -283,6 +283,8 @@ Scope {
                                                     anchors { right: parent.right; verticalCenter: title.verticalCenter }
                                                     text: Theme.glyphClose
                                                     color: closeArea.containsMouse ? Theme.bright : Theme.dim
+                                                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                                                    // the shared press-in (a bare glyph with a wider hit area: no wash)
                                                     MouseArea {
                                                         id: closeArea
                                                         anchors { fill: parent; margins: -6 }
@@ -310,17 +312,15 @@ Scope {
                                                 topPadding: 4
                                                 Repeater {
                                                     model: note.actions
-                                                    Rectangle {
+                                                    Pressable {
                                                         id: actionButton
                                                         required property var modelData
                                                         width: actionText.implicitWidth + 20
                                                         height: 26
-                                                        radius: Theme.radiusRow
-                                                        color: actionArea.containsMouse ? Theme.hover : Theme.clear
                                                         border.width: 1
                                                         border.color: Theme.border
+                                                        onClicked: Notifs.invoke(note.modelData.nid, actionButton.modelData.id)
                                                         StyledText { id: actionText; anchors.centerIn: parent; text: actionButton.modelData.text; font.pixelSize: Theme.fontSmall }
-                                                        MouseArea { id: actionArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.invoke(note.modelData.nid, actionButton.modelData.id) }
                                                     }
                                                 }
                                             }

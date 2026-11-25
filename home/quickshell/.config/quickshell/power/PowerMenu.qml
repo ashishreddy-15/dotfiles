@@ -145,6 +145,11 @@ Scope {
                             Behavior on color { ColorAnimation { duration: Theme.durFast } }
                             PressMotion on scale {}
 
+                            // The tiles come in left to right each time the menu opens.
+                            Stagger { id: enter; order: tile.index; play: card.open; fromHidden: card.shown === 0 }
+                            opacity: enter.progress
+                            transform: Translate { y: enter.rise }
+
                             Column {
                                 anchors.centerIn: parent
                                 spacing: 10
