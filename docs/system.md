@@ -65,11 +65,11 @@ get them too. Apps are launched with `uwsm app -- <cmd>`, so each runs in its ow
 ## Monitors and the lid
 
 The laptop `eDP-1` (1920x1200, scaled 1.2) sits on the left, bottom-aligned with the Samsung `HDMI-A-1` (2560x1440) in
-the centre, which is the main screen. Workspaces 1-9 live on the main screen, 10 on the laptop. Change the laptop scale
+the centre, which is the main screen. Workspaces 1-7 live on the main screen, 8-10 on the laptop. Change the laptop scale
 with `laptopScale` in `modules/monitors.lua`; positions follow automatically.
 
-**The lid.** With another monitor connected, closing the lid turns the laptop screen off and Hyprland moves workspace 10
-(and its windows) to the main monitor. Opening the lid reloads the config, the screen comes back, and workspace 10 goes
+**The lid.** With another monitor connected, closing the lid turns the laptop screen off and Hyprland moves workspaces 8-10
+(and their windows) to the main monitor. Opening the lid reloads the config, the screen comes back, and those workspaces go
 home. Starting with the lid shut keeps the laptop screen off, and unplugging the monitor while the lid is shut turns it
 back on so you are never left without a display. With no other monitor, closing the lid suspends as usual.
 

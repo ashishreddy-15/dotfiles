@@ -25,8 +25,8 @@ local laptopW, laptopH = 1920 / laptopScale, 1200 / laptopScale
 local mainH            = 1440 / mainScale
 
 -- ---- the lid ----
--- With another monitor on, a closed lid turns the laptop screen off, so Hyprland moves workspace 10 (and its windows)
--- to that monitor; opening the lid reloads this config, which turns the screen back on, and workspace 10 goes back
+-- With another monitor on, a closed lid turns the laptop screen off, so Hyprland moves workspaces 8-10 (and their
+-- windows) to that monitor; opening the lid reloads this config, which turns the screen back on, and they go back
 -- (Hyprland returns workspaces to the monitor they came from). With no other monitor nothing changes here: logind
 -- suspends as usual. Also covered: starting with the lid shut, and unplugging the monitor while it is shut.
 local function lidClosed()
@@ -69,12 +69,14 @@ hl.monitor({ output = M.main,   mode = "2560x1440@60", scale = mainScale,
 -- Anything else (projector, another monitor): preferred mode, placed to the right.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
--- Workspaces 1-9 live on the main monitor, 10 on the laptop.
--- If the main monitor is unplugged, Hyprland moves them all to the laptop.
-for i = 1, 9 do
+-- Workspaces 1-7 live on the main monitor, 8-10 on the laptop (10 is the one it opens on).
+-- If either monitor is unplugged, Hyprland moves its workspaces to the other one.
+for i = 1, 7 do
     hl.workspace_rule({ workspace = tostring(i), monitor = M.main, default = (i == 1) })
 end
-hl.workspace_rule({ workspace = "10", monitor = M.laptop, default = true })
+for i = 8, 10 do
+    hl.workspace_rule({ workspace = tostring(i), monitor = M.laptop, default = (i == 10) })
+end
 
 -- Start the cursor on the main monitor.
 hl.config({ cursor = { default_monitor = M.main } })
