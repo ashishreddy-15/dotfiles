@@ -47,8 +47,12 @@ hl.config({
 	},
 })
 
--- Motion: matched to quickshell/Theme.qml. Hyprland speeds are in units of 100 ms, so
--- durBase 140 ms = 1.4, durFast 90 ms = 0.9, durSlow 240 ms = 2.4.
+-- Motion: matched to quickshell/Theme.qml.
+-- Bezier leaves: speed is in units of 100 ms, so durBase 140 ms = 1.4, durFast 90 ms = 0.9.
+-- Spring leaves: the curve's physics (stiffness / damping / mass) sets the timing and `speed` is ignored
+-- (hyprutils only feeds it to the bezier path). hl.animation still requires the field, so spring leaves keep
+-- the duration they stand in for (1.4 windows, 2.4 = durSlow workspaces) purely as documentation.
+-- springSmooth matches the shell's springSmooth / dampingSmooth (Qt's SpringAnimation); scripts/ui-check compares them.
 -- Spatial geometry uses native physical springs (never for fades, borders, or exits);
 -- opacity, colour, and dismissals stay monotonic on easeOut (= Easing.OutCubic).
 hl.curve("easeOut",      { type = "bezier", points = { { 0.215, 0.61 }, { 0.355, 1 } } }) -- = Easing.OutCubic
@@ -64,6 +68,7 @@ hl.animation({ leaf = "fadeIn",        enabled = true, speed = 1.4, bezier = "ea
 hl.animation({ leaf = "fadeOut",       enabled = true, speed = 0.9, bezier = "easeOut" })
 hl.animation({ leaf = "fadeSwitch",    enabled = true, speed = 0.9, bezier = "easeOut" })
 hl.animation({ leaf = "fadeShadow",    enabled = true, speed = 1.4, bezier = "easeOut" })
+hl.animation({ leaf = "fadeDim",       enabled = true, speed = 1.4, bezier = "easeOut" })
 hl.animation({ leaf = "border",        enabled = true, speed = 0.9, bezier = "easeOut" })
 hl.animation({ leaf = "borderangle",   enabled = false })
 hl.animation({ leaf = "layersIn",      enabled = true, speed = 1.4, bezier = "easeOut",      style = "fade" })
@@ -71,3 +76,7 @@ hl.animation({ leaf = "layersOut",     enabled = true, speed = 0.9, bezier = "ea
 hl.animation({ leaf = "workspaces",    enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
 hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
+-- The scratchpad (SUPER+S) drops in like a drawer over the current workspace, on the same glide.
+hl.animation({ leaf = "specialWorkspace",    enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })

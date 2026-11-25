@@ -124,13 +124,14 @@ Singleton {
 
     // ---- motion ----
     // Spatial properties (x, y, width, height, scale) use physical springs so retargeting mid-flight keeps momentum.
-    // Opacity, colour and dismissals use monotonic durations (durFast / durBase / durAmbient) and never overshoot.
+    // Opacity, colour and dismissals use monotonic durations (durFast / durBase / durAmbient) and never overshoot:
+    // an exit moves on the same durFast / easeOut curve as its fade, so the motion is seen before the item is gone.
     // Hyprland's window and workspace animations use matched spring curves in hypr/modules/look.lua.
     readonly property real springSnappy:  5.5     // tactile controls, selection highlights
     readonly property real dampingSnappy: 0.36
     readonly property real springSmooth:  3.8     // cards, bar slide, dynamic height, notification re-stacking
     readonly property real dampingSmooth: 0.42
-    readonly property real dampingExit:   0.85    // critically/over-damped exit: fast settle with zero overshoot
+    readonly property int  exitDrift:     12      // px a dismissed notification drifts sideways as it fades
     readonly property real epsNorm:       0.004   // settling threshold for 0..1 properties (scale, progress)
     readonly property real epsPx:         0.4     // settling threshold for pixel coordinates (x, y, width, height)
     readonly property real pressScale:    0.94    // tactile press-in scale for round toggles and action tiles

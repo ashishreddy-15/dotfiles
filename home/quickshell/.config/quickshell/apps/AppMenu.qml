@@ -58,7 +58,7 @@ Scope {
             Connections {
                 target: root
                 function onOpenChanged() {
-                    if (root.open) { search.text = ""; grid.currentIndex = 0; Qt.callLater(() => search.forceActiveFocus()) }
+                    if (root.open) { search.text = ""; grid.toTop(); Qt.callLater(() => search.forceActiveFocus()) }
                 }
             }
 
@@ -115,7 +115,7 @@ Scope {
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontLarge
                         clip: true
-                        onTextChanged: grid.currentIndex = 0
+                        onTextChanged: grid.toTop()
 
                         // Keyboard: the arrows move over the grid while you type.
                         Keys.onPressed: event => {
@@ -154,7 +154,27 @@ Scope {
                     boundsBehavior: Flickable.StopAtBounds
                     model: win.shown
                     highlightFollowsCurrentItem: false
-                    onCurrentIndexChanged: positionViewAtIndex(currentIndex, GridView.Contain)
+
+                    // The view follows the highlight: as the highlight springs to a new cell, the grid scrolls each
+                    // frame just enough to keep it in view, so a move off the edge glides the rows under a highlight
+                    // that stays on its cell. (positionViewAtIndex jumped the rows at once and dragged the highlight a
+                    // row up with them; it then slid back down after its cell.) A wheel or drag scrolls freely.
+                    function follow(top) {
+                        if (snap || moving || height <= 0) return
+                        let y = contentY
+                        if (top < y) y = top
+                        else if (top + root.cellHeight > y + height) y = top + root.cellHeight - height
+                        y = Math.max(originY, Math.min(y, originY + Math.max(0, contentHeight - height)))
+                        if (y !== contentY) contentY = y
+                    }
+                    // A new search or a fresh open: first app, top of the list, at once (no highlight flying back).
+                    property bool snap: false
+                    function toTop() {
+                        snap = true
+                        currentIndex = 0
+                        contentY = originY
+                        Qt.callLater(() => snap = false)
+                    }
 
                     highlight: Item {
                         z: -1
@@ -163,8 +183,9 @@ Scope {
                         visible: grid.count > 0 && grid.currentIndex >= 0
                         x: grid.currentItem ? grid.currentItem.x : (grid.currentIndex >= 0 ? (grid.currentIndex % root.columns) * root.cellWidth : 0)
                         y: grid.currentItem ? grid.currentItem.y : (grid.currentIndex >= 0 ? Math.floor(grid.currentIndex / root.columns) * root.cellHeight : 0)
-                        Behavior on x { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
-                        Behavior on y { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                        Behavior on x { enabled: !grid.snap; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                        Behavior on y { enabled: !grid.snap; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                        onYChanged: grid.follow(y)
 
                         Rectangle {
                             anchors { fill: parent; margins: 4 }

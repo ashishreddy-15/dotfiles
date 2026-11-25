@@ -24,9 +24,18 @@ Item {
     property real shown: open ? 1 : 0
     Behavior on shown { NumberAnimation { duration: root.open ? Theme.durBase : Theme.durFast; easing.type: Theme.easeOut } }
 
-    // Physical spring progress for scale and slide so retargeting mid-flight keeps momentum.
-    property real spatial: open ? 1 : 0
-    Behavior on spatial { SpringAnimation { spring: root.open ? Theme.springSmooth : Theme.springSnappy; damping: root.open ? Theme.dampingSmooth : Theme.dampingExit; epsilon: Theme.epsNorm } }
+    // 0 = shrunk and raised, 1 = in place: drives the zoom and the short slide.
+    // Entering uses a spring, so an open that interrupts a close carries on smoothly. Leaving uses the fade's own
+    // duration and curve, so the card visibly shrinks while it fades. (An over-damped spring took ~580 ms and had
+    // barely moved by the time the 90 ms fade had hidden the card: the exit read as a plain fade.)
+    property real spatial: 0
+    Component.onCompleted: spatial = open ? 1 : 0
+    onOpenChanged: {
+        if (open) { spatialOut.stop(); spatialIn.restart() }
+        else { spatialIn.stop(); spatialOut.restart() }
+    }
+    SpringAnimation { id: spatialIn; target: root; property: "spatial"; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
+    NumberAnimation { id: spatialOut; target: root; property: "spatial"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
 
     height: Math.min(contentHeight, maxHeight)
     Behavior on height { SpringAnimation { spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx } }

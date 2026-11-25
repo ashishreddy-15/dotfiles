@@ -11,8 +11,14 @@ Singleton {
     // 0 = hidden, 1 = shown; eases between them so the bar slides and fades instead of popping.
     property real barShown: barVisible ? 1 : 0
     Behavior on barShown { NumberAnimation { duration: barVisible ? Theme.durBase : Theme.durFast; easing.type: Theme.easeOut } }
-    property real barSlide: barVisible ? 1 : 0
-    Behavior on barSlide { SpringAnimation { spring: barVisible ? Theme.springSmooth : Theme.springSnappy; damping: barVisible ? Theme.dampingSmooth : Theme.dampingExit; epsilon: Theme.epsNorm } }
+    // The slide: a spring in, and out on the fade's own duration and curve (like ui/Card.qml), so it moves while visible.
+    property real barSlide: 1
+    onBarVisibleChanged: {
+        if (barVisible) { barSlideOut.stop(); barSlideIn.restart() }
+        else { barSlideIn.stop(); barSlideOut.restart() }
+    }
+    property SpringAnimation barSlideIn: SpringAnimation { target: ShellState; property: "barSlide"; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
+    property NumberAnimation barSlideOut: NumberAnimation { target: ShellState; property: "barSlide"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
 
     // How bright the top edge of the wallpaper is, 0 (black) to 255 (white). Measured by Wallpaper.qml.
     // The bar uses it to switch on a background when the wallpaper is too light for its text.

@@ -47,12 +47,16 @@ static() {
     radius=$(tv radiusCard); rounding=$(sed -nE 's/^[[:space:]]*rounding *= *([0-9]+).*/\1/p' "$look")
     [ "$radius" = "$rounding" ] && ok "corner radius $radius = Hyprland rounding" || fail "radiusCard $radius vs Hyprland rounding ${rounding:-?}"
 
-    # Hyprland animation speeds are in units of 100 ms.
-    local name ms want
+    # Hyprland animation speeds are in units of 100 ms. Only bezier leaves count: a spring leaf ignores its
+    # speed (the curve's physics sets the timing), so a speed written there proves nothing.
+    # durSlow is only used by the workspace springs today, so it is checked only if a bezier leaf ever uses it.
+    local name ms want beziers
+    beziers=$(grep -E '^hl\.animation\(.*bezier *=' "$look")
     for pair in durBase:1.4 durFast:0.9 durSlow:2.4; do
         name=${pair%%:*}; want=${pair##*:}; ms=$(tv "$name")
-        if grep -qE "speed *= *$want\b" "$look" && [ "$(awk "BEGIN{print $ms/100}")" = "$want" ]; then ok "$name ${ms} ms = Hyprland speed $want"
-        else fail "$name ${ms:-?} ms has no matching 'speed = $want' in look.lua"; fi
+        if [ "$name" = durSlow ] && ! grep -qE "speed *= *$want\b" <<<"$beziers"; then ok "$name ${ms} ms: no bezier leaf uses it (the workspace springs time themselves)"; continue; fi
+        if grep -qE "speed *= *$want\b" <<<"$beziers" && [ "$(awk "BEGIN{print $ms/100}")" = "$want" ]; then ok "$name ${ms} ms = Hyprland speed $want"
+        else fail "$name ${ms:-?} ms has no bezier leaf with 'speed = $want' in look.lua"; fi
     done
 
     # Hyprland native spring curves for windows (springSmooth) and workspaces (springFluid).
@@ -60,6 +64,39 @@ static() {
     grep -qE 'hl\.curve\("springFluid".*type *= *"spring"' "$look" && ok "Hyprland defines springFluid spring curve" || fail "springFluid spring curve missing from look.lua"
     grep -qE 'spring *= *"springSmooth"' "$look" && ok "Hyprland binds springSmooth (windows)" || fail "springSmooth binding missing from look.lua"
     grep -qE 'spring *= *"springFluid"' "$look" && ok "Hyprland binds springFluid (workspaces)" || fail "springFluid binding missing from look.lua"
+
+    # Same physics on both sides. Qt's SpringAnimation steps every 16 ms (v += spring*diff - damping*v; x += v*0.016),
+    # which is the continuous spring omega^2 = spring/0.016, 2*zeta*omega = damping/0.016. Hyprland's spring is
+    # omega = sqrt(stiffness/mass), zeta = damping / (2*sqrt(stiffness*mass)). Within 10% on both counts reads the same.
+    # curve name field: that field of the hl.curve(name, ...) line in look.lua.
+    curve() { sed -nE "s/^hl\.curve\(\"$1\".*[ ,{]$2 *= *([0-9.]+).*/\1/p" "$look" | head -1; }
+    local qs qd k c m line
+    qs=$(tv springSmooth); qd=$(tv dampingSmooth)
+    for name in springSmooth springFluid; do
+        k=$(curve "$name" stiffness); c=$(curve "$name" damping); m=$(curve "$name" mass)
+        if [ -z "$qs" ] || [ -z "$qd" ] || [ -z "$k" ] || [ -z "$c" ] || [ -z "$m" ]; then fail "$name: cannot read the spring numbers (Theme.qml springSmooth/dampingSmooth, look.lua stiffness/damping/mass)"; continue; fi
+        line=$(awk -v qs="$qs" -v qd="$qd" -v k="$k" -v c="$c" -v m="$m" 'BEGIN{
+            qw = sqrt(qs/0.016); qz = (qd/0.016) / (2*qw); hw = sqrt(k/m); hz = c / (2*sqrt(k*m))
+            dz = (hz-qz)/qz; if (dz < 0) dz = -dz; dw = (hw-qw)/qw; if (dw < 0) dw = -dw
+            printf "%s QML ζ%.2f ω%.1f ≈ Hyprland ζ%.2f ω%.1f\n", (dz <= 0.1 && dw <= 0.1) ? "same" : "differ", qz, qw, hz, hw }')
+        if [ "$name" = springFluid ]; then ok "springFluid vs QML springSmooth (for reference): ${line#* }"
+        elif [ "${line%% *}" = same ]; then ok "springSmooth: ${line#* }"
+        else fail "springSmooth physics differ by more than 10%: ${line#* }"; fi
+    done
+
+    # Every shell surface animates itself in QML, so Hyprland must not animate it as well (no_anim in rules.lua).
+    # Exempt: quickshell-wallpaper (the Background layer; its fade-in at start-up is welcome) and quickshell-picker
+    # (only Picker.qml's default; the launcher and clipboard always set their own namespace).
+    local rules=$root/home/hypr/.config/hypr/modules/rules.lua re ns missing=
+    re=$(awk '/namespace *= *"/ { match($0, /namespace *= *"[^"]*"/); last = substr($0, RSTART, RLENGTH) } /no_anim *= *true/ { print last; exit }' "$rules" | sed -E 's/^namespace *= *"(.*)"$/\1/')
+    if [ -z "$re" ]; then fail "no no_anim namespace rule found in rules.lua"
+    else
+        for ns in $(cd "$qml" && grep -rhoE 'namespace: *"quickshell-[^"]*"' --include=*.qml . | sed -E 's/.*"(.*)"/\1/' | sort -u); do
+            case $ns in quickshell-wallpaper|quickshell-picker) continue ;; esac
+            grep -qE "$re" <<<"$ns" || missing="$missing $ns"
+        done
+        [ -z "$missing" ] && ok "every quickshell layer namespace is no_anim in rules.lua" || fail "layer namespaces Hyprland would animate too (add to no_anim in rules.lua):$missing"
+    fi
 
     accent=$(tv accent | tr -d '"#'); border=$(tv border | tr -d '"#'); text=$(tv text | tr -d '"#')
     grep -qi "$accent" "$look" && ok "accent #$accent in Hyprland active border" || fail "accent #$accent missing from look.lua"

@@ -249,21 +249,30 @@ Scope {
 
             // Two images take turns being on top, so a change cross-fades instead of flashing.
             property bool frontIsA: true
+            // True while the front image is still fading in; the one behind it stays fully opaque until then.
+            readonly property bool fading: (frontIsA ? picA : picB).opacity < 1
 
             component Pic: Image {
                 required property bool isA
+                readonly property bool front: win.frontIsA === isA
                 anchors.fill: parent
                 asynchronous: true
                 cache: false                       // a regenerated file must not be shown from an old copy
                 fillMode: Image.PreserveAspectCrop
                 // Decode at screen size, not at the file's (possibly huge) size.
+                // Both sides, so a tall image is not decoded smaller than the screen.
                 sourceSize.width: Math.round(win.modelData.width * win.modelData.devicePixelRatio)
-                opacity: win.frontIsA === isA ? 1 : 0
+                sourceSize.height: Math.round(win.modelData.height * win.modelData.devicePixelRatio)
+                // Only the incoming image fades: it fades in on top while the outgoing one stays fully opaque
+                // underneath. (Fading both at once showed the background through two half-transparent images:
+                // the screen dimmed by a quarter halfway through every change.)
+                z: front ? 1 : 0
+                opacity: front || win.fading ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: Theme.durAmbient; easing.type: Theme.easeInOut } }
-                // Release the old full-resolution texture once it has faded out.
-                onOpacityChanged: if (opacity === 0 && win.frontIsA !== isA && String(source) !== "") source = ""
+                // Release the old full-resolution texture once it has gone (it drops to 0 hidden behind the new one).
+                onOpacityChanged: if (opacity === 0 && !front && String(source) !== "") source = ""
                 // When the one that was loading in the back is ready, bring it to the front.
-                onStatusChanged: if (status === Image.Ready && win.frontIsA !== isA) win.frontIsA = isA
+                onStatusChanged: if (status === Image.Ready && !front) win.frontIsA = isA
             }
             Pic { id: picA; isA: true }
             Pic { id: picB; isA: false }
@@ -287,6 +296,7 @@ Scope {
             // whiten it a little under dark text (see Theme.barOnLight), so the bar stays readable on
             // mid-tone images. Barely visible on very dark or very light ones.
             Rectangle {
+                z: 2                                 // above both images
                 anchors { top: parent.top; left: parent.left; right: parent.right }
                 height: 90
                 gradient: Gradient {

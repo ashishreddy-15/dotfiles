@@ -41,16 +41,27 @@ Scope {
             implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
             implicitHeight: wantedTop + root.stackMax + Theme.shadowMargin
             color: "transparent"
-            mask: Region { item: list }                          // only the cards take clicks
+            mask: Region { item: hitArea }                       // only the cards take clicks
             WlrLayershell.namespace: "quickshell-notifications"
             WlrLayershell.layer: WlrLayer.Overlay
+
+            // The clickable part: the cards' current extent (the list itself is always full height, see below).
+            Item {
+                id: hitArea
+                x: list.x
+                y: list.y
+                width: list.width
+                height: Math.min(list.contentHeight, root.stackMax)
+            }
 
             ListView {
                 id: list
                 x: Theme.shadowMargin
                 y: win.wantedTop - win.margins.top
                 width: root.cardWidth
-                height: Math.min(contentHeight, root.stackMax)
+                // Full height, never min(contentHeight, ...): a list that shrank the moment a card was removed dropped
+                // that card at once (no exit) and blanked the stack for a frame when the rest started to move.
+                height: root.stackMax
                 interactive: false
                 spacing: root.gap
                 model: Notifs.popups
@@ -62,10 +73,19 @@ Scope {
                         SpringAnimation { property: "scale"; from: 0.95; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
                     }
                 }
+                // A dismissed card fades, shrinks a little and drifts aside; only then does the stack close the gap
+                // (removeDisplaced waits durFast), so the cards below never slide through one that is still fading.
                 remove: Transition {
                     ParallelAnimation {
                         NumberAnimation { property: "opacity"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
                         NumberAnimation { property: "scale"; to: 0.97; duration: Theme.durFast; easing.type: Theme.easeOut }
+                        NumberAnimation { property: "x"; to: Theme.exitDrift; duration: Theme.durFast; easing.type: Theme.easeOut }
+                    }
+                }
+                removeDisplaced: Transition {
+                    SequentialAnimation {
+                        PauseAnimation { duration: Theme.durFast }
+                        SpringAnimation { properties: "y"; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx }
                     }
                 }
                 displaced: Transition {

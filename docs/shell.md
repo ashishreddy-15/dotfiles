@@ -105,8 +105,8 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size, sp
   stay parallel. Small marks use `radiusSmall`.
 - **One card.** The panel, the pickers and the indicator are all built from `ui/Card.qml`: frosted glass (a slightly
   see-through surface that Hyprland blurs, see the `blur-cards` rule in `hypr/modules/rules.lua`), a hairline border, a
-  soft shadow and the shared enter / exit animation (`springSmooth` on entrance and dynamic height, `dampingExit` +
-  `durFast` on exit). A card lives in a fixed-size window that leaves `shadowMargin` free on each side; only the card
+  soft shadow and the shared enter / exit animation (`springSmooth` on entrance and dynamic height; on exit the zoom
+  and slide run on the fade's own `durFast` / `easeOut`, so the card visibly shrinks while it fades). A card lives in a fixed-size window that leaves `shadowMargin` free on each side; only the card
   resizes, never the window (resizing a layer window makes the compositor smear the old frame).
 - **Hover and selection** are a light wash over the card (`hover`, `selected`); the selected row in a list also gets an
   accent mark. Colour washes fade in `durFast`, while sliding selection highlights move with `springSnappy`. An "on" tile
@@ -118,12 +118,22 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size, sp
     settling thresholds so animations preserve velocity when interrupted and terminate cleanly: `Theme.springSnappy` /
     `Theme.dampingSnappy` for tactile controls and sliding highlights (`Picker`, `AppMenu`, `Segmented`, `PowerMenu`,
     `Switch`, sliders), and `Theme.springSmooth` / `Theme.dampingSmooth` for `Card` entrance and dynamic height, bar
-    slide, and notification stack `add` and `displaced` transitions.
-  - Non-spatial properties (`opacity`, `color`) and dismissals (`Card` exit via `dampingExit` + `durFast`, `Notifications`
-    remove, `windowsOut`) never overshoot: they use `durFast` 90 ms, `durBase` 140 ms, `durSlow` 240 ms, `durAmbient`
-    400 ms (wallpaper and bar colours) with `easeOut` (`easeInOut` for cross-fades).
+    slide in, and notification stack `add` and `displaced` transitions. In `AppMenu` the view follows the highlight's
+    spring (it scrolls just enough each frame to keep it in view) instead of jumping with `positionViewAtIndex`.
+  - Non-spatial properties (`opacity`, `color`) and dismissals never overshoot: they use `durFast` 90 ms, `durBase`
+    140 ms, `durSlow` 240 ms, `durAmbient` 400 ms (wallpaper and bar colours) with `easeOut` (`easeInOut` for
+    cross-fades). An exit moves on the same `durFast` / `easeOut` as its fade (`Card`, bar slide out, `windowsOut`), so
+    the motion is seen before the item is gone.
+  - Notifications leave in order: the dismissed card fades, shrinks and drifts `exitDrift` aside, and `removeDisplaced`
+    waits `durFast` before the stack closes the gap. A `ListView` with transitions must keep a fixed height (never
+    `min(contentHeight, ...)`): one that shrinks at the moment of a removal drops the removed item at once and blanks
+    for a frame. Size a separate item for the input mask instead.
+  - The wallpaper changes by fading only the incoming image in on top of the outgoing one, which stays opaque; fading
+    both at once shows the background through them (a 25% dip halfway).
   - Hyprland (`hypr/modules/look.lua`) uses matched native `type = "spring"` curves (`springSmooth` for windows,
-    `springFluid` for workspaces), and `scripts/ui-check` enforces token parity and bans inline spring numbers.
+    `springFluid` for workspaces and the scratchpad drawer). A spring leaf ignores `speed` (it is still required, so it
+    stays as documentation). `scripts/ui-check` compares the spring physics (damping ratio and frequency) of QML and
+    Hyprland, checks every shell layer namespace is `no_anim`, and bans inline spring numbers.
 - **Icons** come from `Theme.glyph*`, never typed inline.
 - **New pieces** should use `Card`, the tokens and the Hyprland rules above, so they match without extra work.
 - **Check animations** by recording (`wf-recorder`, constant frame rate) and measuring frame to frame. Compare direct
