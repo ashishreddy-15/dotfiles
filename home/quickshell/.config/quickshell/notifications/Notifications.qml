@@ -59,7 +59,7 @@ Scope {
                 add: Transition {
                     ParallelAnimation {
                         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
-                        NumberAnimation { property: "scale"; from: 0.97; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
+                        SpringAnimation { property: "scale"; from: 0.95; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
                     }
                 }
                 remove: Transition {
@@ -69,7 +69,7 @@ Scope {
                     }
                 }
                 displaced: Transition {
-                    NumberAnimation { properties: "y"; duration: Theme.durBase; easing.type: Theme.easeOut }
+                    SpringAnimation { properties: "y"; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx }
                 }
             }
         }

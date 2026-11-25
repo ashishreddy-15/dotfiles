@@ -35,12 +35,32 @@ Rectangle {
     border.width: 1
     border.color: Theme.border
 
+    readonly property int activeIndex: options.findIndex(o => valueOf(o) === value)
+
+    Rectangle {
+        id: pill
+        property bool ready: false
+        Component.onCompleted: Qt.callLater(() => ready = true)
+        readonly property Item activeItem: root.activeIndex >= 0 && root.activeIndex < rep.count ? rep.itemAt(root.activeIndex) : null
+        visible: root.activeIndex >= 0
+        x: activeItem ? row.x + activeItem.x : row.x
+        y: Theme.segmentInset
+        width: activeItem ? activeItem.width : 0
+        height: root.implicitHeight - 2 * Theme.segmentInset
+        radius: Theme.radiusSmall
+        color: Theme.selected
+
+        Behavior on x { enabled: pill.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+        Behavior on width { enabled: pill.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+    }
+
     Row {
         id: row
         anchors.centerIn: parent
         spacing: 2
 
         Repeater {
+            id: rep
             model: root.options
 
             Rectangle {
@@ -53,7 +73,7 @@ Rectangle {
                 width: text.implicitWidth + 24
                 height: root.implicitHeight - 2 * Theme.segmentInset
                 radius: Theme.radiusSmall
-                color: on ? (area.containsMouse ? Theme.selectedHover : Theme.selected) : (area.containsMouse ? Theme.hover : Theme.clear)
+                color: area.containsMouse ? Theme.hover : Theme.clear
                 Behavior on color { ColorAnimation { duration: Theme.durFast } }
 
                 StyledText {

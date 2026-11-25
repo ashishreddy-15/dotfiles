@@ -41,7 +41,7 @@ Variants {
             id: content
             anchors.fill: parent
             opacity: ShellState.barShown
-            transform: Translate { y: (ShellState.barShown - 1) * Theme.barHeight / 2 }
+            transform: Translate { y: (ShellState.barSlide - 1) * Theme.barHeight / 2 }
 
             // Left: workspaces, then the focused app
             Row {

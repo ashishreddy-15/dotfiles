@@ -25,17 +25,20 @@ Rectangle {
     Behavior on border.color { ColorAnimation { duration: Theme.durFast } }
 
     Rectangle {
-        width: parent.height - 8
-        height: width
-        radius: width / 2
+        readonly property real baseSize: parent.height - 8
+        width: mouse.pressed ? baseSize + 3 : baseSize
+        height: baseSize
+        radius: height / 2
         anchors.verticalCenter: parent.verticalCenter
         x: root.checked ? parent.width - width - 4 : 4
         color: root.checked ? Theme.bg : Theme.dim
-        Behavior on x { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+        Behavior on x { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+        Behavior on width { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
     }
 
     MouseArea {
+        id: mouse
         anchors { fill: parent; margins: -4 }
         cursorShape: Qt.PointingHandCursor
         onClicked: root.toggled()

@@ -218,7 +218,7 @@ Scope {
                             height: root.rowHeight
                             radius: Theme.radiusRow
                             color: Theme.selected
-                            Behavior on y { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
+                            Behavior on y { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
 
                             // The accent mark makes the selected row obvious on any wallpaper.
                             Rectangle {

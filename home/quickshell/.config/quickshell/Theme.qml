@@ -123,8 +123,18 @@ Singleton {
     readonly property int valueX:     90    // where values and sliders start (10 inset + label column + gap)
 
     // ---- motion ----
-    // Enter: durBase, ease out. Exit: durFast, ease out. Resizing a card: durBase. Hover and selection: durFast.
-    // Slow, ambient changes (wallpaper, bar colours): durAmbient. Hyprland's window animations use the same numbers.
+    // Spatial properties (x, y, width, height, scale) use physical springs so retargeting mid-flight keeps momentum.
+    // Opacity, colour and dismissals use monotonic durations (durFast / durBase / durAmbient) and never overshoot.
+    // Hyprland's window and workspace animations use matched spring curves in hypr/modules/look.lua.
+    readonly property real springSnappy:  5.5     // tactile controls, selection highlights
+    readonly property real dampingSnappy: 0.36
+    readonly property real springSmooth:  3.8     // cards, bar slide, dynamic height, notification re-stacking
+    readonly property real dampingSmooth: 0.42
+    readonly property real dampingExit:   0.85    // critically/over-damped exit: fast settle with zero overshoot
+    readonly property real epsNorm:       0.004   // settling threshold for 0..1 properties (scale, progress)
+    readonly property real epsPx:         0.4     // settling threshold for pixel coordinates (x, y, width, height)
+    readonly property real pressScale:    0.94    // tactile press-in scale for round toggles and action tiles
+
     readonly property int durFast:    90
     readonly property int durBase:    140
     readonly property int durSlow:    240

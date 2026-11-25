@@ -43,9 +43,9 @@ Row {
                 anchors.fill: parent
                 source: entry.modelData.icon
                 opacity: entry.pressed ? 0.6 : entry.containsMouse ? 1 : 0.8   // quiet at rest, full under the pointer
-                scale: entry.pressed ? 0.9 : 1
+                scale: entry.pressed ? Theme.pressScale : 1
                 Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                Behavior on scale { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+                Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
             }
         }
     }

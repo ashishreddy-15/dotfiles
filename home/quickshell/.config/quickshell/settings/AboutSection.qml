@@ -149,7 +149,7 @@ Page {
                 height: parent.height
                 radius: parent.radius
                 color: Theme.accent
-                Behavior on width { NumberAnimation { duration: Theme.durSlow; easing.type: Theme.easeOut } }
+                Behavior on width { SpringAnimation { spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx } }
             }
         }
     }

@@ -97,7 +97,7 @@ attention.
 
 ## Design rules
 
-Everything about how the shell looks comes from `Theme.qml`; no colour, size or duration is written anywhere else
+Everything about how the shell looks comes from `Theme.qml`; no colour, size, spring or duration is written anywhere else
 (`scripts/ui-check` enforces it).
 
 - **Shape.** Windows and floating cards have radius 10 (`radiusCard`; Hyprland's `rounding` matches). A row or button
@@ -105,15 +105,25 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size or 
   stay parallel. Small marks use `radiusSmall`.
 - **One card.** The panel, the pickers and the indicator are all built from `ui/Card.qml`: frosted glass (a slightly
   see-through surface that Hyprland blurs, see the `blur-cards` rule in `hypr/modules/rules.lua`), a hairline border, a
-  soft shadow and the shared enter / exit animation. A card lives in a fixed-size window that leaves `shadowMargin` free
-  on each side; only the card resizes, never the window (resizing a layer window makes the compositor smear the old
-  frame).
+  soft shadow and the shared enter / exit animation (`springSmooth` on entrance and dynamic height, `dampingExit` +
+  `durFast` on exit). A card lives in a fixed-size window that leaves `shadowMargin` free on each side; only the card
+  resizes, never the window (resizing a layer window makes the compositor smear the old frame).
 - **Hover and selection** are a light wash over the card (`hover`, `selected`); the selected row in a list also gets an
-  accent mark. They fade in `durFast`. An "on" tile uses the same sign (wash + accent mark); an "off" tile is only a
-  hairline outline. Solid accent fills are avoided: they shout over the text.
+  accent mark. Colour washes fade in `durFast`, while sliding selection highlights move with `springSnappy`. An "on" tile
+  uses the same sign (wash + accent mark); an "off" tile is only a hairline outline. Solid accent fills are avoided: they
+  shout over the text.
 - **Type.** Sizes come from `fontSmall` 11, `fontBase` 12 (also the bar), `fontLarge` 14, `fontXL` 16.
-- **Motion.** `durFast` 90 ms, `durBase` 140 ms, `durSlow` 240 ms, `durAmbient` 400 ms (wallpaper and bar colours), all
-  ease-out (`easeOut`; `easeInOut` for cross-fades). Enter is `durBase`, exit `durFast`.
+- **Motion.**
+  - Spatial properties (`x`, `y`, `width`, `height`, `scale`) use `SpringAnimation` with `Theme.epsNorm` / `Theme.epsPx`
+    settling thresholds so animations preserve velocity when interrupted and terminate cleanly: `Theme.springSnappy` /
+    `Theme.dampingSnappy` for tactile controls and sliding highlights (`Picker`, `AppMenu`, `Segmented`, `PowerMenu`,
+    `Switch`, sliders), and `Theme.springSmooth` / `Theme.dampingSmooth` for `Card` entrance and dynamic height, bar
+    slide, and notification stack `add` and `displaced` transitions.
+  - Non-spatial properties (`opacity`, `color`) and dismissals (`Card` exit via `dampingExit` + `durFast`, `Notifications`
+    remove, `windowsOut`) never overshoot: they use `durFast` 90 ms, `durBase` 140 ms, `durSlow` 240 ms, `durAmbient`
+    400 ms (wallpaper and bar colours) with `easeOut` (`easeInOut` for cross-fades).
+  - Hyprland (`hypr/modules/look.lua`) uses matched native `type = "spring"` curves (`springSmooth` for windows,
+    `springFluid` for workspaces), and `scripts/ui-check` enforces token parity and bans inline spring numbers.
 - **Icons** come from `Theme.glyph*`, never typed inline.
 - **New pieces** should use `Card`, the tokens and the Hyprland rules above, so they match without extra work.
 - **Check animations** by recording (`wf-recorder`, constant frame rate) and measuring frame to frame. Compare direct

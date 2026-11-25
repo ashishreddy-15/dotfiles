@@ -101,6 +101,27 @@ Scope {
                     event.accepted = true
                 }
 
+                // Sliding selection highlight behind the tiles.
+                Rectangle {
+                    x: row.x + win.current * (root.tileSize + row.spacing)
+                    y: row.y
+                    width: root.tileSize
+                    height: root.tileSize
+                    radius: Theme.radiusRow
+                    color: Theme.selected
+                    Behavior on x { enabled: win.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+
+                    // The accent mark under the chosen one, as in the pickers (here at the bottom edge).
+                    Rectangle {
+                        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 5 }
+                        width: 18
+                        height: 2
+                        radius: Theme.radiusMark
+                        color: win.confirming !== "" ? Theme.warn : Theme.accent
+                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                    }
+                }
+
                 Row {
                     id: row
                     anchors.centerIn: parent
@@ -119,20 +140,10 @@ Scope {
                             width: root.tileSize
                             height: root.tileSize
                             radius: Theme.radiusRow
-                            color: selected ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
-                                            : (area.containsMouse ? Theme.hover : Theme.clear)
+                            color: area.containsMouse ? Theme.hover : Theme.clear
+                            scale: area.pressed ? Theme.pressScale : 1
                             Behavior on color { ColorAnimation { duration: Theme.durFast } }
-
-                            // The accent mark under the chosen one, as in the pickers (here at the bottom edge).
-                            Rectangle {
-                                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 5 }
-                                width: 18
-                                height: 2
-                                radius: Theme.radiusMark
-                                color: tile.asking ? Theme.warn : Theme.accent
-                                opacity: tile.selected ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                            }
+                            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
 
                             Column {
                                 anchors.centerIn: parent

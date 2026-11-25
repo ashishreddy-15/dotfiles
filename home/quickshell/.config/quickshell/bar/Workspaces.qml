@@ -24,7 +24,16 @@ Row {
             required property var modelData
             readonly property bool current: modelData.active   // shown on this monitor right now
 
-            BarText { text: "["; color: Theme.barAccent; opacity: item.current ? 1 : 0 }
+            BarText {
+                id: openBracket
+                text: "["
+                color: Theme.barAccent
+                opacity: item.current ? 1 : 0
+                property real slide: item.current ? 0 : 2
+                Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
+                Behavior on slide { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                transform: Translate { x: openBracket.slide }
+            }
             BarText {
                 text: item.modelData.id
                 color: item.current ? Theme.barBright
@@ -32,7 +41,16 @@ Row {
                      : hover.hovered ? Theme.barText
                      : Theme.barDim
             }
-            BarText { text: "]"; color: Theme.barAccent; opacity: item.current ? 1 : 0 }
+            BarText {
+                id: closeBracket
+                text: "]"
+                color: Theme.barAccent
+                opacity: item.current ? 1 : 0
+                property real slide: item.current ? 0 : -2
+                Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
+                Behavior on slide { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                transform: Translate { x: closeBracket.slide }
+            }
 
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             TapHandler { onTapped: item.modelData.activate() }

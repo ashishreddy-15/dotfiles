@@ -29,13 +29,13 @@ tvl() { sed -nE "s|^ *readonly property [a-z]+ +$1: *dark \? *\"#[0-9a-fA-F]+\" 
 static() {
     echo "static: magic values outside Theme.qml"
     local hits
-    # Every colour, duration, radius and font size must come from Theme.qml.
-    hits=$(cd "$qml" && grep -rnE '"#[0-9a-fA-F]{3,8}"|Qt\.rgba\([^)]*[0-9]|duration: *[0-9]|radius: *[0-9]|pixelSize: *[0-9]|font\.family: *"|font\.pointSize' \
+    # Every colour, duration, spring, radius and font size must come from Theme.qml.
+    hits=$(cd "$qml" && grep -rnE '"#[0-9a-fA-F]{3,8}"|Qt\.rgba\([^)]*[0-9]|duration: *[0-9]|spring: *[0-9]|damping: *[0-9]|epsilon: *[0-9]|mass: *[0-9]|radius: *[0-9]|pixelSize: *[0-9]|font\.family: *"|font\.pointSize' \
            --include=*.qml . | grep -v '^\./Theme\.qml' || true)
     # Wallpaper.qml builds its scrim from Theme numbers: allow rgba made of 0/1 and a Theme.* alpha.
     hits=$(printf '%s\n' "$hits" | grep -vE 'Qt\.rgba\((0|1), (0|1), (0|1), (Theme\.[A-Za-z]+|0)\)' | sed '/^$/d')
     if [ -n "$hits" ]; then fail "hard-coded look values (use a Theme.* token):"; printf '%s\n' "$hits" | sed 's/^/          /'
-    else ok "no hard-coded colours, durations, radii or font sizes"; fi
+    else ok "no hard-coded colours, durations, springs, radii or font sizes"; fi
 
     # Icons: only through Theme.glyph*, so the whole shell uses one icon set.
     hits=$(cd "$qml" && LC_ALL=C.UTF-8 grep -rnP '[\x{e000}-\x{f8ff}\x{2039}\x{203a}\x{00d7}\x{25cf}\x{2715}\x{2713}]|\\\\u[eEfF][0-9a-fA-F]{3}' --include=*.qml . | grep -v '^\./Theme\.qml' | grep -vE '^[^:]+:[0-9]+:[[:space:]]*//' || true)
@@ -55,6 +55,12 @@ static() {
         else fail "$name ${ms:-?} ms has no matching 'speed = $want' in look.lua"; fi
     done
 
+    # Hyprland native spring curves for windows (springSmooth) and workspaces (springFluid).
+    grep -qE 'hl\.curve\("springSmooth".*type *= *"spring"' "$look" && ok "Hyprland defines springSmooth spring curve" || fail "springSmooth spring curve missing from look.lua"
+    grep -qE 'hl\.curve\("springFluid".*type *= *"spring"' "$look" && ok "Hyprland defines springFluid spring curve" || fail "springFluid spring curve missing from look.lua"
+    grep -qE 'spring *= *"springSmooth"' "$look" && ok "Hyprland binds springSmooth (windows)" || fail "springSmooth binding missing from look.lua"
+    grep -qE 'spring *= *"springFluid"' "$look" && ok "Hyprland binds springFluid (workspaces)" || fail "springFluid binding missing from look.lua"
+
     accent=$(tv accent | tr -d '"#'); border=$(tv border | tr -d '"#'); text=$(tv text | tr -d '"#')
     grep -qi "$accent" "$look" && ok "accent #$accent in Hyprland active border" || fail "accent #$accent missing from look.lua"
     grep -qi "$border" "$look" && ok "border #$border in Hyprland inactive border" || fail "border #$border missing from look.lua"
@@ -63,6 +69,7 @@ static() {
         hex=$(tv "$name" | tr -d '"#')
         grep -qi "$hex" "$lock" && ok "$name #$hex in hyprlock" || fail "$name #$hex missing from hyprlock.conf"
     done
+    grep -q "springPop" "$lock" && ok "springPop curve in hyprlock" || fail "springPop missing from hyprlock.conf"
 
     # GTK apps: the stylesheets use the same palette as Theme.qml.
     local name hex
@@ -95,7 +102,7 @@ static() {
         done
     fi
 
-    # The login screen (SDDM) keeps copies of the dark palette and corners (like the lock screen, it has no light version:
+    # The login screen (SDDM) keeps copies of the dark palette, corners and spring stiffness (like the lock screen, it has no light version:
     # both are light text over the darkened wallpaper).
     local sddm="$root/system/sddm/carbon/Main.qml"
     if [ -f "$sddm" ]; then
@@ -103,6 +110,8 @@ static() {
             hex=$(tv "$name" | tr -d '"#')
             grep -qi "\"#$hex\"" "$sddm" && ok "$name #$hex in the login screen" || fail "$name #$hex missing from system/sddm/carbon/Main.qml"
         done
+        local snappy; snappy=$(tv springSnappy)
+        grep -qE "(spring|springSnappy) *: *$snappy\b" "$sddm" && ok "springSnappy $snappy in the login screen" || fail "springSnappy ${snappy:-?} missing from system/sddm/carbon/Main.qml"
     fi
     # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")
@@ -111,12 +120,19 @@ static() {
 }
 
 # ---------------------------------------------------------------------------------------------------------
-layers() { hyprctl layers -j 2>/dev/null | python3 -c '
+layers() {
+    hyprctl layers -j 2>/dev/null | python3 -c '
 import json, sys
 for mon in json.load(sys.stdin).values():
     for lvl in mon["levels"].values():
         for l in lvl:
-            if l["namespace"].startswith("quickshell-"): print(l["namespace"])'; }
+            if l["namespace"].startswith("quickshell-"): print(l["namespace"])'
+    hyprctl clients -j 2>/dev/null | python3 -c '
+import json, sys
+for c in json.load(sys.stdin):
+    if c.get("class") == "org.quickshell" and c.get("title") == "Settings" and c.get("mapped"):
+        print("quickshell-settings")'
+}
 
 # Poll until namespace $1 is gone; echo the milliseconds it took (or "stuck").
 time_gone() {
@@ -134,8 +150,9 @@ live() {
     echo "live: open / close every floating surface"
     command -v qs >/dev/null && command -v hyprctl >/dev/null && hyprctl layers >/dev/null 2>&1 || { fail "needs a running Hyprland session with quickshell"; return; }
 
-    # Start from a quiet desktop: close the panel and wait (up to 3 s) for every pop-up to unmap.
+    # Start from a quiet desktop: close the panel/settings and wait (up to 3 s) for every pop-up to unmap.
     qs ipc call panel close >/dev/null 2>&1
+    qs ipc call settings close >/dev/null 2>&1
     local i
     for i in $(seq 300); do layers | grep -qE 'quickshell-(launcher|apps|clipboard|settings|pairing|power|center|panel|osd|notifications|traymenu|handwriting)$' || break; sleep 0.01; done
     local before; before=$(layers | sort -u | tr '\n' ' ')
@@ -171,7 +188,7 @@ live() {
     local errs
     # Only the shell that is running now: earlier ones (before a restart) may have logged errors that are already fixed.
     local pid; pid=$(systemctl --user show -p MainPID --value quickshell 2>/dev/null)
-    errs=$(journalctl --user -u quickshell --since "-10 min" --no-pager 2>/dev/null | grep -F "quickshell[$pid]" | grep -E "ERROR|WARN" | grep -v "Reloading" | tail -5)
+    errs=$(journalctl --user -u quickshell --since "-10 min" --no-pager 2>/dev/null | grep -F "quickshell[$pid]" | grep -E "ERROR|WARN" | grep -vE "Reloading|qt\.svg\.draw|sni\.watcher" | tail -5)
     [ -z "$errs" ] && ok "no errors or warnings from the running shell (pid $pid) in the last 10 minutes" || { fail "quickshell logged problems:"; printf '%s\n' "$errs" | cut -c1-200 | sed 's/^/          /'; }
 }
 

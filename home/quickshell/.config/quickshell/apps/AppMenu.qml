@@ -153,8 +153,25 @@ Scope {
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
                     model: win.shown
-                    highlightMoveDuration: Theme.durFast
+                    highlightFollowsCurrentItem: false
                     onCurrentIndexChanged: positionViewAtIndex(currentIndex, GridView.Contain)
+
+                    highlight: Item {
+                        z: -1
+                        width: root.cellWidth
+                        height: root.cellHeight
+                        visible: grid.count > 0 && grid.currentIndex >= 0
+                        x: grid.currentItem ? grid.currentItem.x : (grid.currentIndex >= 0 ? (grid.currentIndex % root.columns) * root.cellWidth : 0)
+                        y: grid.currentItem ? grid.currentItem.y : (grid.currentIndex >= 0 ? Math.floor(grid.currentIndex / root.columns) * root.cellHeight : 0)
+                        Behavior on x { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                        Behavior on y { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+
+                        Rectangle {
+                            anchors { fill: parent; margins: 4 }
+                            radius: Theme.radiusCard
+                            color: Theme.selected
+                        }
+                    }
 
                     delegate: Item {
                         id: cell
@@ -168,7 +185,7 @@ Scope {
                         Rectangle {
                             anchors { fill: parent; margins: 4 }
                             radius: Theme.radiusCard
-                            color: cell.current ? Theme.selected : (area.containsMouse ? Theme.hover : Theme.clear)
+                            color: area.containsMouse ? Theme.hover : Theme.clear
                             Behavior on color { ColorAnimation { duration: Theme.durFast } }
                         }
 
@@ -176,6 +193,8 @@ Scope {
                             anchors.centerIn: parent
                             width: parent.width - 16
                             spacing: 8
+                            scale: area.pressed ? Theme.pressScale : 1
+                            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
 
                             IconImage {
                                 anchors.horizontalCenter: parent.horizontalCenter

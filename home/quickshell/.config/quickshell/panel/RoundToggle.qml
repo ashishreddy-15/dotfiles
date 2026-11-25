@@ -41,6 +41,8 @@ Item {
             color: root.on ? Theme.accent : (area.containsMouse ? Theme.hover : Theme.clear)
             border.width: root.on ? 0 : 1
             border.color: Theme.border
+            scale: area.pressed ? Theme.pressScale : 1
+            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
             Behavior on color { ColorAnimation { duration: Theme.durFast } }
 
             StyledText {

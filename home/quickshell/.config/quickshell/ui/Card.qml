@@ -24,13 +24,17 @@ Item {
     property real shown: open ? 1 : 0
     Behavior on shown { NumberAnimation { duration: root.open ? Theme.durBase : Theme.durFast; easing.type: Theme.easeOut } }
 
+    // Physical spring progress for scale and slide so retargeting mid-flight keeps momentum.
+    property real spatial: open ? 1 : 0
+    Behavior on spatial { SpringAnimation { spring: root.open ? Theme.springSmooth : Theme.springSnappy; damping: root.open ? Theme.dampingSmooth : Theme.dampingExit; epsilon: Theme.epsNorm } }
+
     height: Math.min(contentHeight, maxHeight)
-    Behavior on height { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
+    Behavior on height { SpringAnimation { spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx } }
 
     opacity: shown
-    scale: 0.97 + 0.03 * shown
+    scale: 0.95 + 0.05 * spatial
     transformOrigin: root.origin
-    transform: Translate { y: (1 - root.shown) * -8 }
+    transform: Translate { y: (1 - root.spatial) * (root.origin === Item.Bottom ? 8 : -8) }
 
     RectangularShadow {
         anchors.fill: parent

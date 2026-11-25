@@ -19,7 +19,7 @@ Item {
         id: track
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
         height: mouse.pressed ? 6 : 4       // a little thicker under the pointer, thicker still while dragging
-        Behavior on height { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+        Behavior on height { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
         radius: Theme.radiusSmall
         color: Theme.border
 
@@ -28,6 +28,7 @@ Item {
             height: parent.height
             radius: parent.radius
             color: root.muted ? Theme.dim : Theme.accent
+            Behavior on width { enabled: !mouse.pressed; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
         }
 
         // Knob: appears when the pointer is over the slider.
@@ -39,8 +40,9 @@ Item {
             radius: width / 2
             color: Theme.bright
             opacity: mouse.containsMouse || mouse.pressed ? 1 : 0
+            Behavior on x { enabled: !mouse.pressed; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
             Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-            Behavior on width { NumberAnimation { duration: Theme.durFast; easing.type: Theme.easeOut } }
+            Behavior on width { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
         }
     }
 
