@@ -29,7 +29,6 @@ Singleton {
         const v = stateView.text().trim()
         setShade(v)
         scheme = dark ? "prefer-dark" : "prefer-light"
-        refresh()
     }
 
     // qs ipc call appearance scheme dark|light     (the script calls this after a change from a terminal)

@@ -19,7 +19,8 @@ Page {
         .sort((a, b) => (b.connected - a.connected) || ((b.paired ? 1 : 0) - (a.paired ? 1 : 0)) || a.name.localeCompare(b.name))
     readonly property var connectedDevices: Bluetooth.devices.values.filter(d => d.connected)
 
-    Component.onCompleted: Rfkill.refresh()
+    Component.onCompleted: { Rfkill.refresh(); Pairing.sectionOpen = true }
+    Component.onDestruction: Pairing.sectionOpen = false
 
     Binding {
         target: root.adapter

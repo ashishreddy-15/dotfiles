@@ -12,6 +12,9 @@ Page {
     property string range: "today"          // today | yesterday | week | all
     property string query: ""
 
+    Component.onCompleted: Notifs.openArchive()
+    Component.onDestruction: Notifs.closeArchive()
+
     // ---- the entries to show, with a heading before each new day ----
     function startOfDay(offset) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + offset); return d.getTime() }
     function dayName(ms) {

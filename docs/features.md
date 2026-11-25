@@ -141,17 +141,19 @@ buttons and pressure curves are otherwise set in the app (Xournal++: Edit > Pref
 
 ## Handwriting input
 
-A slim strip you write into with the pen; what you write becomes text. Made to be used from the pen alone.
+A slim strip you write into with the pen; what you write becomes text. Made to be used from the pen alone. **Off by
+default**: turn it on in **Settings > Tablet > Handwriting input** (remembered in `~/.local/state/dotfiles/handwriting.json`).
 
 **The handwriting key: Caps Lock.** Tap the field with the pen tip, press **Caps Lock** (left hand; the pen is in the
 right): the strip opens just below where the pointer is (above it if there is no room), next to the field you tapped.
 Write, press **Caps Lock** again: the text is typed into that field and the strip closes. On the laptop keyboard the
-Copilot key does the same. While a pen tablet is connected Caps Lock does not lock capitals (the shell sets `caps:none`, see `Tablet.qml`; with no tablet it is a normal Caps Lock again; the bind is
+Copilot key does the same. While handwriting input is enabled and a pen tablet is connected, Caps Lock does not lock
+capitals (the shell sets `caps:none`, see `Handwriting.qml`; otherwise it is a normal Caps Lock; the bind is
 on key code 66 in `binds.lua`, calling `qs ipc call handwriting pen`). Also `Super + Shift + W` (open / close) or an
 ExpressKey set to "Handwriting input". Not the pen's side button: apps get a click from it too (Hyprland cannot stop
 that), and that click would move the focus off the field (e.g. off Brave's address bar).
-The strip only opens while a pen tablet is connected (the keys do nothing otherwise), and it closes if the tablet is
-unplugged.
+The strip only opens while handwriting input is enabled in Settings and a pen tablet is connected (the keys do nothing
+otherwise), and it closes if either is turned off or the tablet is unplugged.
 With the launcher open, it docks under the launcher's search box instead, and the launcher stays open while you write.
 
 **The pad becomes the strip.** While the strip is open, the whole pad maps onto it (keeping proportions: the full width
@@ -217,7 +219,7 @@ Confirm with nothing pending closes the strip. In Type mode the strip takes no k
 into your window. Not used in Launcher mode.
 
 **IPC** (`qs ipc call handwriting <fn>`): `toggle`, `open`, `close`, `cancel`, `confirm`, `submit`, `undo`, `pen` (open,
-or confirm if open), `continuous on|off`.
+or confirm if open), `continuous on|off`, `enabled on|off`, `status`.
 
 **Keeping what you write** (Settings > Tablet > Handwriting > "Keep what I write", **on by default**). On Enter, the ink
 picture, the strokes and the final text (as you corrected it) are saved in `~/handwriting/usage/`, on this computer

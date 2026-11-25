@@ -56,143 +56,148 @@ Scope {
 
     function go(i) { ShellState.settingsSection = sections[Math.max(0, Math.min(sections.length - 1, i))].id }
 
-    // ---- keyboard focus: the sidebar (the card itself has the focus) or a control inside the section ----
-    Connections {
-        target: ShellState
-        function onSettingsOpenChanged() { if (ShellState.settingsOpen) { win.requestActivate(); card.forceActiveFocus() } }
-        function onSettingsSectionChanged() { card.forceActiveFocus() }
-    }
-    function inContent(item) {
-        for (let p = item; p; p = p.parent) if (p === content) return true
-        return false
-    }
-    // Into the section: the first control. Between controls: the next / previous one; before the first, the sidebar.
-    function moveFocus(forward) {
-        const cur = card.Window.activeFocusItem
-        const from = inContent(cur) ? cur : content
-        const next = from.nextItemInFocusChain(forward)
-        if (next && inContent(next) && next !== content) next.forceActiveFocus()
-        else if (!forward) card.forceActiveFocus()
-    }
+    LazyLoader {
+        id: loader
+        active: ShellState.settingsOpen
 
-    FloatingWindow {
-        id: win
+        FloatingWindow {
+            id: win
 
-        title: "Settings"
-        visible: ShellState.settingsOpen
-        // Closed by the compositor (Super + Q): keep the shared state in step.
-        onVisibleChanged: if (!visible) ShellState.settingsOpen = false
-        implicitWidth: root.cardWidth
-        implicitHeight: root.cardHeight
-        minimumSize: Qt.size(root.minWidth, root.minHeight)
-        color: Theme.surface
+            title: "Settings"
+            visible: true
+            // Closed by the compositor (Super + Q): keep the shared state in step.
+            onVisibleChanged: if (!visible) ShellState.settingsOpen = false
+            implicitWidth: root.cardWidth
+            implicitHeight: root.cardHeight
+            minimumSize: Qt.size(root.minWidth, root.minHeight)
+            color: Theme.surface
 
-        Item {
-            id: card
-            anchors.fill: parent
-            readonly property real shown: win.visible ? 1 : 0
-
-            // Keys the controls do not use come up to here (the controls handle Enter, Space and Left / Right themselves).
-            focus: true
-            Keys.onPressed: event => {
-                const inside = root.inContent(card.Window.activeFocusItem)
-                if (event.key === Qt.Key_Down) { if (inside) root.moveFocus(true); else root.go(root.index + 1) }
-                else if (event.key === Qt.Key_Up) { if (inside) root.moveFocus(false); else root.go(root.index - 1) }
-                else if (event.key === Qt.Key_Tab) root.moveFocus(true)
-                else if (event.key === Qt.Key_Backtab) root.moveFocus(false)
-                else if (!inside && (event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) root.moveFocus(true)
-                else if (inside && event.key === Qt.Key_Left) card.forceActiveFocus()
-                else return
-                event.accepted = true
+            // ---- keyboard focus: the sidebar (the card itself has the focus) or a control inside the section ----
+            Component.onCompleted: Qt.callLater(() => card.forceActiveFocus())
+            Connections {
+                target: ShellState
+                function onSettingsSectionChanged() { card.forceActiveFocus() }
+            }
+            function inContent(item) {
+                for (let p = item; p; p = p.parent) if (p === content) return true
+                return false
+            }
+            // Into the section: the first control. Between controls: the next / previous one; before the first, the sidebar.
+            function moveFocus(forward) {
+                const cur = card.Window.activeFocusItem
+                const from = inContent(cur) ? cur : content
+                const next = from.nextItemInFocusChain(forward)
+                if (next && inContent(next) && next !== content) next.forceActiveFocus()
+                else if (!forward) card.forceActiveFocus()
             }
 
-            Row {
+            Item {
+                id: card
                 anchors.fill: parent
+                readonly property real shown: win.visible ? 1 : 0
 
-                // ---- sidebar ----
-                Item {
-                    width: root.sidebarWidth
-                    height: parent.height
+                // Keys the controls do not use come up to here (the controls handle Enter, Space and Left / Right themselves).
+                focus: true
+                Keys.onPressed: event => {
+                    const inside = win.inContent(card.Window.activeFocusItem)
+                    if (event.key === Qt.Key_Down) { if (inside) win.moveFocus(true); else root.go(root.index + 1) }
+                    else if (event.key === Qt.Key_Up) { if (inside) win.moveFocus(false); else root.go(root.index - 1) }
+                    else if (event.key === Qt.Key_Tab) win.moveFocus(true)
+                    else if (event.key === Qt.Key_Backtab) win.moveFocus(false)
+                    else if (!inside && (event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) win.moveFocus(true)
+                    else if (inside && event.key === Qt.Key_Left) card.forceActiveFocus()
+                    else return
+                    event.accepted = true
+                }
 
-                    Column {
-                        anchors { fill: parent; margins: Theme.cardInset + 8 }
-                        spacing: 2
+                Row {
+                    anchors.fill: parent
 
-                        StyledText {
-                            text: "Settings"
-                            color: Theme.bright
-                            font.pixelSize: Theme.fontLarge
-                            height: 44
-                            leftPadding: 8
-                        }
-                        Repeater {
-                            model: root.sections
-                            Column {
-                                required property var modelData
-                                required property int index
-                                width: parent.width
+                    // ---- sidebar ----
+                    Item {
+                        width: root.sidebarWidth
+                        height: parent.height
 
-                                // A small heading where a group starts
-                                StyledText {
-                                    visible: index === 0 || root.sections[index - 1].group !== modelData.group
-                                    leftPadding: 8
-                                    topPadding: index === 0 ? 4 : 16
-                                    bottomPadding: 6
-                                    text: modelData.group
-                                    color: Theme.dim
-                                    font.pixelSize: Theme.fontSmall
-                                }
-                                SideItem {
-                                    text: modelData.label
-                                    glyph: modelData.glyph
-                                    current: ShellState.settingsSection === modelData.id
-                                    onClicked: { ShellState.settingsSection = modelData.id; card.forceActiveFocus() }
+                        Column {
+                            anchors { fill: parent; margins: Theme.cardInset + 8 }
+                            spacing: 2
+
+                            StyledText {
+                                text: "Settings"
+                                color: Theme.bright
+                                font.pixelSize: Theme.fontLarge
+                                height: 44
+                                leftPadding: 8
+                            }
+                            Repeater {
+                                model: root.sections
+                                Column {
+                                    required property var modelData
+                                    required property int index
+                                    width: parent.width
+
+                                    // A small heading where a group starts
+                                    StyledText {
+                                        visible: index === 0 || root.sections[index - 1].group !== modelData.group
+                                        leftPadding: 8
+                                        topPadding: index === 0 ? 4 : 16
+                                        bottomPadding: 6
+                                        text: modelData.group
+                                        color: Theme.dim
+                                        font.pixelSize: Theme.fontSmall
+                                    }
+                                    SideItem {
+                                        text: modelData.label
+                                        glyph: modelData.glyph
+                                        current: ShellState.settingsSection === modelData.id
+                                        onClicked: { ShellState.settingsSection = modelData.id; card.forceActiveFocus() }
+                                    }
                                 }
                             }
                         }
+
                     }
 
-                }
+                    Rectangle { width: 1; height: parent.height; color: Theme.border }
 
-                Rectangle { width: 1; height: parent.height; color: Theme.border }
+                    // ---- the settings of the chosen section ----
+                    Item {
+                        width: parent.width - root.sidebarWidth - 1
+                        height: parent.height
 
-                // ---- the settings of the chosen section ----
-                Item {
-                    width: parent.width - root.sidebarWidth - 1
-                    height: parent.height
-
-                    StyledText {
-                        id: heading
-                        x: root.pad
-                        y: root.pad
-                        text: root.sections[root.index].label
-                        color: Theme.bright
-                        font.pixelSize: Theme.fontXL
-                    }
-
-                    Loader {
-                        id: content
-                        anchors { left: parent.left; right: parent.right; top: heading.bottom; bottom: parent.bottom; margins: root.pad; topMargin: 16 }
-                        active: win.visible
-                        source: root.sections[root.index].file
-                    }
-
-                    // Close: an x at the top right of the window.
-                    Rectangle {
-                        id: closeButton
-                        anchors { top: parent.top; right: parent.right; margins: 14 }
-                        width: 32
-                        height: 32
-                        radius: Theme.radiusRow
-                        color: closeArea.pressed ? Theme.selected : closeArea.containsMouse ? Theme.hover : Theme.clear
-                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                        activeFocusOnTab: true
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { ShellState.settingsOpen = false; event.accepted = true }
+                        StyledText {
+                            id: heading
+                            x: root.pad
+                            y: root.pad
+                            text: root.sections[root.index].label
+                            color: Theme.bright
+                            font.pixelSize: Theme.fontXL
                         }
-                        StyledText { anchors.centerIn: parent; text: Theme.glyphTimes; color: closeArea.containsMouse ? Theme.bright : Theme.dim; font.pixelSize: Theme.fontXL }
-                        MouseArea { id: closeArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.settingsOpen = false }
-                        FocusRing { visible: closeButton.activeFocus; anchors.margins: -3 }
+
+                        Loader {
+                            id: content
+                            anchors { left: parent.left; right: parent.right; top: heading.bottom; bottom: parent.bottom; margins: root.pad; topMargin: 16 }
+                            active: win.visible
+                            source: root.sections[root.index].file
+                        }
+
+                        // Close: an x at the top right of the window.
+                        Rectangle {
+                            id: closeButton
+                            anchors { top: parent.top; right: parent.right; margins: 14 }
+                            width: 32
+                            height: 32
+                            radius: Theme.radiusRow
+                            color: closeArea.pressed ? Theme.selected : closeArea.containsMouse ? Theme.hover : Theme.clear
+                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                            activeFocusOnTab: true
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) { ShellState.settingsOpen = false; event.accepted = true }
+                            }
+                            StyledText { anchors.centerIn: parent; text: Theme.glyphTimes; color: closeArea.containsMouse ? Theme.bright : Theme.dim; font.pixelSize: Theme.fontXL }
+                            MouseArea { id: closeArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.settingsOpen = false }
+                            FocusRing { visible: closeButton.activeFocus; anchors.margins: -3 }
+                        }
                     }
                 }
             }

@@ -1,5 +1,3 @@
-//@ pragma UseQApplication
-
 // Entry point. Each piece of the desktop lives in its own folder and is listed here.
 // Quickshell reloads automatically when any of these files is saved.
 // Logs: journalctl --user -u quickshell -f
@@ -23,6 +21,7 @@ ShellRoot {
     // settings), so touch them here.
     readonly property bool tabletReady: Tablet.present
     readonly property bool touchpadReady: Touchpad.present
+    readonly property bool handwritingReady: Handwriting.active
 
     Bar {}
     Notifications {}

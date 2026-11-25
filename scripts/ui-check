@@ -145,6 +145,10 @@ live() {
     local item target fn ns res
     for item in launcher:toggle:quickshell-launcher apps:toggle:quickshell-apps clipboard:toggle:quickshell-clipboard panel:toggle:quickshell-panel settings:toggle:quickshell-settings power:toggle:quickshell-power notifications:toggle:quickshell-center handwriting:toggle:quickshell-handwriting; do
         IFS=: read -r target fn ns <<<"$item"
+        if [ "$target" = handwriting ] && ! qs ipc call handwriting status 2>/dev/null | grep -q '"active":true'; then
+            ok "handwriting: skipped (disabled in Settings or no tablet connected)"
+            continue
+        fi
         qs ipc call "$target" "$fn" >/dev/null 2>&1; sleep 0.6
         if layers | grep -qx "$ns"; then
             qs ipc call "$target" "$fn" >/dev/null 2>&1

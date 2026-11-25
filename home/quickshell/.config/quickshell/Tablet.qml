@@ -71,12 +71,14 @@ Singleton {
     }
     Process {
         id: actionLister
-        running: true
         command: [Quickshell.env("HOME") + "/.local/bin/tablet-keys", "--actions"]
         stdout: StdioCollector {
             onStreamFinished: root.actions = text.trim().split("\n").filter(l => l.includes("\t"))
                 .map(l => ({ id: l.split("\t")[0], label: l.split("\t")[1] }))
         }
+    }
+    function ensureActions() {
+        if (actions.length === 0 && !actionLister.running) actionLister.running = true
     }
 
     function set(key, value) {
@@ -88,8 +90,8 @@ Singleton {
     // ---- what is connected ----
     function refresh() {
         if (!lister.running) lister.running = true
-        if (!batteryFinder.running) batteryFinder.running = true
-        if (!rulesCheck.running) rulesCheck.running = true
+        if (root.present && !batteryFinder.running) batteryFinder.running = true
+        if (!root.keysReady && !rulesCheck.running) rulesCheck.running = true
     }
     Process {
         id: lister
@@ -101,6 +103,7 @@ Singleton {
                     const changed = JSON.stringify(names) !== JSON.stringify(root.tablets)
                     root.tablets = names
                     if (changed) root.apply()
+                    if (names.length > 0 && !batteryFinder.running) batteryFinder.running = true
                 } catch (e) { root.tablets = [] }
             }
         }
@@ -117,8 +120,14 @@ Singleton {
             }
         }
     }
-    // Plugged in or out: look again every few seconds (cheap: one small hyprctl call).
-    Timer { interval: 5000; running: true; repeat: true; onTriggered: root.refresh() }
+    // Plug/unplug notifications come from tablet-keys (started by udev 70-tablet-pad.rules) via `qs ipc call tablet apply`,
+    // and Settings > Tablet calls refresh() on open. Only poll battery slowly while that section is open.
+    Timer {
+        interval: 60000
+        running: root.present && ShellState.settingsOpen && ShellState.settingsSection === "tablet"
+        repeat: true
+        onTriggered: if (!batteryFinder.running) batteryFinder.running = true
+    }
 
     // ---- applying ----
     function monitorFor(name) { return Hyprland.monitors.values.find(m => m.name === name) ?? null }
@@ -178,13 +187,6 @@ Singleton {
         Quickshell.execDetached(["hyprctl", "eval", lua])     // detached: two quick calls (map, restore) never drop one
     }
 
-    // Caps Lock is the handwriting key while a pen tablet is connected (it then does not lock capitals); with no tablet
-    // it is an ordinary Caps Lock again. The bind in binds.lua is non_consuming, so the key still reaches the system.
-    function applyCapsKey() {
-        Quickshell.execDetached(["hyprctl", "eval", 'hl.config({ input = { kb_options = "' + (present ? "caps:none" : "") + '" } })'])
-    }
-    onPresentChanged: applyCapsKey()
-
     // What was applied last, to check: `qs ipc call tablet status`.
     property string lastApplied: ""
     IpcHandler {
@@ -197,11 +199,10 @@ Singleton {
     Connections {
         target: Hyprland
         function onFocusedMonitorChanged() { if (root.screen === "current" && root.keepRatio) root.apply() }
-        function onRawEvent(event) { if (event.name === "configreloaded") { root.apply(); root.applyCapsKey() } }
+        function onRawEvent(event) { if (event.name === "configreloaded") root.apply() }
     }
 
     Component.onCompleted: {
-        applyCapsKey()
         try {
             const d = JSON.parse(saved.text())
             if (d.screen) screen = d.screen

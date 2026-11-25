@@ -12,6 +12,8 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 Type=simple
 # Icon theme for app icons (launcher): without this only the minimal hicolor theme is searched.
 Environment=QS_ICON_THEME=Adwaita
+# Quickshell links jemalloc: return freed heap pages promptly after lazy-loaded pop-ups close.
+Environment=MALLOC_CONF=dirty_decay_ms:1000,muzzy_decay_ms:1000
 ExecStart=/usr/bin/quickshell
 Restart=on-failure
 RestartSec=1

@@ -41,7 +41,7 @@ Singleton {
     // Apps start through `uwsm app`, so each runs in its own systemd scope; terminal apps open in kitty.
     function launch(app) {
         const cmd = Array.from(app.command)
-        const full = app.runInTerminal ? ["kitty", "-e", ...cmd] : cmd
+        const full = app.runInTerminal ? ["kitty", "--single-instance", "-e", ...cmd] : cmd
         Quickshell.execDetached(["uwsm", "app", "--", ...full])
     }
 }

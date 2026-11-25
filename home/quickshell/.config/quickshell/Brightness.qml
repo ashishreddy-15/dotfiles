@@ -48,7 +48,7 @@ Singleton {
     // one could not be controlled so far (e.g. after fixing the i2c permission).
     function refresh() {
         for (const d of displays) d.refresh()
-        if (ddcStatus !== "ok") redetect.restart()
+        if (hasExternal && ddcStatus !== "ok") redetect.restart()
     }
 
     // Dim every screen we can control when the computer goes idle, and put each back as it was on activity
@@ -79,6 +79,7 @@ Singleton {
     // ---- which screens can we control? ----
     readonly property var monitorNames: Hyprland.monitors.values.map(m => m.name)
     readonly property string internalName: monitorNames.find(n => isInternal(n)) ?? ""
+    readonly property bool hasExternal: monitorNames.some(n => !isInternal(n))
 
     Process {
         id: findBacklight
@@ -111,7 +112,15 @@ Singleton {
     }
 
     // Look again when screens come or go (not on every change: detection takes a few seconds).
-    Timer { id: redetect; interval: 2500; onTriggered: if (!detect.running) detect.running = true }
+    // Skip probing I2C entirely when only the laptop panel is connected.
+    Timer {
+        id: redetect
+        interval: 2500
+        onTriggered: {
+            if (!root.hasExternal) { root.ddcScreens = []; root.ddcStatus = "none"; return }
+            if (!detect.running) detect.running = true
+        }
+    }
     Connections {
         target: Hyprland.monitors
         function onValuesChanged() { redetect.restart() }

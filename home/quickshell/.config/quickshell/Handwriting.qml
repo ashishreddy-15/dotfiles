@@ -3,11 +3,13 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 
 // Handwriting input: the settings, the link to the recognition daemon (hw-ocr), and what happens to the text.
 // The popup itself is handwriting/HandwritingPopup.qml (Super + Shift + W, `qs ipc call handwriting toggle`).
 //
 // Settings, kept in ~/.local/state/dotfiles/handwriting.json (Settings > Tablet > Handwriting):
+//   enabled   master on/off switch (off by default); popup and Caps Lock remapping only work while enabled and a tablet is connected
 //   deliver   "type"      type the text into the window that was focused before the popup (wtype)
 //             "copy"      only put it on the clipboard
 //             "launcher"  open the launcher with the text typed into its search field
@@ -21,6 +23,8 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    property bool enabled: false
+    readonly property bool active: enabled && Tablet.present
     property bool open: false
     property string deliver: "type"
     property bool logging: true
@@ -58,7 +62,7 @@ Singleton {
     }
     function set(key, value) {
         root[key] = value
-        writer.json = JSON.stringify({ deliver: deliver, log: logging, continuous: continuousDefault, lineEnd: lineEnd })
+        writer.json = JSON.stringify({ enabled: enabled, deliver: deliver, log: logging, continuous: continuousDefault, lineEnd: lineEnd })
         writer.running = true
     }
     // ---- the flag file ----
@@ -124,17 +128,34 @@ Singleton {
         if (deliver === "launcher" || ShellState.launcherKeepOpen) open = false      // the launcher keeps the focus
         else closeWith(["true"])
     }
+    // Caps Lock is the handwriting key while handwriting input is enabled and a pen tablet is connected (it then does
+    // not lock capitals); otherwise it is an ordinary Caps Lock. The bind in binds.lua is non_consuming, so the key
+    // still reaches the system.
+    function applyCapsKey() {
+        Quickshell.execDetached(["hyprctl", "eval", 'hl.config({ input = { kb_options = "' + (active ? "caps:none" : "") + '" } })'])
+    }
+    onActiveChanged: {
+        applyCapsKey()
+        if (!active && open) cancel()
+    }
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) { if (event.name === "configreloaded") root.applyCapsKey() }
+    }
+
     Component.onDestruction: Quickshell.execDetached(["rm", "-f", flagPath])
 
     Component.onCompleted: {
         Quickshell.execDetached(["rm", "-f", flagPath])      // left over from a crashed shell
         try {
             const d = JSON.parse(saved.text())
+            if (d.enabled !== undefined) enabled = !!d.enabled
             if (deliverModes.some(m => m.value === d.deliver)) deliver = d.deliver
             if (d.log !== undefined) logging = !!d.log
             if (d.continuous !== undefined) continuousDefault = !!d.continuous
             if (d.lineEnd === "space" || d.lineEnd === "newline") lineEnd = d.lineEnd
         } catch (e) { /* first run: the defaults */ }
+        applyCapsKey()
     }
 
     // ---- the daemon ----

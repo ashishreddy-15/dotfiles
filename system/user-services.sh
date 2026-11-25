@@ -18,7 +18,10 @@ source "$here/../scripts/lib/svc.sh"
 svc_group on  "desktop shell: bar, launcher"   quickshell.service
 svc_group on  "idle: lock, screen off, sleep"  hypridle.service
 svc_group on  "password prompts for apps"      hyprpolkitagent.service
-svc_group on  "Bluetooth pairing prompts"      bt-agent.service
+# Started on demand by Settings > Bluetooth (only while pairing is open); saves ~31 MiB at idle.
+SVC_NOW=1
+svc_group off "Bluetooth pairing (on demand)"  bt-agent.service
+SVC_NOW=0
 svc_group off "Bluetooth file transfer"        obex.service
 # Socket-activated: nothing runs until the handwriting popup (or `hw-ocr`) connects; the daemon exits when idle.
 SVC_NOW=1

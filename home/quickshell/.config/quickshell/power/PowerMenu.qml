@@ -14,8 +14,8 @@ Scope {
     id: root
 
     property bool open: false
-    property int current: 0
-    property string confirming: ""
+    property bool mounted: false
+    onOpenChanged: if (open) mounted = true; else if (!loader.item || !loader.item.alive) mounted = false
 
     IpcHandler {
         target: "power"
@@ -29,127 +29,142 @@ Scope {
         function onOpenPowerMenu() { root.open = true }
     }
 
-    onOpenChanged: {
-        confirming = ""
-        if (open) { current = 0; Qt.callLater(() => card.forceActiveFocus()) }
-    }
-
-    function activate(i) {
-        const a = Power.actions[i]
-        current = i
-        if (a.ask && confirming !== a.name) { confirming = a.name; forget.restart(); return }
-        open = false
-        Power.run(a)
-    }
-    // Forget an unanswered question after a few seconds.
-    Timer { id: forget; interval: 4000; onTriggered: root.confirming = "" }
-
     readonly property int tileSize: 112
 
-    PanelWindow {
-        id: win
+    LazyLoader {
+        id: loader
+        active: root.open || root.mounted
 
-        screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
-        visible: root.open || card.shown > 0
+        PanelWindow {
+            id: win
 
-        anchors { top: true; bottom: true; left: true; right: true }
-        exclusionMode: ExclusionMode.Ignore
-        color: "transparent"
-        WlrLayershell.namespace: "quickshell-power"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            property bool ready: false
+            readonly property bool alive: card.shown > 0
+            property int current: 0
+            property string confirming: ""
+            onAliveChanged: if (!alive && !root.open) Qt.callLater(() => { if (!root.open && (!loader.item || !loader.item.alive)) root.mounted = false })
 
-        // The dimmed screen; a click on it closes the menu.
-        Rectangle {
-            anchors.fill: parent
-            color: Theme.shadow
-            opacity: card.shown
-            MouseArea { anchors.fill: parent; onClicked: root.open = false }
-        }
-
-        Card {
-            id: card
-            anchors.centerIn: parent
-            width: row.implicitWidth + 2 * Theme.cardInset * 3
-            open: root.open
-            contentHeight: root.tileSize + 2 * Theme.cardInset * 3
-
-            focus: true
-            Keys.onPressed: event => {
-                const n = Power.actions.length
-                const byKey = Power.actions.findIndex(a => a.key === event.key)
-                if (event.key === Qt.Key_Escape) root.open = false
-                else if (event.key === Qt.Key_Right || event.key === Qt.Key_Tab) { root.current = (root.current + 1) % n; root.confirming = "" }
-                else if (event.key === Qt.Key_Left || event.key === Qt.Key_Backtab) { root.current = (root.current - 1 + n) % n; root.confirming = "" }
-                else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) root.activate(root.current)
-                else if (byKey >= 0) root.activate(byKey)
-                else return
-                event.accepted = true
+            Component.onCompleted: Qt.callLater(() => { ready = true; card.forceActiveFocus() })
+            Connections {
+                target: root
+                function onOpenChanged() {
+                    win.confirming = ""
+                    if (root.open) { win.current = 0; Qt.callLater(() => card.forceActiveFocus()) }
+                }
             }
 
-            Row {
-                id: row
+            function activate(i) {
+                const a = Power.actions[i]
+                current = i
+                if (a.ask && confirming !== a.name) { confirming = a.name; forget.restart(); return }
+                root.open = false
+                Power.run(a)
+            }
+            // Forget an unanswered question after a few seconds.
+            Timer { id: forget; interval: 4000; onTriggered: win.confirming = "" }
+
+            screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
+            visible: root.open || card.shown > 0
+
+            anchors { top: true; bottom: true; left: true; right: true }
+            exclusionMode: ExclusionMode.Ignore
+            color: "transparent"
+            WlrLayershell.namespace: "quickshell-power"
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+            // The dimmed screen; a click on it closes the menu.
+            Rectangle {
+                anchors.fill: parent
+                color: Theme.shadow
+                opacity: card.shown
+                MouseArea { anchors.fill: parent; onClicked: root.open = false }
+            }
+
+            Card {
+                id: card
                 anchors.centerIn: parent
-                spacing: Theme.cardInset
+                width: row.implicitWidth + 2 * Theme.cardInset * 3
+                open: root.open && win.ready
+                contentHeight: root.tileSize + 2 * Theme.cardInset * 3
 
-                Repeater {
-                    model: Power.actions
+                focus: true
+                Keys.onPressed: event => {
+                    const n = Power.actions.length
+                    const byKey = Power.actions.findIndex(a => a.key === event.key)
+                    if (event.key === Qt.Key_Escape) root.open = false
+                    else if (event.key === Qt.Key_Right || event.key === Qt.Key_Tab) { win.current = (win.current + 1) % n; win.confirming = "" }
+                    else if (event.key === Qt.Key_Left || event.key === Qt.Key_Backtab) { win.current = (win.current - 1 + n) % n; win.confirming = "" }
+                    else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) win.activate(win.current)
+                    else if (byKey >= 0) win.activate(byKey)
+                    else return
+                    event.accepted = true
+                }
 
-                    Rectangle {
-                        id: tile
-                        required property var modelData
-                        required property int index
-                        readonly property bool selected: root.current === index
-                        readonly property bool asking: root.confirming === modelData.name
+                Row {
+                    id: row
+                    anchors.centerIn: parent
+                    spacing: Theme.cardInset
 
-                        width: root.tileSize
-                        height: root.tileSize
-                        radius: Theme.radiusRow
-                        color: selected ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
-                                        : (area.containsMouse ? Theme.hover : Theme.clear)
-                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                    Repeater {
+                        model: Power.actions
 
-                        // The accent mark under the chosen one, as in the pickers (here at the bottom edge).
                         Rectangle {
-                            anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 5 }
-                            width: 18
-                            height: 2
-                            radius: Theme.radiusMark
-                            color: tile.asking ? Theme.warn : Theme.accent
-                            opacity: tile.selected ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                        }
+                            id: tile
+                            required property var modelData
+                            required property int index
+                            readonly property bool selected: win.current === index
+                            readonly property bool asking: win.confirming === modelData.name
 
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 10
-                            StyledText {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: tile.modelData.glyph
-                                color: tile.asking ? Theme.warn : tile.selected ? Theme.bright : Theme.text
-                                font.pixelSize: Theme.fontIcon
+                            width: root.tileSize
+                            height: root.tileSize
+                            radius: Theme.radiusRow
+                            color: selected ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
+                                            : (area.containsMouse ? Theme.hover : Theme.clear)
+                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+
+                            // The accent mark under the chosen one, as in the pickers (here at the bottom edge).
+                            Rectangle {
+                                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 5 }
+                                width: 18
+                                height: 2
+                                radius: Theme.radiusMark
+                                color: tile.asking ? Theme.warn : Theme.accent
+                                opacity: tile.selected ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
                             }
-                            StyledText {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: tile.asking ? tile.modelData.label + "?" : tile.modelData.label
-                                color: tile.asking ? Theme.warn : tile.selected ? Theme.bright : Theme.text
+
+                            Column {
+                                anchors.centerIn: parent
+                                spacing: 10
+                                StyledText {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: tile.modelData.glyph
+                                    color: tile.asking ? Theme.warn : tile.selected ? Theme.bright : Theme.text
+                                    font.pixelSize: Theme.fontIcon
+                                }
+                                StyledText {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: tile.asking ? tile.modelData.label + "?" : tile.modelData.label
+                                    color: tile.asking ? Theme.warn : tile.selected ? Theme.bright : Theme.text
+                                }
                             }
-                        }
 
-                        // The letter that picks it
-                        StyledText {
-                            anchors { top: parent.top; right: parent.right; margins: 8 }
-                            text: String.fromCharCode(tile.modelData.key).toUpperCase()
-                            color: Theme.dim
-                            font.pixelSize: Theme.fontSmall
-                        }
+                            // The letter that picks it
+                            StyledText {
+                                anchors { top: parent.top; right: parent.right; margins: 8 }
+                                text: String.fromCharCode(tile.modelData.key).toUpperCase()
+                                color: Theme.dim
+                                font.pixelSize: Theme.fontSmall
+                            }
 
-                        MouseArea {
-                            id: area
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.activate(tile.index)
+                            MouseArea {
+                                id: area
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: win.activate(tile.index)
+                            }
                         }
                     }
                 }

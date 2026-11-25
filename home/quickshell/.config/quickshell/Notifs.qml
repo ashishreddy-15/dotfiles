@@ -26,14 +26,26 @@ Singleton {
     readonly property int archiveDays: 7
     readonly property string logFile: Quickshell.env("HOME") + "/.local/state/dotfiles/notifications.jsonl"
     property var archive: []                  // [{ time, app, summary, body, urgency }], newest first
+    property bool archiveActive: false        // only loaded while Settings > Notifications is open
+    property bool pruned: false
+
+    function openArchive() {
+        archiveActive = true
+        if (!pruned) { pruned = true; pruner.running = true }
+        else logView.reload()
+    }
+    function closeArchive() {
+        archiveActive = false
+        archive = []
+    }
 
     FileView {
         id: logView
-        path: root.logFile
-        watchChanges: true
+        path: root.archiveActive ? root.logFile : ""
+        watchChanges: root.archiveActive
         printErrors: false
-        onFileChanged: reload()
-        onLoaded: root.readArchive()
+        onFileChanged: if (root.archiveActive) reload()
+        onLoaded: if (root.archiveActive) root.readArchive()
         onLoadFailed: root.archive = []
     }
     function readArchive() {
@@ -66,12 +78,12 @@ Singleton {
     Process {
         id: clearer
         command: ["sh", "-c", 'umask 077; : > "$1"', "sh", root.logFile]
-        onExited: { root.archive = []; logView.reload() }
+        onExited: { root.archive = []; if (root.archiveActive) logView.reload() }
     }
 
-    // When the shell starts: drop entries older than archiveDays.
+    // Drop entries older than archiveDays the first time the archive is opened in a session.
     Process {
-        running: true
+        id: pruner
         command: ["python3", "-I", "-c",
             "import json, os, sys, time\n" +
             "path, days = sys.argv[1], float(sys.argv[2])\n" +
@@ -87,7 +99,7 @@ Singleton {
             "open(tmp, 'w', encoding='utf-8').writelines(keep)\n" +
             "os.replace(tmp, path)\n",
             root.logFile, String(root.archiveDays)]
-        onExited: logView.reload()
+        onExited: if (root.archiveActive) logView.reload()
     }
 
     // id -> the live Notification object (to dismiss it or invoke an action)

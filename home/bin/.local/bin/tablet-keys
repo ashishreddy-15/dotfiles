@@ -82,6 +82,14 @@ def is_pen(path):
         return False
     return "pen" in name.lower()
 
+def notify_shell(delay=0):
+    """Tell Quickshell's Tablet singleton to re-check devices on plug/unplug (replaces 5s idle polling)."""
+    cmd = ["sh", "-c", f"sleep {delay}; qs ipc call tablet apply"] if delay else ["qs", "ipc", "call", "tablet", "apply"]
+    try:
+        subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        pass
+
 def main(argv):
     if argv[:1] == ["--actions"]:
         for k, (label, _) in ACTIONS.items():
@@ -89,28 +97,35 @@ def main(argv):
         return
     if len(argv) != 1: sys.exit(__doc__)
     signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # actions are not waited for: let the kernel clean them up
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     pen = is_pen(argv[0])
-    with open(argv[0], "rb", buffering=0) as dev:
-        while True:
-            data = dev.read(EVENT.size)
-            if len(data) < EVENT.size: break     # the pad went away
-            _, _, etype, code, value = EVENT.unpack(data)
-            if pen:
-                # Only while the strip is open (the pointer is then over the strip, so the click apps also get from
-                # this button lands harmlessly on it). With the strip closed the same click would land in the app under
-                # the pointer and move its focus (e.g. off Brave's address bar), so the strip is opened by an ExpressKey.
-                if etype == EV_KEY and code == BTN_STYLUS and value == 1 and os.path.exists(POPUP_FLAG):
-                    print("pen button: handwriting confirm", flush=True)
-                    run(ACTIONS["hw-pen"][1])
-                continue
-            if etype != EV_KEY or value != 1 or not (BTN_0 <= code < BTN_0 + 16): continue
-            index = code - BTN_0
-            action = action_for(index)
-            what = ACTIONS.get(action, ("", None))[1]
-            print(f"key {index + 1}: {action}", flush=True)
-            if what:
-                proc = run(what)
-                if TARGET: print("   ->", proc.communicate()[0].strip(), flush=True)
+    if not pen: notify_shell(0.5)                   # pad appeared: tell the shell to pick up the tablet
+    try:
+        with open(argv[0], "rb", buffering=0) as dev:
+            while True:
+                data = dev.read(EVENT.size)
+                if len(data) < EVENT.size: break    # the pad went away
+                _, _, etype, code, value = EVENT.unpack(data)
+                if pen:
+                    # Only while the strip is open (the pointer is then over the strip, so the click apps also get from
+                    # this button lands harmlessly on it). With the strip closed the same click would land in the app under
+                    # the pointer and move its focus (e.g. off Brave's address bar), so the strip is opened by an ExpressKey.
+                    if etype == EV_KEY and code == BTN_STYLUS and value == 1 and os.path.exists(POPUP_FLAG):
+                        print("pen button: handwriting confirm", flush=True)
+                        run(ACTIONS["hw-pen"][1])
+                    continue
+                if etype != EV_KEY or value != 1 or not (BTN_0 <= code < BTN_0 + 16): continue
+                index = code - BTN_0
+                action = action_for(index)
+                what = ACTIONS.get(action, ("", None))[1]
+                print(f"key {index + 1}: {action}", flush=True)
+                if what:
+                    proc = run(what)
+                    if TARGET: print("   ->", proc.communicate()[0].strip(), flush=True)
+    except (OSError, KeyboardInterrupt):
+        pass
+    finally:
+        if not pen: notify_shell(0.5)               # pad went away: tell the shell to restore Caps Lock / state
 
 if __name__ == "__main__":
     main(sys.argv[1:])

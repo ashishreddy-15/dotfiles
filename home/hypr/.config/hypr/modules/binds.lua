@@ -7,7 +7,7 @@ local function app(cmd) return hl.dsp.exec_cmd("uwsm app -- " .. cmd) end
 local mod = "SUPER"
 local function k(keys) return mod .. " + " .. keys end
 
-local terminal    = "kitty"
+local terminal    = "kitty --single-instance"
 local fileManager = "nautilus --new-window"
 local browser     = "brave-origin"
 
@@ -22,7 +22,7 @@ hl.bind(k("A"),       hl.dsp.exec_cmd("qs ipc call apps toggle"))        -- app 
 hl.bind(k("N"),       hl.dsp.exec_cmd("qs ipc call notifications toggle"))  -- notification centre
 hl.bind(k("I"),       hl.dsp.exec_cmd("qs ipc call settings toggle"))     -- settings (Wi-Fi, Bluetooth, sound, wallpaper...)
 hl.bind(k("SHIFT + W"), hl.dsp.exec_cmd("qs ipc call handwriting toggle"))   -- handwriting input: write with the pen, the text is typed
--- The handwriting key: Caps Lock (key code 66; the shell sets caps:none while a tablet is connected, so it then never locks capitals; with no tablet it is a normal Caps Lock), under the left hand
+-- The handwriting key: Caps Lock (key code 66; the shell sets caps:none while handwriting input is enabled in Settings and a tablet is connected, so it then never locks capitals; otherwise it is a normal Caps Lock), under the left hand
 -- while the right one holds the pen. First press opens the strip, the next one types what you wrote. The laptop's
 -- Copilot key (which sends Super + Shift + F23) does the same.
 hl.bind("code:66",          hl.dsp.exec_cmd("qs ipc call handwriting pen"), { non_consuming = true })

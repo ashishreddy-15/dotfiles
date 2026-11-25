@@ -19,10 +19,13 @@ Scope {
     id: root
 
     property bool open: false
+    property bool mounted: false
+    onOpenChanged: if (open) mounted = true; else if (!loader.item || !loader.item.alive) mounted = false
     property int requestId: 0
     property string kind: ""
     property string device: ""
     property string value: ""
+    property string initialInput: ""
 
     readonly property bool needsInput: kind === "pin" || kind === "passkey"
     readonly property string title: kind === "service" ? "Allow " + device + "?"
@@ -45,147 +48,163 @@ Scope {
             root.kind = kind
             root.device = device
             root.value = value
-            input.text = kind === "pin" ? value : ""
+            root.initialInput = kind === "pin" ? value : ""
+            if (loader.item) loader.item.setInput(root.initialInput)
             root.open = true
         }
         // BlueZ gave up (timeout, or the device went away).
         function cancel(): void { root.open = false }
     }
 
-    function answer(accept) {
+    function answer(accept, typed) {
         if (!open) return
         open = false
         if (kind === "show" || requestId === 0) return          // nothing is waiting
         reply.command = ["gdbus", "call", "--session", "--dest", "dev.dotfiles.BluetoothAgent",
                          "--object-path", "/dev/dotfiles/BluetoothAgent", "--method", "dev.dotfiles.BluetoothAgent.Answer",
-                         String(requestId), accept ? "true" : "false", needsInput ? input.text : ""]
+                         String(requestId), accept ? "true" : "false", needsInput ? (typed ?? "") : ""]
         reply.running = true
     }
     Process { id: reply }
 
-    onOpenChanged: if (open) Qt.callLater(() => needsInput ? input.forceActiveFocus() : card.forceActiveFocus())
+    LazyLoader {
+        id: loader
+        active: root.open || root.mounted
 
-    PanelWindow {
-        id: win
+        PanelWindow {
+            id: win
 
-        screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
-        visible: root.open || card.shown > 0
+            property bool ready: false
+            readonly property bool alive: card.shown > 0
+            function setInput(t) { input.text = t }
+            onAliveChanged: if (!alive && !root.open) Qt.callLater(() => { if (!root.open && (!loader.item || !loader.item.alive)) root.mounted = false })
 
-        // No anchors: centred.
-        exclusionMode: ExclusionMode.Ignore
-        implicitWidth: 440 + 2 * Theme.shadowMargin
-        implicitHeight: 260 + 2 * Theme.shadowMargin
-        color: "transparent"
-        mask: Region { item: card }
-        WlrLayershell.namespace: "quickshell-pairing"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-        HyprlandFocusGrab {
-            active: root.open
-            windows: [win]
-            onCleared: root.answer(false)
-        }
-
-        Card {
-            id: card
-            x: Theme.shadowMargin
-            y: Theme.shadowMargin
-            width: 440
-            open: root.open
-            contentHeight: column.implicitHeight + 2 * 24
-
-            focus: true
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Escape) root.answer(false)
-                else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) root.answer(true)
-                else return
-                event.accepted = true
+            Component.onCompleted: Qt.callLater(() => { ready = true; (root.needsInput ? input : card).forceActiveFocus() })
+            Connections {
+                target: root
+                function onOpenChanged() { if (root.open) Qt.callLater(() => (root.needsInput ? input : card).forceActiveFocus()) }
             }
 
-            Column {
-                id: column
-                x: 24
-                y: 24
-                width: parent.width - 48
-                spacing: 12
+            screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
+            visible: root.open || card.shown > 0
 
-                StyledText {
-                    width: parent.width
-                    text: root.title
-                    color: Theme.bright
-                    font.pixelSize: Theme.fontLarge
-                    elide: Text.ElideRight
+            // No anchors: centred.
+            exclusionMode: ExclusionMode.Ignore
+            implicitWidth: 440 + 2 * Theme.shadowMargin
+            implicitHeight: 260 + 2 * Theme.shadowMargin
+            color: "transparent"
+            mask: Region { item: card }
+            WlrLayershell.namespace: "quickshell-pairing"
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+            HyprlandFocusGrab {
+                active: root.open
+                windows: [win]
+                onCleared: root.answer(false, input.text)
+            }
+
+            Card {
+                id: card
+                x: Theme.shadowMargin
+                y: Theme.shadowMargin
+                width: 440
+                open: root.open && win.ready
+                contentHeight: column.implicitHeight + 2 * 24
+
+                focus: true
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) root.answer(false, input.text)
+                    else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) root.answer(true, input.text)
+                    else return
+                    event.accepted = true
                 }
-                StyledText {
-                    width: parent.width
-                    text: root.body
-                    color: Theme.dim
-                    wrapMode: Text.Wrap
-                }
 
-                // The code to compare or to type on the device
-                StyledText {
-                    visible: root.kind === "confirm" || root.kind === "show"
-                    text: root.value
-                    color: Theme.bright
-                    font.pixelSize: Theme.fontXL
-                    font.letterSpacing: 4
-                }
+                Column {
+                    id: column
+                    x: 24
+                    y: 24
+                    width: parent.width - 48
+                    spacing: 12
 
-                // PIN or passkey
-                Rectangle {
-                    visible: root.needsInput
-                    width: parent.width
-                    height: 34
-                    radius: Theme.radiusRow
-                    color: Theme.hover
-                    border.width: 1
-                    border.color: input.activeFocus ? Theme.accent : Theme.border
-
-                    TextInput {
-                        id: input
-                        anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                        verticalAlignment: TextInput.AlignVCenter
+                    StyledText {
+                        width: parent.width
+                        text: root.title
                         color: Theme.bright
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontBase
-                        inputMethodHints: Qt.ImhDigitsOnly
-                        clip: true
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Escape) { root.answer(false); event.accepted = true }
-                            else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { root.answer(true); event.accepted = true }
-                        }
+                        font.pixelSize: Theme.fontLarge
+                        elide: Text.ElideRight
                     }
-                }
+                    StyledText {
+                        width: parent.width
+                        text: root.body
+                        color: Theme.dim
+                        wrapMode: Text.Wrap
+                    }
 
-                // Buttons: Cancel, then the one that accepts
-                Item {
-                    width: parent.width
-                    height: 34
+                    // The code to compare or to type on the device
+                    StyledText {
+                        visible: root.kind === "confirm" || root.kind === "show"
+                        text: root.value
+                        color: Theme.bright
+                        font.pixelSize: Theme.fontXL
+                        font.letterSpacing: 4
+                    }
 
-                    component Button: Rectangle {
-                        id: btn
-                        property string text
-                        property bool primary: false
-                        signal clicked()
-                        width: label.implicitWidth + 32
+                    // PIN or passkey
+                    Rectangle {
+                        visible: root.needsInput
+                        width: parent.width
                         height: 34
                         radius: Theme.radiusRow
-                        color: primary ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
-                                       : (area.containsMouse ? Theme.hover : Theme.clear)
+                        color: Theme.hover
                         border.width: 1
-                        border.color: primary ? Theme.accent : Theme.border
-                        Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                        StyledText { id: label; anchors.centerIn: parent; text: btn.text; color: btn.primary ? Theme.bright : Theme.text }
-                        MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: btn.clicked() }
+                        border.color: input.activeFocus ? Theme.accent : Theme.border
+
+                        TextInput {
+                            id: input
+                            anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
+                            verticalAlignment: TextInput.AlignVCenter
+                            text: root.initialInput
+                            color: Theme.bright
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontBase
+                            inputMethodHints: Qt.ImhDigitsOnly
+                            clip: true
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Escape) { root.answer(false, input.text); event.accepted = true }
+                                else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { root.answer(true, input.text); event.accepted = true }
+                            }
+                        }
                     }
 
-                    Row {
-                        anchors.right: parent.right
-                        spacing: 8
-                        Button { visible: root.kind !== "show"; text: "Cancel"; onClicked: root.answer(false) }
-                        Button { text: root.acceptText; primary: true; onClicked: root.answer(true) }
+                    // Buttons: Cancel, then the one that accepts
+                    Item {
+                        width: parent.width
+                        height: 34
+
+                        component Button: Rectangle {
+                            id: btn
+                            property string text
+                            property bool primary: false
+                            signal clicked()
+                            width: label.implicitWidth + 32
+                            height: 34
+                            radius: Theme.radiusRow
+                            color: primary ? (area.containsMouse ? Theme.selectedHover : Theme.selected)
+                                           : (area.containsMouse ? Theme.hover : Theme.clear)
+                            border.width: 1
+                            border.color: primary ? Theme.accent : Theme.border
+                            Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                            StyledText { id: label; anchors.centerIn: parent; text: btn.text; color: btn.primary ? Theme.bright : Theme.text }
+                            MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: btn.clicked() }
+                        }
+
+                        Row {
+                            anchors.right: parent.right
+                            spacing: 8
+                            Button { visible: root.kind !== "show"; text: "Cancel"; onClicked: root.answer(false, input.text) }
+                            Button { text: root.acceptText; primary: true; onClicked: root.answer(true, input.text) }
+                        }
                     }
                 }
             }

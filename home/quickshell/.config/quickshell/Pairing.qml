@@ -13,6 +13,23 @@ Singleton {
 
     property var pending: []        // addresses of devices we are pairing
     property var failed: []         // addresses whose last pairing did not work
+    property bool sectionOpen: false
+    readonly property bool needAgent: sectionOpen || pending.length > 0
+
+    // bt-agent (Python/PyGObject, ~31 MiB) only needs to run while Settings > Bluetooth is open or a pairing is in flight.
+    onNeedAgentChanged: {
+        if (needAgent) {
+            stopAgent.stop()
+            Quickshell.execDetached(["systemctl", "--user", "start", "bt-agent.service"])
+        } else {
+            stopAgent.restart()
+        }
+    }
+    Timer {
+        id: stopAgent
+        interval: 5000
+        onTriggered: if (!root.needAgent) Quickshell.execDetached(["systemctl", "--user", "stop", "bt-agent.service"])
+    }
 
     function start(device) {
         failed = failed.filter(a => a !== device.address)

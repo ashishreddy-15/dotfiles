@@ -71,16 +71,37 @@ Scope {
     }
 
     // ---- brightness of the top edge (decides whether the bar needs a background) ----
+    // Cached beside the state file (`<path>\t<luminance>`) so restarting with the same wallpaper skips python3 + Pillow.
+    readonly property string lumFile: home + "/.local/state/dotfiles/wallpaper-luminance"
+    property string cachedLumPath: ""
+    property real cachedLumValue: 0
+    FileView {
+        id: savedLum
+        path: root.lumFile
+        blockLoading: true
+        printErrors: false
+    }
     Process {
         id: measure
         property string image
         // Mean brightness of the top 12% of the image, 0-255. Pillow is already needed by the generator.
         command: ["python3", "-I", "-c",
-            "import sys\nfrom PIL import Image\n" +
-            "im = Image.open(sys.argv[1]); im.draft('L', (800, 800)); im = im.convert('L')\n" +
+            "import os, sys\nfrom PIL import Image\n" +
+            "img, cache = sys.argv[1], sys.argv[2]\n" +
+            "im = Image.open(img); im.draft('L', (800, 800)); im = im.convert('L')\n" +
             "w, h = im.size; px = list(im.crop((0, 0, w, max(1, round(h * 0.12)))).resize((64, 4)).getdata())\n" +
-            "print(sum(px) / len(px))", image]
-        stdout: StdioCollector { onStreamFinished: ShellState.topLuminance = parseFloat(text) || 0 }
+            "lum = sum(px) / len(px)\n" +
+            "os.makedirs(os.path.dirname(cache), exist_ok=True)\n" +
+            "open(cache + '.tmp', 'w').write(f'{img}\\t{lum}\\n'); os.replace(cache + '.tmp', cache)\n" +
+            "print(lum)", image, root.lumFile]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const v = parseFloat(text) || 0
+                root.cachedLumPath = measure.image
+                root.cachedLumValue = v
+                ShellState.topLuminance = v
+            }
+        }
     }
     onFilesChanged: ShellState.wallpaperFiles = files
     Connections {
@@ -91,6 +112,13 @@ Scope {
     }
     // The lock screen shows the same wallpaper: hyprlock.conf includes this one-line file (`source = ...`).
     readonly property string lockFile: home + "/.local/state/dotfiles/hyprlock-wallpaper.conf"
+    property string lastLock: ""
+    FileView {
+        id: savedLock
+        path: root.lockFile
+        blockLoading: true
+        printErrors: false
+    }
     Process {
         id: lockWriter
         property string value
@@ -99,8 +127,12 @@ Scope {
 
     onCurrentChanged: {
         ShellState.wallpaperCurrent = current
-        if (current !== "") { lockWriter.value = current; lockWriter.running = true }
-        if (current !== "") { measure.image = current; measure.running = true }
+        if (current !== "") {
+            const wantLock = "$wallpaper = " + current
+            if (lastLock !== wantLock) { lastLock = wantLock; lockWriter.value = current; lockWriter.running = true }
+            if (cachedLumPath === current) ShellState.topLuminance = cachedLumValue
+            else { measure.image = current; measure.running = true }
+        }
     }
 
     function set(path) {
@@ -110,8 +142,9 @@ Scope {
         save.running = true
     }
 
+    property bool pendingNext: false
     function next() {
-        if (files.length === 0) return
+        if (files.length === 0) { pendingNext = true; rescan(); return }
         const i = files.indexOf(current)
         set(files[(i + 1) % files.length])
     }
@@ -158,9 +191,12 @@ Scope {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.files = text.split("\n").filter(l => l !== "")
-                if (root.files.length > 0 && !thumbs.running) { thumbs.images = root.files; thumbs.running = true }
+                if (root.files.length > 0 && ShellState.settingsOpen && ShellState.settingsSection === "wallpaper" && !thumbs.running) {
+                    thumbs.images = root.files; thumbs.running = true
+                }
                 // Nothing remembered (or the file is gone): use the first one.
                 if (root.files.length > 0 && !root.files.includes(root.current)) root.current = root.files[0]
+                if (root.pendingNext && root.files.length > 0) { root.pendingNext = false; root.next() }
             }
         }
     }
@@ -168,10 +204,15 @@ Scope {
     Component.onCompleted: {
         ShellState.wallpaperThumbDir = thumbDir
         ShellState.wallpaperBuiltinFolders = builtinFolders
+        const lumLine = savedLum.text().trim()
+        const tab = lumLine.indexOf("\t")
+        if (tab > 0) { cachedLumPath = lumLine.slice(0, tab); cachedLumValue = parseFloat(lumLine.slice(tab + 1)) || 0 }
+        lastLock = savedLock.text().trim()
         try { current = saved.text().trim() } catch (e) { current = "" }
         folders = savedFolders.text().split("\n").filter(l => l !== "")
         ShellState.wallpaperFolders = folders
-        rescan()
+        // Defer scanning & thumbnail generation until Settings > Wallpaper opens (or first run with no saved wallpaper).
+        if (current === "") rescan()
     }
 
     IpcHandler {
@@ -180,10 +221,14 @@ Scope {
         function set(path: string): void { root.set(path) }
     }
 
-    // Look for new images whenever Settings opens (it shows them in Settings > Wallpaper).
+    // Look for new images and update thumbnails only when Settings > Wallpaper is showing.
+    function maybeRescan() {
+        if (ShellState.settingsOpen && ShellState.settingsSection === "wallpaper") rescan()
+    }
     Connections {
         target: ShellState
-        function onSettingsOpenChanged() { if (ShellState.settingsOpen) root.rescan() }
+        function onSettingsOpenChanged() { root.maybeRescan() }
+        function onSettingsSectionChanged() { root.maybeRescan() }
     }
 
     // ---- the wallpaper itself ----
@@ -215,6 +260,8 @@ Scope {
                 sourceSize.width: Math.round(win.modelData.width * win.modelData.devicePixelRatio)
                 opacity: win.frontIsA === isA ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: Theme.durAmbient; easing.type: Theme.easeInOut } }
+                // Release the old full-resolution texture once it has faded out.
+                onOpacityChanged: if (opacity === 0 && win.frontIsA !== isA && String(source) !== "") source = ""
                 // When the one that was loading in the back is ready, bring it to the front.
                 onStatusChanged: if (status === Image.Ready && win.frontIsA !== isA) win.frontIsA = isA
             }

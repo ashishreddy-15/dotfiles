@@ -28,6 +28,7 @@ Scope {
     id: root
 
     property bool open: false
+    property bool mounted: false
     // While true, focus leaving the picker does not close it (the handwriting strip docked under the launcher).
     property bool keepOpen: false
     property string query: ""
@@ -50,7 +51,7 @@ Scope {
     readonly property int maxCardHeight: searchHeight + 1 + 2 * listPadding + maxResults * rowHeight
 
     // Open with text already typed.
-    function setQuery(text) { open = true; input.text = text }
+    function setQuery(text) { open = true; query = text; if (loader.item) loader.item.setInput(text) }
     // Same as pressing Enter on the highlighted row.
     function chooseSelected() { choose(items[selected]) }
     function choose(item) {
@@ -59,7 +60,10 @@ Scope {
         activated(item)
     }
 
-    onOpenChanged: if (open) { query = ""; selected = 0; offset = 0 }
+    onOpenChanged: {
+        if (open) { mounted = true; query = ""; selected = 0; offset = 0 }
+        else if (!loader.item || !loader.item.alive) mounted = false
+    }
 
     // Move the highlight by `step` rows (wrapping) and scroll so it stays visible.
     function move(step) {
@@ -81,208 +85,220 @@ Scope {
         offset = Math.max(0, Math.min(offset, items.length - maxResults))
     }
 
-    PanelWindow {
-        id: win
+    LazyLoader {
+        id: loader
+        active: root.open || root.mounted
 
-        // Open on the monitor you're working on.
-        screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
+        PanelWindow {
+            id: win
 
-        // Stay mapped until the close animation has finished.
-        visible: root.open || card.shown > 0
+            property bool ready: false
+            readonly property bool alive: card.shown > 0
+            function setInput(t) { input.text = t }
 
-        anchors.top: true                            // top only = horizontally centred
-        margins.top: Math.round((screen?.height ?? 1080) * 0.22) - Theme.shadowMargin
-        exclusionMode: ExclusionMode.Ignore
-        // Fixed size: the card plus room for its shadow on every side. The window never resizes; only the card does.
-        implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
-        implicitHeight: root.maxCardHeight + 2 * Theme.shadowMargin
-        color: "transparent"
-        mask: Region { item: card }                  // only the card takes clicks; the rest is see-through
-        WlrLayershell.namespace: root.namespace
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            onAliveChanged: if (!alive && !root.open) Qt.callLater(() => { if (!root.open && (!loader.item || !loader.item.alive)) root.mounted = false })
 
-        // Close when clicking anywhere else.
-        HyprlandFocusGrab {
-            active: root.open && !root.keepOpen
-            windows: [win]
-            onCleared: if (!root.keepOpen) root.open = false
-        }
+            Component.onCompleted: Qt.callLater(() => { ready = true; input.forceActiveFocus() })
+            Connections {
+                target: root
+                function onOpenChanged() { if (root.open) { input.text = root.query; Qt.callLater(() => input.forceActiveFocus()) } }
+            }
 
-        Card {
-            id: card
-            x: Theme.shadowMargin
-            y: Theme.shadowMargin
-            width: root.cardWidth
-            open: root.open
-            contentHeight: column.implicitHeight
+            // Open on the monitor you're working on.
+            screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? ShellState.mainScreen
 
-            WheelHandler { onWheel: e => root.move(e.angleDelta.y > 0 ? -1 : 1) }
+            // Stay mapped until the close animation has finished.
+            visible: root.open || card.shown > 0
 
-            Column {
-                id: column
-                width: parent.width
+            anchors.top: true                            // top only = horizontally centred
+            margins.top: Math.round((screen?.height ?? 1080) * 0.22) - Theme.shadowMargin
+            exclusionMode: ExclusionMode.Ignore
+            // Fixed size: the card plus room for its shadow on every side. The window never resizes; only the card does.
+            implicitWidth: root.cardWidth + 2 * Theme.shadowMargin
+            implicitHeight: root.maxCardHeight + 2 * Theme.shadowMargin
+            color: "transparent"
+            mask: Region { item: card }                  // only the card takes clicks; the rest is see-through
+            WlrLayershell.namespace: root.namespace
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-                // Search field
-                Item {
-                    width: parent.width
-                    height: root.searchHeight
+            // Close when clicking anywhere else.
+            HyprlandFocusGrab {
+                active: root.open && !root.keepOpen
+                windows: [win]
+                onCleared: if (!root.keepOpen) root.open = false
+            }
 
-                    TextInput {
-                        id: input
-                        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 20; rightMargin: 20 }
-                        text: root.query
-                        onTextChanged: { root.query = text; root.selected = 0; root.offset = 0 }
-                        color: Theme.bright
-                        selectionColor: Theme.border
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontXL
-                        clip: true
-                        focus: true
+            Card {
+                id: card
+                x: Theme.shadowMargin
+                y: Theme.shadowMargin
+                width: root.cardWidth
+                open: root.open && win.ready
+                contentHeight: column.implicitHeight
 
-                        Connections {
-                            target: root
-                            function onOpenChanged() { if (root.open) { input.text = ""; input.forceActiveFocus() } }
-                        }
-
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Escape) {
-                                root.open = false
-                            } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
-                                root.move(1)
-                            } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) {
-                                root.move(-1)
-                            } else if (event.key === Qt.Key_PageDown) {
-                                root.page(root.maxResults)
-                            } else if (event.key === Qt.Key_PageUp) {
-                                root.page(-root.maxResults)
-                            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                root.chooseSelected()
-                            } else {
-                                return
-                            }
-                            event.accepted = true
-                        }
-
-                        StyledText {
-                            visible: root.items.length > root.maxResults
-                            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                            text: (root.selected + 1) + "/" + root.items.length
-                            color: Theme.dim
-                        }
-                        StyledText {
-                            visible: input.text === ""
-                            text: root.placeholder
-                            color: Theme.dim
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontXL
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-                }
-
-                // Results
-                Rectangle {
-                    visible: root.items.length > 0
-                    width: parent.width
-                    height: 1
-                    color: Theme.border
-                }
-
-                Item {
-                    visible: root.items.length > 0
-                    width: parent.width
-                    height: list.implicitHeight
-
-                    // One highlight for the whole list: it slides to the selected row instead of each row
-                    // lighting up on its own. (Scrolling moves `offset`, and the highlight follows.)
-                    Rectangle {
-                        x: root.listPadding
-                        y: root.listPadding + (root.selected - root.offset) * root.rowHeight
-                        width: parent.width - 2 * root.listPadding
-                        height: root.rowHeight
-                        radius: Theme.radiusRow
-                        color: Theme.selected
-                        Behavior on y { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
-
-                        // The accent mark makes the selected row obvious on any wallpaper.
-                        Rectangle {
-                            x: 4
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 2
-                            height: 16
-                            radius: Theme.radiusMark
-                            color: Theme.accent
-                        }
-                    }
+                WheelHandler { onWheel: e => root.move(e.angleDelta.y > 0 ? -1 : 1) }
 
                 Column {
-                    id: list
+                    id: column
                     width: parent.width
-                    topPadding: root.listPadding
-                    bottomPadding: root.listPadding
 
-                    Repeater {
-                        model: root.visibleItems
+                    // Search field
+                    Item {
+                        width: parent.width
+                        height: root.searchHeight
 
+                        TextInput {
+                            id: input
+                            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 20; rightMargin: 20 }
+                            text: root.query
+                            onTextChanged: { root.query = text; root.selected = 0; root.offset = 0 }
+                            color: Theme.bright
+                            selectionColor: Theme.border
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontXL
+                            clip: true
+                            focus: true
+
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Escape) {
+                                    root.open = false
+                                } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
+                                    root.move(1)
+                                } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) {
+                                    root.move(-1)
+                                } else if (event.key === Qt.Key_PageDown) {
+                                    root.page(root.maxResults)
+                                } else if (event.key === Qt.Key_PageUp) {
+                                    root.page(-root.maxResults)
+                                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                    root.chooseSelected()
+                                } else {
+                                    return
+                                }
+                                event.accepted = true
+                            }
+
+                            StyledText {
+                                visible: root.items.length > root.maxResults
+                                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                                text: (root.selected + 1) + "/" + root.items.length
+                                color: Theme.dim
+                            }
+                            StyledText {
+                                visible: input.text === ""
+                                text: root.placeholder
+                                color: Theme.dim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontXL
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+
+                    // Results
+                    Rectangle {
+                        visible: root.items.length > 0
+                        width: parent.width
+                        height: 1
+                        color: Theme.border
+                    }
+
+                    Item {
+                        visible: root.items.length > 0
+                        width: parent.width
+                        height: list.implicitHeight
+
+                        // One highlight for the whole list: it slides to the selected row instead of each row
+                        // lighting up on its own. (Scrolling moves `offset`, and the highlight follows.)
                         Rectangle {
-                            id: row
-                            required property var modelData
-                            required property int index
-                            readonly property bool active: index + root.offset === root.selected
-
                             x: root.listPadding
+                            y: root.listPadding + (root.selected - root.offset) * root.rowHeight
                             width: parent.width - 2 * root.listPadding
                             height: root.rowHeight
                             radius: Theme.radiusRow
-                            color: Theme.clear   // the highlight is drawn behind the list
+                            color: Theme.selected
+                            Behavior on y { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
 
-                            RowLayout {
-                                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
-                                spacing: 12
-
-                                IconImage {
-                                    visible: !!row.modelData.icon
-                                    implicitSize: 22
-                                    source: Quickshell.iconPath(row.modelData.icon ?? "", "application-x-executable")
-                                }
-
-                                // Title, with an optional dim subtitle right after it. Long titles are cut with "…".
-                                Item {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-
-                                    StyledText {
-                                        id: title
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: Math.min(implicitWidth, parent.width - (sub.visible ? sub.implicitWidth + 10 : 0))
-                                        elide: Text.ElideRight
-                                        text: row.modelData.title
-                                        color: row.active ? Theme.bright : Theme.text
-                                        font.pixelSize: Theme.fontLarge
-                                    }
-                                    StyledText {
-                                        id: sub
-                                        anchors { left: title.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
-                                        visible: text !== ""
-                                        text: row.modelData.subtitle ?? ""
-                                        color: Theme.dim
-                                    }
-                                }
+                            // The accent mark makes the selected row obvious on any wallpaper.
+                            Rectangle {
+                                x: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 2
+                                height: 16
+                                radius: Theme.radiusMark
+                                color: Theme.accent
                             }
+                        }
 
-                            // Only a real mouse move changes the highlight. (A list that re-lays out under a
-                            // resting pointer must not steal the keyboard selection.)
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onPositionChanged: root.selected = row.index + root.offset
-                                onClicked: root.choose(row.modelData)
+                    Column {
+                        id: list
+                        width: parent.width
+                        topPadding: root.listPadding
+                        bottomPadding: root.listPadding
+
+                        Repeater {
+                            model: root.visibleItems
+
+                            Rectangle {
+                                id: row
+                                required property var modelData
+                                required property int index
+                                readonly property bool active: index + root.offset === root.selected
+
+                                x: root.listPadding
+                                width: parent.width - 2 * root.listPadding
+                                height: root.rowHeight
+                                radius: Theme.radiusRow
+                                color: Theme.clear   // the highlight is drawn behind the list
+
+                                RowLayout {
+                                    anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
+                                    spacing: 12
+
+                                    IconImage {
+                                        visible: !!row.modelData.icon
+                                        implicitSize: 22
+                                        source: Quickshell.iconPath(row.modelData.icon ?? "", "application-x-executable")
+                                    }
+
+                                    // Title, with an optional dim subtitle right after it. Long titles are cut with "…".
+                                    Item {
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+
+                                        StyledText {
+                                            id: title
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: Math.min(implicitWidth, parent.width - (sub.visible ? sub.implicitWidth + 10 : 0))
+                                            elide: Text.ElideRight
+                                            text: row.modelData.title
+                                            color: row.active ? Theme.bright : Theme.text
+                                            font.pixelSize: Theme.fontLarge
+                                        }
+                                        StyledText {
+                                            id: sub
+                                            anchors { left: title.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+                                            visible: text !== ""
+                                            text: row.modelData.subtitle ?? ""
+                                            color: Theme.dim
+                                        }
+                                    }
+                                }
+
+                                // Only a real mouse move changes the highlight. (A list that re-lays out under a
+                                // resting pointer must not steal the keyboard selection.)
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onPositionChanged: root.selected = row.index + root.offset
+                                    onClicked: root.choose(row.modelData)
+                                }
                             }
                         }
                     }
-                }
+                    }
                 }
             }
         }

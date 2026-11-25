@@ -29,78 +29,97 @@ Scope {
         }
     }
 
-    // Move the keyboard focus to the next (or previous) control on the page.
-    function moveFocus(forward) {
-        const cur = card.Window.activeFocusItem ?? card
-        const next = cur.nextItemInFocusChain(forward)
-        if (next) next.forceActiveFocus()
-    }
-
+    property bool mounted: false
     Connections {
         target: ShellState
-        function onPanelOpenChanged() { if (ShellState.panelOpen) Brightness.refresh() }    // show the real levels
+        function onPanelOpenChanged() {
+            if (ShellState.panelOpen) { root.mounted = true; Brightness.refresh() }    // show the real levels
+            else if (!loader.item || !loader.item.alive) root.mounted = false
+        }
     }
 
-    PanelWindow {
-        id: win
+    LazyLoader {
+        id: loader
+        active: ShellState.panelOpen || root.mounted
 
-        screen: Quickshell.screens.find(s => s.name === ShellState.panelScreen) ?? ShellState.mainScreen
+        PanelWindow {
+            id: win
 
-        // Stay mapped until the close animation has finished.
-        visible: ShellState.panelOpen || card.shown > 0
+            property bool ready: false
+            readonly property bool alive: card.shown > 0
+            onAliveChanged: if (!alive && !ShellState.panelOpen) Qt.callLater(() => { if (!ShellState.panelOpen && (!loader.item || !loader.item.alive)) root.mounted = false })
 
-        // Where the card sits: just under the bar, a little in from the right edge. The window itself is
-        // larger (room for the shadow) and never changes size; the card is placed inside it.
-        readonly property int wantedTop: Theme.barHeight + 4
-        readonly property int wantedRight: 8
-        anchors { top: true; right: true }
-        margins.top: Math.max(0, wantedTop - Theme.shadowMargin)
-        margins.right: Math.max(0, wantedRight - Theme.shadowMargin)
-        exclusionMode: ExclusionMode.Ignore
-        implicitWidth: root.panelWidth + 2 * Theme.shadowMargin
-        implicitHeight: wantedTop + root.maxHeight + Theme.shadowMargin
-        color: "transparent"
-        mask: Region { item: card }
-        WlrLayershell.namespace: "quickshell-panel"
-        WlrLayershell.layer: WlrLayer.Overlay
-        // Exclusive while open, like the pickers, so the keyboard works the moment it opens (Esc, arrows, Enter).
-        WlrLayershell.keyboardFocus: ShellState.panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            // Move the keyboard focus to the next (or previous) control on the page.
+            function moveFocus(forward) {
+                const cur = card.Window.activeFocusItem ?? card
+                const next = cur.nextItemInFocusChain(forward)
+                if (next) next.forceActiveFocus()
+            }
 
-        HyprlandFocusGrab {
-            active: ShellState.panelOpen
-            windows: [win]
-            onCleared: ShellState.panelOpen = false
-        }
+            Component.onCompleted: Qt.callLater(() => { ready = true; card.forceActiveFocus() })
+            Connections {
+                target: ShellState
+                function onPanelOpenChanged() { if (ShellState.panelOpen) Qt.callLater(() => card.forceActiveFocus()) }
+            }
 
-        Card {
-            id: card
-            x: win.width - root.panelWidth - (win.wantedRight - win.margins.right)
-            y: win.wantedTop - win.margins.top
-            width: root.panelWidth
-            open: ShellState.panelOpen
-            origin: Item.TopRight
-            contentHeight: mainPage.implicitHeight + 2 * Theme.cardInset
-            maxHeight: root.maxHeight
+            screen: Quickshell.screens.find(s => s.name === ShellState.panelScreen) ?? ShellState.mainScreen
 
-            focus: true
-            // Keyboard: Esc closes; Up / Down (and Tab) move between controls; each control handles Enter, Space and
-            // Left / Right itself.
-            Keys.onEscapePressed: ShellState.panelOpen = false
-            Keys.onUpPressed: root.moveFocus(false)
-            Keys.onDownPressed: root.moveFocus(true)
+            // Stay mapped until the close animation has finished.
+            visible: ShellState.panelOpen || card.shown > 0
 
-            Flickable {
-                anchors { fill: parent; margins: Theme.cardInset }
-                contentWidth: width
-                contentHeight: mainPage.implicitHeight
-                interactive: contentHeight > height
-                boundsBehavior: Flickable.StopAtBounds
-                clip: true
+            // Where the card sits: just under the bar, a little in from the right edge. The window itself is
+            // larger (room for the shadow) and never changes size; the card is placed inside it.
+            readonly property int wantedTop: Theme.barHeight + 4
+            readonly property int wantedRight: 8
+            anchors { top: true; right: true }
+            margins.top: Math.max(0, wantedTop - Theme.shadowMargin)
+            margins.right: Math.max(0, wantedRight - Theme.shadowMargin)
+            exclusionMode: ExclusionMode.Ignore
+            implicitWidth: root.panelWidth + 2 * Theme.shadowMargin
+            implicitHeight: wantedTop + root.maxHeight + Theme.shadowMargin
+            color: "transparent"
+            mask: Region { item: card }
+            WlrLayershell.namespace: "quickshell-panel"
+            WlrLayershell.layer: WlrLayer.Overlay
+            // Exclusive while open, like the pickers, so the keyboard works the moment it opens (Esc, arrows, Enter).
+            WlrLayershell.keyboardFocus: ShellState.panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-                MainPage {
-                    id: mainPage
-                    width: parent.width
-                    onDone: ShellState.panelOpen = false
+            HyprlandFocusGrab {
+                active: ShellState.panelOpen
+                windows: [win]
+                onCleared: ShellState.panelOpen = false
+            }
+
+            Card {
+                id: card
+                x: win.width - root.panelWidth - (win.wantedRight - win.margins.right)
+                y: win.wantedTop - win.margins.top
+                width: root.panelWidth
+                open: ShellState.panelOpen && win.ready
+                origin: Item.TopRight
+                contentHeight: mainPage.implicitHeight + 2 * Theme.cardInset
+                maxHeight: root.maxHeight
+
+                focus: true
+                // Keyboard: Esc closes; Up / Down (and Tab) move between controls; each control handles Enter, Space and
+                // Left / Right itself.
+                Keys.onEscapePressed: ShellState.panelOpen = false
+                Keys.onUpPressed: win.moveFocus(false)
+                Keys.onDownPressed: win.moveFocus(true)
+
+                Flickable {
+                    anchors { fill: parent; margins: Theme.cardInset }
+                    contentWidth: width
+                    contentHeight: mainPage.implicitHeight
+                    interactive: contentHeight > height
+                    boundsBehavior: Flickable.StopAtBounds
+                    clip: true
+
+                    MainPage {
+                        id: mainPage
+                        width: parent.width
+                        onDone: ShellState.panelOpen = false
+                    }
                 }
             }
         }
