@@ -129,6 +129,12 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size, sp
     between light and dark: `ShellState.barFlipping`; hover stays `durFast`) with `easeOut` (`easeInOut` for
     cross-fades). An exit moves on the same `durFast` / `easeOut` as its fade (`Card`, bar slide out, `windowsOut`), so
     the motion is seen before the item is gone.
+  - Reduce motion (Settings > Appearance, `appearance set reduce-motion on|off`, state in
+    `~/.local/state/dotfiles/motion`): `Theme.reduceMotion` turns every preset off (values jump into place), cards and
+    the bar only fade (`Card.moved`), notifications fade in place and the stack moves at once (its view transitions
+    are set to `null`: a ListView ignores `Transition.enabled`), and looping pulses stop. Fades keep their durations.
+    Outside the shell the same switch turns off Hyprland's window and workspace motion (fades stay) and GTK's
+    `enable-animations`, which browsers turn into `prefers-reduced-motion`. New motion must check it, or use a preset.
   - Notifications leave in order: the dismissed card fades, shrinks and drifts `exitDrift` aside, and `removeDisplaced`
     waits `durFast` before the stack closes the gap. A `ListView` with transitions must keep a fixed height (never
     `min(contentHeight, ...)`): one that shrinks at the moment of a removal drops the removed item at once and blanks

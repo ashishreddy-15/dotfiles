@@ -25,18 +25,34 @@ Singleton {
         printErrors: false
     }
     function setShade(value) { dark = (String(value).trim() !== "light" && value !== "prefer-light" && value !== "default") }
+
+    // Reduce motion (Settings > Appearance, `appearance set reduce-motion on|off`): things change in place instead of
+    // sliding, zooming or bouncing; fades stay. Read the same way as the scheme: "reduced" or "full", missing = full.
+    readonly property string motionFile: Quickshell.env("HOME") + "/.local/state/dotfiles/motion"
+    property bool reduceMotion: false
+    FileView {
+        id: motionView
+        path: root.motionFile
+        blockLoading: true
+        printErrors: false
+    }
+    function setMotion(value) { reduceMotion = (String(value).trim() === "reduced" || value === "on") }
+
     Component.onCompleted: {
         const v = stateView.text().trim()
         setShade(v)
         scheme = dark ? "prefer-dark" : "prefer-light"
+        setMotion(motionView.text())
     }
 
     // qs ipc call appearance scheme dark|light     (the script calls this after a change from a terminal)
     // qs ipc call appearance toggle
+    // qs ipc call appearance motion reduced|full    (the script calls this after a change from a terminal)
     IpcHandler {
         target: "appearance"
         function scheme(value: string): void { root.setShade(value); root.scheme = root.dark ? "prefer-dark" : "prefer-light" }
         function toggle(): void { root.set("color-scheme", root.dark ? "prefer-light" : "prefer-dark") }
+        function motion(value: string): void { root.setMotion(value) }
     }
     property string gtkTheme: ""
     property string iconTheme: ""
@@ -64,6 +80,7 @@ Singleton {
         case "cursor-size":  cursorSize = Number(value); break
         case "font":         font = value; break
         case "font-size":    fontSize = Number(value); break
+        case "reduce-motion": setMotion(value); break
         }
         // A newer value for the same key replaces one still waiting.
         queue = queue.filter(q => q[0] !== key).concat([[key, value]])
@@ -100,6 +117,7 @@ Singleton {
                     root.cursorSize = Number(c["cursor-size"]) || 24
                     root.font = c["font"]
                     root.fontSize = Number(c["font-size"]) || 10
+                    if (c["reduce-motion"] !== undefined) root.setMotion(c["reduce-motion"])
                 } catch (e) { console.log("appearance: could not read settings:", e) }
             }
         }

@@ -107,6 +107,10 @@ static() {
         else fail "springSmooth physics differ by more than 10%: ${line#* }"; fi
     done
 
+    # Reduce motion: Hyprland and the start page follow it too (the shell's half is in Theme.qml).
+    grep -q 'dotfiles/motion' "$look" && ok "look.lua reads the reduce-motion state file" || fail "look.lua does not read ~/.local/state/dotfiles/motion"
+    grep -q 'prefers-reduced-motion: *reduce' "$root/startpage/index.html" && ok "start page has a prefers-reduced-motion block" || fail "startpage/index.html has no @media (prefers-reduced-motion: reduce) block"
+
     # Every shell surface animates itself in QML, so Hyprland must not animate it as well (no_anim in rules.lua).
     # Exempt: quickshell-wallpaper (the Background layer; its fade-in at start-up is welcome) and quickshell-picker
     # (only Picker.qml's default; the launcher and clipboard always set their own namespace).

@@ -20,13 +20,15 @@ Item {
 
         // The dot pulses gently, the way a recording light does.
         BarText {
+            id: dot
             anchors.verticalCenter: parent.verticalCenter
             text: Theme.glyphMark
             color: Theme.barErr
             font.pixelSize: Theme.fontMark
             SequentialAnimation on opacity {
-                running: ShellState.recording
+                running: ShellState.recording && !Theme.reduceMotion   // reduce motion: a steady dot
                 loops: Animation.Infinite
+                onRunningChanged: if (!running) dot.opacity = 1
                 NumberAnimation { to: 0.35; duration: Theme.durPulse; easing.type: Theme.easeInOut }
                 NumberAnimation { to: 1; duration: Theme.durPulse; easing.type: Theme.easeInOut }
             }

@@ -43,6 +43,11 @@ Item {
             }
         }
         SettingRow {
+            title: "Reduce motion"
+            description: "Things change in place instead of sliding, zooming or bouncing; fades stay. Also applies to windows and workspaces, GTK apps and web pages that ask for it."
+            Switch { checked: Appearance.reduceMotion; onToggled: Appearance.set("reduce-motion", Appearance.reduceMotion ? "off" : "on") }
+        }
+        SettingRow {
             title: "GTK theme"
             description: Appearance.gtkThemes.length > 1 ? "The look of GTK apps." : "Only Adwaita is installed. Others appear here when installed (for example adw-gtk3-theme)."
             Segmented {

@@ -130,6 +130,9 @@ Singleton {
     // One spring per job. Write them through the presets in ui/ (HighlightMotion, PressMotion, ValueMotion,
     // SmoothMotion), which carry the spring, damping and settling threshold together.
     // (Qt steps a SpringAnimation every 16 ms; measured step responses: overshoot / time to settle within 2%.)
+    // Reduce motion (Settings > Appearance): the presets jump instead of springing, cards and the bar only fade,
+    // notifications fade in place, and looping pulses stop. Colour and opacity fades keep their durations.
+    readonly property bool reduceMotion: Appearance.reduceMotion
     readonly property real springHighlight:  6.0   // follows a selection (lists, grids, pills, tabs): 0.2% / ~210 ms
     readonly property real dampingHighlight: 0.48
     readonly property real springPress:      5.5   // the press-in scale only: the small bounce (6%) reads as tactile

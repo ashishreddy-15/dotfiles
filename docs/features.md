@@ -31,7 +31,7 @@ or Up / Down move between controls, Enter and Space press, and Left / Right adju
 wallpaper grid; switches only take Space / Enter). Left on a plain row, or Shift+Tab from the first control, goes back
 to the sidebar.
 
-**Appearance** (colour scheme, GTK / icon / cursor theme, cursor size, fonts) runs the `appearance` command, which
+**Appearance** (colour scheme, reduce motion, GTK / icon / cursor theme, cursor size, fonts) runs the `appearance` command, which
 writes gsettings, the two `settings.ini` files (symlinks into `home/gtk/`, so `git diff` shows what changed and you can
 commit it) and the running cursor. In a terminal: `appearance get`, `appearance list gtk|icons|cursors|fonts`,
 `appearance set font-size 11`.
@@ -60,6 +60,21 @@ One switch changes everything: **Settings > Appearance > Colour scheme**, or `ap
 The bar is the exception: it has no background, so its text follows the wallpaper, not the scheme (see
 [wallpapers](#wallpapers)). The lock and login screens are light text over the darkened wallpaper in both schemes. Apps with
 their own setting (Brave, JetBrains IDEs, Qt apps) follow only if that setting is "system" / "sync with OS".
+
+### Reduce motion
+
+**Settings > Appearance > Reduce motion**, or `appearance set reduce-motion on|off` in a terminal. It writes
+`~/.local/state/dotfiles/motion` (`reduced` or `full`; missing = full) and gsettings `enable-animations`, then reloads
+Hyprland and tells the shell (both best-effort). Nothing in the repo changes, so toggling it leaves `git status` clean.
+
+| What | How it follows |
+|---|---|
+| The shell | reads the state file; things change in place instead of sliding, zooming or bouncing, fades stay |
+| Windows and workspaces | `look.lua` reads the same file and turns off the window and workspace animations: windows only fade in and out, moves jump, workspaces switch at once. Fades and border colours stay |
+| GTK / libadwaita apps | gsettings `enable-animations` |
+| Web pages, the start page | Firefox and Chromium-based browsers derive `prefers-reduced-motion` from `enable-animations` |
+
+`appearance sync` re-applies `enable-animations` from the state file, so a fresh login matches.
 
 ## Wallpapers
 

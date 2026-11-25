@@ -70,7 +70,7 @@ Scope {
                 add: Transition {
                     ParallelAnimation {
                         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.durBase; easing.type: Theme.easeOut }
-                        SpringAnimation { property: "scale"; from: 0.95; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
+                        SpringAnimation { property: "scale"; from: Theme.reduceMotion ? 1 : 0.95; to: 1; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsNorm }
                     }
                 }
                 // A dismissed card fades, shrinks a little and drifts aside; only then does the stack close the gap
@@ -78,17 +78,23 @@ Scope {
                 remove: Transition {
                     ParallelAnimation {
                         NumberAnimation { property: "opacity"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
-                        NumberAnimation { property: "scale"; to: 0.97; duration: Theme.durFast; easing.type: Theme.easeOut }
-                        NumberAnimation { property: "x"; to: Theme.exitDrift; duration: Theme.durFast; easing.type: Theme.easeOut }
+                        NumberAnimation { property: "scale"; to: Theme.reduceMotion ? 1 : 0.97; duration: Theme.durFast; easing.type: Theme.easeOut }
+                        NumberAnimation { property: "x"; to: Theme.reduceMotion ? 0 : Theme.exitDrift; duration: Theme.durFast; easing.type: Theme.easeOut }
                     }
                 }
-                removeDisplaced: Transition {
+                // Reduce motion: no transition at all, so the rest of the stack moves at once. (Transition.enabled is
+                // not honoured by a ListView's view transitions; only taking the transition away works.)
+                removeDisplaced: Theme.reduceMotion ? null : closeUp
+                displaced: Theme.reduceMotion ? null : restack
+                Transition {
+                    id: closeUp
                     SequentialAnimation {
                         PauseAnimation { duration: Theme.durFast }
                         SpringAnimation { properties: "y"; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx }
                     }
                 }
-                displaced: Transition {
+                Transition {
+                    id: restack
                     SpringAnimation { properties: "y"; spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx }
                 }
             }

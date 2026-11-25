@@ -29,6 +29,7 @@ Item {
     // duration and curve, so the card visibly shrinks while it fades. (An over-damped spring took ~580 ms and had
     // barely moved by the time the 90 ms fade had hidden the card: the exit read as a plain fade.)
     property real spatial: 0
+    readonly property real moved: Theme.reduceMotion ? 1 : spatial   // reduce motion: the card only fades
     Component.onCompleted: spatial = open ? 1 : 0
     onOpenChanged: {
         if (open) { spatialOut.stop(); spatialIn.restart() }
@@ -41,9 +42,9 @@ Item {
     SmoothMotion on height {}
 
     opacity: shown
-    scale: 0.95 + 0.05 * spatial
+    scale: 0.95 + 0.05 * moved
     transformOrigin: root.origin
-    transform: Translate { y: (1 - root.spatial) * (root.origin === Item.Bottom ? 8 : -8) }
+    transform: Translate { y: (1 - root.moved) * (root.origin === Item.Bottom ? 8 : -8) }
 
     RectangularShadow {
         anchors.fill: parent

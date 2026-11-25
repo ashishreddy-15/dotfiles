@@ -121,6 +121,12 @@
       transform: translateX(2px) scale(0.98);
     }
 
+    /* Reduce motion (the desktop's switch sets it through gsettings): no nudge or press spring, only the colour fade. */
+    @media (prefers-reduced-motion: reduce) {
+      a { transition: color 0.1s var(--ease-out), background 0.1s var(--ease-out); }
+      a:hover, a:focus, a:active { transform: none; }
+    }
+
     .link-left { display: flex; align-items: center; gap: 0.5rem; }
 
     .dot {

@@ -41,7 +41,7 @@ Variants {
             id: content
             anchors.fill: parent
             opacity: ShellState.barShown
-            transform: Translate { y: (ShellState.barSlide - 1) * Theme.barHeight / 2 }
+            transform: Translate { y: Theme.reduceMotion ? 0 : (ShellState.barSlide - 1) * Theme.barHeight / 2 }   // reduce motion: fade only
 
             // Left: workspaces, then the focused app
             Row {

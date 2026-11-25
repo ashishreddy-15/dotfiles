@@ -511,7 +511,7 @@ Scope {
                                 color: win.error !== "" ? Theme.err : Theme.dim
                                 font.pixelSize: Theme.fontXL
                                 SequentialAnimation on opacity {
-                                    running: win.reading
+                                    running: win.reading && !Theme.reduceMotion
                                     loops: Animation.Infinite
                                     onRunningChanged: if (!running) placeholder.opacity = 1
                                     NumberAnimation { to: 0.4; duration: Theme.durPulse; easing.type: Theme.easeInOut }

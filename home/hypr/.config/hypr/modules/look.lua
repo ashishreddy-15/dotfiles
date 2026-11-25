@@ -16,6 +16,19 @@ local palette = {
 }
 local colours = palette[scheme]
 
+-- Reduce motion: `appearance set reduce-motion on` writes "reduced" to ~/.local/state/dotfiles/motion (missing = full)
+-- and reloads Hyprland. Reduced turns off the spatial leaves below (spring geometry, popin, workspace slides): windows
+-- then appear and disappear with only their fade, moves and resizes jump, and workspaces switch instantly. Fades,
+-- borders and layers stay on, since a short opacity / colour change is not motion.
+local motion_reduced = false
+f = io.open((os.getenv("HOME") or "") .. "/.local/state/dotfiles/motion", "r")
+if f then
+	local v = (f:read("*a") or ""):gsub("%s+", "")
+	f:close()
+	motion_reduced = v == "reduced"
+end
+local spatial = not motion_reduced
+
 hl.config({
 	general = {
 		gaps_in = 4,
@@ -55,15 +68,16 @@ hl.config({
 -- springSmooth matches the shell's springSmooth / dampingSmooth (Qt's SpringAnimation); scripts/ui-check compares them.
 -- Spatial geometry uses native physical springs (never for fades, borders, or exits);
 -- opacity, colour, and dismissals stay monotonic on easeOut (= Easing.OutCubic).
+-- `enabled = spatial` marks the leaves that reduce motion turns off (see `spatial` at the top).
 hl.curve("easeOut",      { type = "bezier", points = { { 0.215, 0.61 }, { 0.355, 1 } } }) -- = Easing.OutCubic
 hl.curve("springSmooth", { type = "spring", mass = 1, stiffness = 260, damping = 27.7 }) -- ~0.86 damping ratio: weighted, supple windows
 hl.curve("springFluid",  { type = "spring", mass = 1, stiffness = 210, damping = 26.7 }) -- ~0.92 damping ratio: smooth workspace glide
 
 hl.animation({ leaf = "global",        enabled = true, speed = 1.4, bezier = "easeOut" })
-hl.animation({ leaf = "windows",       enabled = true, speed = 1.4, spring = "springSmooth" })
-hl.animation({ leaf = "windowsIn",     enabled = true, speed = 1.4, spring = "springSmooth", style = "popin 92%" })
-hl.animation({ leaf = "windowsOut",    enabled = true, speed = 0.9, bezier = "easeOut",      style = "popin 94%" })
-hl.animation({ leaf = "windowsMove",   enabled = true, speed = 1.4, spring = "springSmooth" })
+hl.animation({ leaf = "windows",       enabled = spatial, speed = 1.4, spring = "springSmooth" })
+hl.animation({ leaf = "windowsIn",     enabled = spatial, speed = 1.4, spring = "springSmooth", style = "popin 92%" })
+hl.animation({ leaf = "windowsOut",    enabled = spatial, speed = 0.9, bezier = "easeOut",      style = "popin 94%" })
+hl.animation({ leaf = "windowsMove",   enabled = spatial, speed = 1.4, spring = "springSmooth" })
 hl.animation({ leaf = "fadeIn",        enabled = true, speed = 1.4, bezier = "easeOut" })
 hl.animation({ leaf = "fadeOut",       enabled = true, speed = 0.9, bezier = "easeOut" })
 hl.animation({ leaf = "fadeSwitch",    enabled = true, speed = 0.9, bezier = "easeOut" })
@@ -73,10 +87,10 @@ hl.animation({ leaf = "border",        enabled = true, speed = 0.9, bezier = "ea
 hl.animation({ leaf = "borderangle",   enabled = false })
 hl.animation({ leaf = "layersIn",      enabled = true, speed = 1.4, bezier = "easeOut",      style = "fade" })
 hl.animation({ leaf = "layersOut",     enabled = true, speed = 0.9, bezier = "easeOut",      style = "fade" })
-hl.animation({ leaf = "workspaces",    enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
-hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
-hl.animation({ leaf = "workspacesOut", enabled = true, speed = 2.4, spring = "springFluid",  style = "slide" })
+hl.animation({ leaf = "workspaces",    enabled = spatial, speed = 2.4, spring = "springFluid",  style = "slide" })
+hl.animation({ leaf = "workspacesIn",  enabled = spatial, speed = 2.4, spring = "springFluid",  style = "slide" })
+hl.animation({ leaf = "workspacesOut", enabled = spatial, speed = 2.4, spring = "springFluid",  style = "slide" })
 -- The scratchpad (SUPER+S) drops in like a drawer over the current workspace, on the same glide.
-hl.animation({ leaf = "specialWorkspace",    enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })
-hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })
-hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2.4, spring = "springFluid", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspace",    enabled = spatial, speed = 2.4, spring = "springFluid", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = spatial, speed = 2.4, spring = "springFluid", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = spatial, speed = 2.4, spring = "springFluid", style = "slidevert" })
