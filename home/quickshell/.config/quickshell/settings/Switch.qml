@@ -32,8 +32,8 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         x: root.checked ? parent.width - width - 4 : 4
         color: root.checked ? Theme.bg : Theme.dim
-        Behavior on x { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
-        Behavior on width { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+        HighlightMotion on x {}
+        PressMotion on width { epsilon: Theme.epsPx }
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
     }
 

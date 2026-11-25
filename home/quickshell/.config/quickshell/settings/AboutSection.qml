@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs
+import "../ui"
 
 // About: what this machine is. The system and who is signed in at the top, memory and disk as two meters, then the
 // software and the hardware as plain rows. Everything comes from one `fastfetch --format json` run (about 15 ms),
@@ -149,7 +150,7 @@ Page {
                 height: parent.height
                 radius: parent.radius
                 color: Theme.accent
-                Behavior on width { SpringAnimation { spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx } }
+                ValueMotion on width {}
             }
         }
     }

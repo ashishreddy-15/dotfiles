@@ -7,5 +7,7 @@ StyledText {
     color: Theme.barText
     font.pixelSize: Theme.barFontSize
     font.weight: Theme.barFontWeight
-    Behavior on color { ColorAnimation { duration: Theme.durAmbient } }
+    // A wallpaper change flips every bar colour at once: ease that slowly. Hover and state changes answer in durFast,
+    // like every other hover in the shell.
+    Behavior on color { ColorAnimation { duration: ShellState.barFlipping ? Theme.durAmbient : Theme.durFast } }
 }

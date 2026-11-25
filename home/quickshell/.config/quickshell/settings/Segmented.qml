@@ -50,8 +50,8 @@ Rectangle {
         radius: Theme.radiusSmall
         color: Theme.selected
 
-        Behavior on x { enabled: pill.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
-        Behavior on width { enabled: pill.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+        HighlightMotion on x { active: pill.ready }
+        HighlightMotion on width { active: pill.ready }
     }
 
     Row {

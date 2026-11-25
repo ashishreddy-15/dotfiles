@@ -218,7 +218,7 @@ Scope {
                             height: root.rowHeight
                             radius: Theme.radiusRow
                             color: Theme.selected
-                            Behavior on y { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                            HighlightMotion on y {}
 
                             // The accent mark makes the selected row obvious on any wallpaper.
                             Rectangle {

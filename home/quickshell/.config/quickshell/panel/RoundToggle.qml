@@ -42,7 +42,7 @@ Item {
             border.width: root.on ? 0 : 1
             border.color: Theme.border
             scale: area.pressed ? Theme.pressScale : 1
-            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
+            PressMotion on scale {}
             Behavior on color { ColorAnimation { duration: Theme.durFast } }
 
             StyledText {

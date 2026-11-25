@@ -27,8 +27,8 @@ Item {
             SequentialAnimation on opacity {
                 running: ShellState.recording
                 loops: Animation.Infinite
-                NumberAnimation { to: 0.35; duration: Theme.durAmbient * 2; easing.type: Theme.easeInOut }
-                NumberAnimation { to: 1; duration: Theme.durAmbient * 2; easing.type: Theme.easeInOut }
+                NumberAnimation { to: 0.35; duration: Theme.durPulse; easing.type: Theme.easeInOut }
+                NumberAnimation { to: 1; duration: Theme.durPulse; easing.type: Theme.easeInOut }
             }
         }
         BarText {

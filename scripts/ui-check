@@ -42,6 +42,29 @@ static() {
     if [ -n "$hits" ]; then fail "icon characters written inline (use Theme.glyph*):"; printf '%s\n' "$hits" | sed 's/^/          /'
     else ok "all icons come from Theme.glyph*"; fi
 
+    # Motion: a Behavior that animates with a spring uses one of the ui/*Motion.qml presets (HighlightMotion,
+    # PressMotion, ValueMotion, SmoothMotion), so every spring in the shell is one of four named feels. Standalone
+    # SpringAnimation objects (in a Transition, or driven from code with a target) are fine.
+    # Reported: a `Behavior on` whose block (up to its closing brace) contains a SpringAnimation.
+    hits=$(cd "$qml" && find . -name '*.qml' ! -path './ui/*Motion.qml' -print0 | sort -z | xargs -0 awk '
+        FNR == 1 { open = 0 }
+        /^[[:space:]]*\/\// { next }
+        {
+            if (!open && /Behavior on /) { open = 1; at = FNR; depth = 0; started = 0; seen = 0 }
+            if (open) {
+                if (/SpringAnimation/) seen = 1
+                n = split($0, ch, ""); for (i = 1; i <= n; i++) { if (ch[i] == "{") { depth++; started = 1 } else if (ch[i] == "}") depth-- }
+                if (started && depth <= 0) { if (seen) print FILENAME ":" at; open = 0 }
+            }
+        }' || true)
+    if [ -n "$hits" ]; then fail "Behaviors with their own SpringAnimation (use a ui/*Motion.qml preset):"; printf '%s\n' "$hits" | sed 's/^/          /'
+    else ok "every spring Behavior uses a ui/*Motion.qml preset"; fi
+
+    # Removed motion tokens (springSnappy split into springHighlight / springPress / springValue).
+    hits=$(cd "$qml" && grep -rnwE 'springSnappy|dampingSnappy|dampingExit' --include=*.qml . | grep -v '^\./Theme\.qml' || true)
+    if [ -n "$hits" ]; then fail "removed motion tokens still used (springSnappy / dampingSnappy / dampingExit):"; printf '%s\n' "$hits" | sed 's/^/          /'
+    else ok "no removed motion tokens (springSnappy, dampingSnappy, dampingExit)"; fi
+
     echo "static: Theme.qml agrees with Hyprland, hyprlock and the kitty font"
     local radius accent border text rounding
     radius=$(tv radiusCard); rounding=$(sed -nE 's/^[[:space:]]*rounding *= *([0-9]+).*/\1/p' "$look")
@@ -147,8 +170,8 @@ static() {
             hex=$(tv "$name" | tr -d '"#')
             grep -qi "\"#$hex\"" "$sddm" && ok "$name #$hex in the login screen" || fail "$name #$hex missing from system/sddm/carbon/Main.qml"
         done
-        local snappy; snappy=$(tv springSnappy)
-        grep -qE "(spring|springSnappy) *: *$snappy\b" "$sddm" && ok "springSnappy $snappy in the login screen" || fail "springSnappy ${snappy:-?} missing from system/sddm/carbon/Main.qml"
+        local press; press=$(tv springPress)
+        grep -qE "springPress *: *$press\b" "$sddm" && ok "springPress $press in the login screen" || fail "springPress ${press:-?} missing from system/sddm/carbon/Main.qml"
     fi
     # (The shell keeps its own 12 px base; it is deliberately not tied to kitty's 11.5 pt.)
     local fam; fam=$(sed -nE 's/^ *readonly property string fontFamily: *"([^"]+)".*/\1/p' "$theme")

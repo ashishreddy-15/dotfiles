@@ -109,19 +109,24 @@ Everything about how the shell looks comes from `Theme.qml`; no colour, size, sp
   and slide run on the fade's own `durFast` / `easeOut`, so the card visibly shrinks while it fades). A card lives in a fixed-size window that leaves `shadowMargin` free on each side; only the card
   resizes, never the window (resizing a layer window makes the compositor smear the old frame).
 - **Hover and selection** are a light wash over the card (`hover`, `selected`); the selected row in a list also gets an
-  accent mark. Colour washes fade in `durFast`, while sliding selection highlights move with `springSnappy`. An "on" tile
+  accent mark. Colour washes fade in `durFast`, while sliding selection highlights move with `HighlightMotion`. An "on" tile
   uses the same sign (wash + accent mark); an "off" tile is only a hairline outline. Solid accent fills are avoided: they
   shout over the text.
 - **Type.** Sizes come from `fontSmall` 11, `fontBase` 12 (also the bar), `fontLarge` 14, `fontXL` 16.
 - **Motion.**
-  - Spatial properties (`x`, `y`, `width`, `height`, `scale`) use `SpringAnimation` with `Theme.epsNorm` / `Theme.epsPx`
-    settling thresholds so animations preserve velocity when interrupted and terminate cleanly: `Theme.springSnappy` /
-    `Theme.dampingSnappy` for tactile controls and sliding highlights (`Picker`, `AppMenu`, `Segmented`, `PowerMenu`,
-    `Switch`, sliders), and `Theme.springSmooth` / `Theme.dampingSmooth` for `Card` entrance and dynamic height, bar
-    slide in, and notification stack `add` and `displaced` transitions. In `AppMenu` the view follows the highlight's
+  - Spatial properties (`x`, `y`, `width`, `height`, `scale`) use springs, so an interrupted animation keeps its
+    velocity. There is one spring per job, written through a preset in `ui/` (a Behavior: `HighlightMotion on y {}`;
+    gate it with `active:`, not `enabled:`). `scripts/ui-check` fails a Behavior that writes its own spring.
+    - `HighlightMotion` (`springHighlight` 6.0 / 0.48: 0.2% overshoot, ~210 ms): anything that follows a selection
+      (`Picker`, `AppMenu`, `PowerMenu`, `Segmented`, the `Switch` thumb, the workspace brackets).
+    - `PressMotion` (`springPress` 5.5 / 0.36): the press-in scale and press stretch; the one spring allowed a bounce.
+    - `ValueMotion` (`springValue` 5.5 / 0.55: no overshoot): fills and knobs that show a value (sliders, OSD, meters).
+    - `SmoothMotion` (`springSmooth` 3.8 / 0.42): a `Card`'s height. Explicit springs (`Card` entrance, bar slide in,
+      notification `add` / `displaced`) use the same tokens directly. In `AppMenu` the view follows the highlight's
     spring (it scrolls just enough each frame to keep it in view) instead of jumping with `positionViewAtIndex`.
   - Non-spatial properties (`opacity`, `color`) and dismissals never overshoot: they use `durFast` 90 ms, `durBase`
-    140 ms, `durSlow` 240 ms, `durAmbient` 400 ms (wallpaper and bar colours) with `easeOut` (`easeInOut` for
+    140 ms, `durSlow` 240 ms, `durAmbient` 400 ms (wallpaper changes, and bar text while the wallpaper flips it
+    between light and dark: `ShellState.barFlipping`; hover stays `durFast`) with `easeOut` (`easeInOut` for
     cross-fades). An exit moves on the same `durFast` / `easeOut` as its fade (`Card`, bar slide out, `windowsOut`), so
     the motion is seen before the item is gone.
   - Notifications leave in order: the dismissed card fades, shrinks and drifts `exitDrift` aside, and `removeDisplaced`

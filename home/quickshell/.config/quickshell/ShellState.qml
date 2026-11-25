@@ -23,6 +23,16 @@ Singleton {
     // How bright the top edge of the wallpaper is, 0 (black) to 255 (white). Measured by Wallpaper.qml.
     // The bar uses it to switch on a background when the wallpaper is too light for its text.
     property real topLuminance: 0
+    // Set the luminance through this, so bar text knows the next colour change is the wallpaper's (it eases over
+    // durAmbient) and not a hover or a state change (durFast). See bar/BarText.qml.
+    property bool barFlipping: false
+    function setTopLuminance(v) {
+        if (v === topLuminance) return
+        barFlipping = true
+        barFlipTimer.restart()
+        topLuminance = v
+    }
+    property Timer barFlipTimer: Timer { interval: Theme.durAmbient; onTriggered: ShellState.barFlipping = false }
 
     // Quick-settings panel (click the clock, or Super+A). It opens on the monitor named here.
     property bool panelOpen: false

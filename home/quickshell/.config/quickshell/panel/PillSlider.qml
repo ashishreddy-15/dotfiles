@@ -48,7 +48,7 @@ Item {
         radius: height / 2
         width: parent.height + root.clamp(root.active ? root.value : 0) * (parent.width - parent.height)
         color: root.muted || !root.active ? Theme.border : Theme.sliderFill
-        Behavior on width { enabled: !area.pressed; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+        ValueMotion on width { active: !area.pressed }
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
     }
 

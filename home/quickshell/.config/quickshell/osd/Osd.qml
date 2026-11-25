@@ -117,7 +117,7 @@ Scope {
                             height: parent.height
                             radius: parent.radius
                             color: root.muted ? Theme.dim : Theme.accent
-                            Behavior on width { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                            ValueMotion on width {}
                         }
                     }
 

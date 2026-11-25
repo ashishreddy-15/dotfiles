@@ -514,8 +514,8 @@ Scope {
                                     running: win.reading
                                     loops: Animation.Infinite
                                     onRunningChanged: if (!running) placeholder.opacity = 1
-                                    NumberAnimation { to: 0.4; duration: Theme.durAmbient * 2; easing.type: Theme.easeInOut }
-                                    NumberAnimation { to: 1; duration: Theme.durAmbient * 2; easing.type: Theme.easeInOut }
+                                    NumberAnimation { to: 0.4; duration: Theme.durPulse; easing.type: Theme.easeInOut }
+                                    NumberAnimation { to: 1; duration: Theme.durPulse; easing.type: Theme.easeInOut }
                                 }
                             }
                         }

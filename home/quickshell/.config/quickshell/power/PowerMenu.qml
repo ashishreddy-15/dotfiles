@@ -109,7 +109,7 @@ Scope {
                     height: root.tileSize
                     radius: Theme.radiusRow
                     color: Theme.selected
-                    Behavior on x { enabled: win.ready; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                    HighlightMotion on x { active: win.ready }
 
                     // The accent mark under the chosen one, as in the pickers (here at the bottom edge).
                     Rectangle {
@@ -143,7 +143,7 @@ Scope {
                             color: area.containsMouse ? Theme.hover : Theme.clear
                             scale: area.pressed ? Theme.pressScale : 1
                             Behavior on color { ColorAnimation { duration: Theme.durFast } }
-                            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
+                            PressMotion on scale {}
 
                             Column {
                                 anchors.centerIn: parent

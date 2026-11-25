@@ -25,8 +25,8 @@ Rectangle {
     readonly property int radiusRow:  6
     readonly property int durFast:    90
     readonly property int durBase:    140
-    readonly property real springSnappy: 5.5
-    readonly property real dampingSnappy: 0.36
+    readonly property real springPress:  5.5    // the press-in scale only: the small bounce reads as tactile
+    readonly property real dampingPress: 0.36
     readonly property real epsNorm: 0.004
     readonly property real epsPx: 0.4
     readonly property real pressScale: 0.94
@@ -156,7 +156,8 @@ Rectangle {
                 transform: Translate { x: pill.shakeOffset }
                 Behavior on shakeOffset {
                     enabled: pill.shakeSpring
-                    SpringAnimation { spring: root.springSnappy * 1.5; damping: 0.22; epsilon: root.epsPx }
+                    // Wrong password: a stiffer press spring with low damping, so it rings a few times. Bouncy on purpose.
+                    SpringAnimation { spring: root.springPress * 1.5; damping: 0.22; epsilon: root.epsPx }
                 }
 
                 TextInput {
@@ -199,7 +200,7 @@ Rectangle {
             color: on ? root.selected : (chipArea.containsMouse ? root.hover : "transparent")
             Behavior on color { ColorAnimation { duration: root.durFast } }
             scale: chipArea.pressed ? root.pressScale : 1
-            Behavior on scale { SpringAnimation { spring: root.springSnappy; damping: root.dampingSnappy; epsilon: root.epsNorm } }
+            Behavior on scale { SpringAnimation { spring: root.springPress; damping: root.dampingPress; epsilon: root.epsNorm } }
             Text { id: chipText; anchors.centerIn: parent; text: chip.label; color: chip.on ? root.bright : root.text; font.family: root.font; font.pixelSize: 13 }
             MouseArea { id: chipArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: chip.clicked() }
         }

@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs
+import "../ui"
 
 // App tray icons (nm-applet, chat apps...). Left click: open. Right click: menu.
 Row {
@@ -45,7 +46,7 @@ Row {
                 opacity: entry.pressed ? 0.6 : entry.containsMouse ? 1 : 0.8   // quiet at rest, full under the pointer
                 scale: entry.pressed ? Theme.pressScale : 1
                 Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
+                PressMotion on scale {}
             }
         }
     }

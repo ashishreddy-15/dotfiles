@@ -38,7 +38,7 @@ Item {
     NumberAnimation { id: spatialOut; target: root; property: "spatial"; to: 0; duration: Theme.durFast; easing.type: Theme.easeOut }
 
     height: Math.min(contentHeight, maxHeight)
-    Behavior on height { SpringAnimation { spring: Theme.springSmooth; damping: Theme.dampingSmooth; epsilon: Theme.epsPx } }
+    SmoothMotion on height {}
 
     opacity: shown
     scale: 0.95 + 0.05 * spatial

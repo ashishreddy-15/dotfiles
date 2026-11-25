@@ -121,7 +121,7 @@ Page {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         opacity: status === Image.Ready ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Theme.durBase } }
+                        Behavior on opacity { NumberAnimation { duration: Theme.durBase; easing.type: Theme.easeOut } }
                     }
                     FocusRing { visible: cell.activeFocus; z: 20 }
                     // Selected: an accent outline over the image; hover: a light wash.

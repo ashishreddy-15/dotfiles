@@ -183,8 +183,8 @@ Scope {
                         visible: grid.count > 0 && grid.currentIndex >= 0
                         x: grid.currentItem ? grid.currentItem.x : (grid.currentIndex >= 0 ? (grid.currentIndex % root.columns) * root.cellWidth : 0)
                         y: grid.currentItem ? grid.currentItem.y : (grid.currentIndex >= 0 ? Math.floor(grid.currentIndex / root.columns) * root.cellHeight : 0)
-                        Behavior on x { enabled: !grid.snap; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
-                        Behavior on y { enabled: !grid.snap; SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                        HighlightMotion on x { active: !grid.snap }
+                        HighlightMotion on y { active: !grid.snap }
                         onYChanged: grid.follow(y)
 
                         Rectangle {
@@ -215,7 +215,7 @@ Scope {
                             width: parent.width - 16
                             spacing: 8
                             scale: area.pressed ? Theme.pressScale : 1
-                            Behavior on scale { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsNorm } }
+                            PressMotion on scale {}
 
                             IconImage {
                                 anchors.horizontalCenter: parent.horizontalCenter

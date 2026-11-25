@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs
+import "../ui"
 
 // The workspaces that live on this bar's monitor, terminal style:  1 [2] 3
 // Click to switch. Brackets are always there (just invisible), so nothing shifts.
@@ -31,7 +32,7 @@ Row {
                 opacity: item.current ? 1 : 0
                 property real slide: item.current ? 0 : 2
                 Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                Behavior on slide { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                HighlightMotion on slide {}
                 transform: Translate { x: openBracket.slide }
             }
             BarText {
@@ -48,7 +49,7 @@ Row {
                 opacity: item.current ? 1 : 0
                 property real slide: item.current ? 0 : -2
                 Behavior on opacity { NumberAnimation { duration: Theme.durFast } }
-                Behavior on slide { SpringAnimation { spring: Theme.springSnappy; damping: Theme.dampingSnappy; epsilon: Theme.epsPx } }
+                HighlightMotion on slide {}
                 transform: Translate { x: closeBracket.slide }
             }
 

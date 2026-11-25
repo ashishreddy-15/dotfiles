@@ -127,9 +127,16 @@ Singleton {
     // Opacity, colour and dismissals use monotonic durations (durFast / durBase / durAmbient) and never overshoot:
     // an exit moves on the same durFast / easeOut curve as its fade, so the motion is seen before the item is gone.
     // Hyprland's window and workspace animations use matched spring curves in hypr/modules/look.lua.
-    readonly property real springSnappy:  5.5     // tactile controls, selection highlights
-    readonly property real dampingSnappy: 0.36
-    readonly property real springSmooth:  3.8     // cards, bar slide, dynamic height, notification re-stacking
+    // One spring per job. Write them through the presets in ui/ (HighlightMotion, PressMotion, ValueMotion,
+    // SmoothMotion), which carry the spring, damping and settling threshold together.
+    // (Qt steps a SpringAnimation every 16 ms; measured step responses: overshoot / time to settle within 2%.)
+    readonly property real springHighlight:  6.0   // follows a selection (lists, grids, pills, tabs): 0.2% / ~210 ms
+    readonly property real dampingHighlight: 0.48
+    readonly property real springPress:      5.5   // the press-in scale only: the small bounce (6%) reads as tactile
+    readonly property real dampingPress:     0.36
+    readonly property real springValue:      5.5   // a fill that shows a value (sliders, OSD, meters): 0% / ~320 ms
+    readonly property real dampingValue:     0.55
+    readonly property real springSmooth:  3.8     // cards, bar slide, dynamic height, notification re-stacking: 0% / ~300 ms
     readonly property real dampingSmooth: 0.42
     readonly property int  exitDrift:     12      // px a dismissed notification drifts sideways as it fades
     readonly property real epsNorm:       0.004   // settling threshold for 0..1 properties (scale, progress)
@@ -140,6 +147,7 @@ Singleton {
     readonly property int durBase:    140
     readonly property int durSlow:    240
     readonly property int durAmbient: 400
+    readonly property int durPulse:   800     // one half of a slow attention pulse (recording dot, "reading..." text)
     readonly property int easeOut:    Easing.OutCubic
     readonly property int easeInOut:  Easing.InOutCubic
 

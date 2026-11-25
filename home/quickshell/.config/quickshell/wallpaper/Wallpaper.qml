@@ -99,7 +99,7 @@ Scope {
                 const v = parseFloat(text) || 0
                 root.cachedLumPath = measure.image
                 root.cachedLumValue = v
-                ShellState.topLuminance = v
+                ShellState.setTopLuminance(v)
             }
         }
     }
@@ -130,7 +130,7 @@ Scope {
         if (current !== "") {
             const wantLock = "$wallpaper = " + current
             if (lastLock !== wantLock) { lastLock = wantLock; lockWriter.value = current; lockWriter.running = true }
-            if (cachedLumPath === current) ShellState.topLuminance = cachedLumValue
+            if (cachedLumPath === current) ShellState.setTopLuminance(cachedLumValue)
             else { measure.image = current; measure.running = true }
         }
     }
